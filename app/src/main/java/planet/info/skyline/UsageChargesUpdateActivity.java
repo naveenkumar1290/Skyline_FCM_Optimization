@@ -273,6 +273,7 @@ public class UsageChargesUpdateActivity extends AppCompatActivity {
             case android.R.id.home:
                 // API 5+ solution
                 onBackPressed();
+                Toast.makeText(getApplicationContext(),"",Toast.LENGTH_SHORT).show();
                 return true;
 
             default:
