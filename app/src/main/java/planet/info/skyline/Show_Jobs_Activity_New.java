@@ -43,11 +43,10 @@ public class Show_Jobs_Activity_New extends AppCompatActivity implements TabLayo
         tabs = new ArrayList<>();
         tabs.add("Job File(s)");
         tabs.add("Client File(s)");
-    //    tabs.add("Project File(s)");
+        tabs.add("Project File(s)");
         sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
         jobtxt_id = sp.getString(Utility.KEY_JOB_ID_FOR_JOBFILES, "");
-       /* Intent in = getIntent();
-        jobtxt_id = in.getStringExtra("job_idtxt");*/
+
         if (jobtxt_id != null && (!jobtxt_id.equalsIgnoreCase(""))) {
             setTabs_ViewPager();
         } else {
@@ -113,10 +112,10 @@ public class Show_Jobs_Activity_New extends AppCompatActivity implements TabLayo
             public void onPageSelected(int position) {
                 tabLayout.setScrollPosition(position, 0f, true);
                 try {
-                    if (position == 1) {
-                        _menu.findItem(R.id.menu_share).setVisible(false);
-                    } else {
+                    if (position == 0) {
                         _menu.findItem(R.id.menu_share).setVisible(true);
+                    } else {
+                        _menu.findItem(R.id.menu_share).setVisible(false);
                     }
                 }catch (Exception e){
                     e.getMessage();

@@ -2196,14 +2196,18 @@ public class ClientFilesActivity extends AppCompatActivity {
         protected void onPreExecute() {
             //showprogressdialog();
             super.onPreExecute();
-            progressDialog = new ProgressDialog(ClientFilesActivity.this);
-            progressDialog.setMessage("Uploading, Please wait..");
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progressDialog.setIndeterminate(false);
-            progressDialog.setProgress(0);
-            progressDialog.setMax(100);
-            progressDialog.setCancelable(false);
-            progressDialog.show();
+           try {
+               progressDialog = new ProgressDialog(getApplicationContext());
+               progressDialog.setMessage("Uploading, Please wait..");
+               progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+               progressDialog.setIndeterminate(false);
+               progressDialog.setProgress(0);
+               progressDialog.setMax(100);
+               progressDialog.setCancelable(false);
+               progressDialog.show();
+           }catch (Exception e){
+               e.getMessage();
+           }
 
         }
 
@@ -2286,7 +2290,6 @@ public class ClientFilesActivity extends AppCompatActivity {
                 if (String.valueOf(statusCode).equalsIgnoreCase("200")) {
 
                     for (int i = 0; i < list_ImageDescData.size(); i++) {
-
                         String Jobid_or_swoid = list_ImageDescData.get(i).get(Utility.KEY_Jobid_or_swoid);
                         String dataa = list_ImageDescData.get(i).get(Utility.KEY_dataa);
                         String imagename = list_UploadImageName.get(i);//list_ImageDescData.get(i).get(Utility.KEY_imagename);

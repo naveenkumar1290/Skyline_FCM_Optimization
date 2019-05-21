@@ -183,6 +183,13 @@ public class Utility {
     public static final String Method_CHANGE_TIME_CODE_TIMESHEET = "timesheetold3_Dec";
     public static final String Method_SAVE_USAGE_REPORT = "SaveUsageCharges";
     public static final String Method_USAGE_REPORT_LIST = "GetUsageCharges";
+
+    public static final String Method_FETCH_PROJECTFILE_FOLDER = "BindProjectFileFolder";
+    public static final String Method_FETCH_PROJECTFILE = "GetrojectFile";
+
+
+
+
     /********************************************Beta server************************************************/
     public static final String HEADER = "https://";
     public static final String URL_EP1 = HEADER + "beta.ep2.businesstowork.com/ep1";

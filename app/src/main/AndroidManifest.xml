@@ -350,6 +350,9 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label=""
             android:theme="@style/ThemeNoActionBar" />
+        <activity android:name=".FullscreenWebViewNew" />
+
+
         <activity
             android:name=".client.ClientFilesActivity"
             android:screenOrientation="sensorPortrait"

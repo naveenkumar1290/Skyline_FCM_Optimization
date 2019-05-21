@@ -130,13 +130,6 @@ public class ProjectFilesActivity extends AppCompatActivity {
 
         /**/
 
-//        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-//            @Override
-//            public void onRefresh() {
-//                callApiProjectPhotos();
-//
-//            }
-//        });
 
 
         /**/
@@ -149,8 +142,6 @@ public class ProjectFilesActivity extends AppCompatActivity {
 
             }
         });
-
-
         // mSwipeRefreshLayout.setRefreshing(true);
     }
 
@@ -271,8 +262,6 @@ public class ProjectFilesActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
-
     public void getProjectPhotos() {
         list_ProjectPhotos.clear();
         ArrayList<ProjectPhoto> yetToBeReviewd = new ArrayList<>();
@@ -583,7 +572,6 @@ public class ProjectFilesActivity extends AppCompatActivity {
         this.menu = menu;
         return true;
     }
-
     private class Async_ProjectPhotos extends AsyncTask<Void, Void, Void> {
 
         ProgressDialog progressDoalog;
@@ -639,135 +627,6 @@ public class ProjectFilesActivity extends AppCompatActivity {
 
         }
     }
-
-    public class order_adapter extends BaseAdapter {
-        Context context;
-        private List<ProjectPhoto> beanArrayList;
-
-        public order_adapter(Context context, List<ProjectPhoto> beanArrayList) {
-            this.context = context;
-            this.beanArrayList = beanArrayList;
-        }
-
-        @Override
-        public int getCount() {
-            return beanArrayList.size();
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return i;
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(final int i, View convertview, ViewGroup viewGroup) {
-
-            final Holder holder;
-            final String FileName = beanArrayList.get(i).getFILENAME();
-            final String Descr = beanArrayList.get(i).getDescr();
-            final String job = beanArrayList.get(i).getJob();
-            final String createdate = beanArrayList.get(i).getCreatedate();
-            final String Action_status = beanArrayList.get(i).getActionStatus();
-            final String ImgName = beanArrayList.get(i).getImgName();
-
-            if (convertview == null) {
-                holder = new Holder();
-
-                convertview = LayoutInflater.from(context).inflate(R.layout.row_client_project_photos, null);
-                holder.index_no = (Button) convertview.findViewById(R.id.serial_no);
-
-                holder.thumbnail = (ImageView) convertview.findViewById(R.id.thumbnail);
-                holder.tv_file_name = (TextView) convertview.findViewById(R.id.tv_file_name);
-                holder.tv_job_name = (TextView) convertview.findViewById(R.id.tv_job_name);
-                holder.tv_dated = (TextView) convertview.findViewById(R.id.tv_dated);
-                holder.tv_status = (TextView) convertview.findViewById(R.id.tv_status);
-
-
-                convertview.setTag(holder);
-            } else {
-                holder = (Holder) convertview.getTag();
-            }
-
-            // holder.thumbnail.setTag(i);
-            holder.index_no.setText(String.valueOf(i + 1));
-
-            String url = URL_EP2 + "/upload/" + FileName;
-
-            //  holder.thumbnail.setTag(i); // this line
-
-            String fileExt = FileName.substring(FileName.lastIndexOf("."));
-            boolean isImage = Arrays.asList(Utility.imgExt).contains(fileExt);
-            boolean isDoc = Arrays.asList(Utility.docExt).contains(fileExt);
-            boolean isMedia = Arrays.asList(Utility.mediaExt).contains(fileExt);
-
-            if (isImage) {
-
-
-//
-                Picasso.with(context).load(url).into(holder.thumbnail);
-
-
-            } else if (isDoc) {
-                holder.thumbnail.setImageResource(R.drawable.doc);
-            } else if (isMedia) {
-                holder.thumbnail.setImageResource(R.drawable.media);
-            }
-
-
-            if (ImgName == null || ImgName.trim().equals("")) {
-                holder.tv_file_name.setText("Not available");
-            } else {
-                holder.tv_file_name.setText(ImgName);
-            }
-            if (job == null || job.trim().equals("")) {
-                holder.tv_job_name.setText("Not available");
-            } else {
-                holder.tv_job_name.setText(job);
-            }
-
-            if (createdate == null || createdate.trim().equals("")) {
-                holder.tv_dated.setText("Not available");
-            } else {
-                holder.tv_dated.setText(createdate);
-            }
-            if (Action_status == null || Action_status.trim().equals("")) {
-                holder.tv_status.setText("Not available");
-            } else {
-                holder.tv_status.setText(Action_status);
-            }
-
-            final ProjectPhoto obj = beanArrayList.get(i);
-            convertview.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, ProjectPhotoDetailActivity.class);
-                    intent.putExtra("obj", obj);
-
-                    startActivity(intent);
-                }
-            });
-
-            return convertview;
-        }
-
-
-        class Holder {
-            TextView tv_file_name, tv_job_name, tv_dated, tv_status;
-            ImageView thumbnail;
-            Button index_no;
-
-
-        }
-
-
-    }
-
-
     private class get_company_job_id extends AsyncTask<String, Void, Void> {
 
         final ProgressDialog ringProgressDialog = new ProgressDialog(ProjectFilesActivity.this);
@@ -929,7 +788,6 @@ public class ProjectFilesActivity extends AppCompatActivity {
             alertDialog1.show();
         }
     }
-
     public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MyViewHolder> {
 
         private List<ProjectPhoto> moviesList;
@@ -1146,5 +1004,6 @@ public class ProjectFilesActivity extends AppCompatActivity {
             return moviesList.size();
         }
     }
+
 }
 

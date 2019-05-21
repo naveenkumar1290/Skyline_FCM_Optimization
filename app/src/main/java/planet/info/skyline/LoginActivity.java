@@ -519,7 +519,6 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
             String TIMESHEET_RIGHT = jsonObject.getString("status");
             ed.putString(Utility.USER_TIMESHEET_RIGHT, TIMESHEET_RIGHT).commit();
 
-
         } catch (Exception e) {
             e.printStackTrace();
         }

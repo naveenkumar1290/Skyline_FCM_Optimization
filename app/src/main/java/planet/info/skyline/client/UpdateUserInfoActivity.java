@@ -305,6 +305,12 @@ public class UpdateUserInfoActivity extends AppCompatActivity {
     }
 
     public void UpdateUserDetail() {
+      int position_city_selected=  et_city .getSelectedItemPosition();
+        int position_state_selected=    et_state .getSelectedItemPosition();
+
+
+
+
         if (et_Fname.getText().toString().trim().length() == 0) {
             Toast.makeText(UpdateUserInfoActivity.this, "Please enter first name", Toast.LENGTH_SHORT).show();
         } else if (et_Lname.getText().toString().trim().length() == 0) {
@@ -321,7 +327,16 @@ public class UpdateUserInfoActivity extends AppCompatActivity {
             Toast.makeText(UpdateUserInfoActivity.this, "Please enter pin code", Toast.LENGTH_SHORT).show();
 //        }else if (et_Fax.getText().toString().trim().length() == 0) {
 //            Toast.makeText(UpdateUserInfoActivity.this, "Please enter fax no.", Toast.LENGTH_SHORT).show();
-        } else {
+        }
+
+        else if (position_state_selected == 0) {
+            Toast.makeText(UpdateUserInfoActivity.this, "Please select State!", Toast.LENGTH_SHORT).show();
+        }
+        else if (position_city_selected == 0) {
+            Toast.makeText(UpdateUserInfoActivity.this, "Please select City!", Toast.LENGTH_SHORT).show();
+        }
+
+        else {
             if (new ConnectionDetector(context).isConnectingToInternet()) {
                 new Async_UpdateClientUserInfo().execute();
             } else {
