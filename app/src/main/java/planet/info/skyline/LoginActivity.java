@@ -95,8 +95,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
        // getToken();
         //   int x=1/0;//for crash report check
         //  setPermission(Manifest.permission.READ_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
-      /*  Toast.makeText(getApplicationContext(),"",Toast.LENGTH_SHORT).show();
-        Toast.makeText(getApplicationContext(),"",Toast.LENGTH_SHORT).show();*/
+
         if (CheckingPermissionIsEnabledOrNot()) {
             //   Toast.makeText(HomeActivity.this, "All Permissions Granted Successfully", Toast.LENGTH_LONG).show();
         } else {
