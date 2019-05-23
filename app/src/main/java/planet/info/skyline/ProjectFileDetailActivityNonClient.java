@@ -1166,7 +1166,7 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
                 progressDoalog.dismiss();
             }catch (Exception e){e.getCause();}
 
-            if (status.equals("2") || status.equals("3") || status.equals("4")) {
+            if (status.equals("2") || status.equals("3") || status.equals("4") || status.equals("5")) {
                 Toast.makeText(getApplicationContext(), "Status changed successfully!", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getApplicationContext(), "Mail sent successfully!", Toast.LENGTH_SHORT).show();
