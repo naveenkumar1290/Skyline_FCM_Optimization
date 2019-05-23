@@ -92,6 +92,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_userregistat_new);
         ed_username = (EditText) findViewById(R.id.reg_fullname);
+        ed_username = (EditText) findViewById(R.id.reg_fullname);
        // getToken();
         //   int x=1/0;//for crash report check
         //  setPermission(Manifest.permission.READ_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
