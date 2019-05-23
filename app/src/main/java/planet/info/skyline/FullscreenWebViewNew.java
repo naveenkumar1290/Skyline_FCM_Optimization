@@ -137,7 +137,7 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_fullscreen_image_view);
-        setTitle("View Report");
+        setTitle("Download File");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
@@ -146,9 +146,9 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
         //  mContentView = (NetworkImageView)findViewById(R.id.fullscreen_content);
         mContentView = (ImageView) findViewById(R.id.fullscreen_content);
         url_web = getIntent().getStringExtra("url");
-        if (url_web.contains("/")) {
-            FileName = url_web.substring(url_web.lastIndexOf("/")+1);
-        }
+        FileName = getIntent().getStringExtra("FileName");
+
+
 
         final ProgressDialog progressDoalog = new ProgressDialog(FullscreenWebViewNew.this);
         progressDoalog.setMessage(getString(R.string.Loading_text));
@@ -186,7 +186,7 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
         });
 
 
-        webView.loadUrl("http://drive.google.com/viewerng/viewer?embedded=true&url=" + url_web);
+        webView.loadUrl( url_web);
         mContentView.setOnTouchListener(FullscreenWebViewNew.this);
 
 
@@ -440,7 +440,7 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
             /**/
 
             String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-            File folder = new File(extStorageDirectory, "DCDC");
+            File folder = new File(extStorageDirectory, "Exhibit Power");
 
             if (!folder.exists()) {
                 folder.mkdir();

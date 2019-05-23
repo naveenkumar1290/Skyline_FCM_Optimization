@@ -56,4 +56,6 @@
        <color name="snoozed">#bdb76b </color>
        <!--nks-->
        <color name="icon_color">@color/colorAccent</color>
+       <color name="path_color">#f0ad4e</color>
+
 </resources>

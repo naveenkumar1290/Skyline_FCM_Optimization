@@ -201,12 +201,10 @@ public class Utility {
     public static final String URL_EP2 = HEADER + "www.exhibitpower2.com";
     public static final String KEY_NAMESPACE = "https://tempuri.org/";*/
     /******************************************dev server 1********************************************/
-/*
-    public static final String HEADER = "http://";
+  /*  public static final String HEADER = "http://";
     public static final String URL_EP1 = HEADER + "staging.ep1.businesstowork.com";
     public static final String URL_EP2 = HEADER + "staging.ep2.businesstowork.com";
-    public static final String KEY_NAMESPACE = "https://tempuri.org/";
-*/
+    public static final String KEY_NAMESPACE = "https://tempuri.org/";*/
 
     /******************************************dev server 1********************************************/
 

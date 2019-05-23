@@ -14,6 +14,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,7 +54,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import planet.info.skyline.client.ProjectFileDetailActivity;
 import planet.info.skyline.crash_report.ConnectionDetector;
+import planet.info.skyline.model.PathProjectFile;
 import planet.info.skyline.model.ProjectFileFolder;
 import planet.info.skyline.util.FileDownloader;
 import planet.info.skyline.util.Utility;
@@ -79,8 +84,11 @@ public class ShowJobFiles_Fragment extends Fragment {
     ArrayList<ProjectFileFolder> List_ProjectFileFolder = new ArrayList<>();
 
     String masterId = "0";
-    String FileId = "0";
+    // String FileId = "0";
     SharedPreferences sp;
+
+    ArrayList<PathProjectFile> List_Path = new ArrayList<>();
+    private RecyclerView path_recyclerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -90,6 +98,11 @@ public class ShowJobFiles_Fragment extends Fragment {
         jobs_list_View = (ListView) rootView.findViewById(R.id.cart_listview);
         tv_msg = (TextView) rootView.findViewById(R.id.tv_msg);
         sp = getActivity().getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
+
+        path_recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        path_recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
+        path_recyclerView.setItemAnimator(new DefaultItemAnimator());
+
 
         pullToRefresh = rootView.findViewById(R.id.pullToRefresh);
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -112,7 +125,14 @@ public class ShowJobFiles_Fragment extends Fragment {
             jobtxt_id = bundle.getString("jobtxt_id", "");
             tab = bundle.getString("tab", "");
         }
+        if (tab.equals("2")) {
+            path_recyclerView.setVisibility(View.VISIBLE);
+        } else {
+            path_recyclerView.setVisibility(View.GONE);
+        }
 
+        List_Path.add(new PathProjectFile("Root >", "0"));
+        refreshAdapter();
 
         if (new ConnectionDetector(getActivity()).isConnectingToInternet()) {
             new get_jobFiles_Acyntask().execute();
@@ -397,7 +417,7 @@ public class ShowJobFiles_Fragment extends Fragment {
 
         String userRole = sp.getString(Utility.LOGIN_USER_ROLE, "");
         String dealerId = sp.getString(Utility.DEALER_ID, "");
-        String   compID = sp.getString(Utility.COMPANY_ID_BILLABLE, "");
+        String compID = sp.getString(Utility.COMPANY_ID_BILLABLE, "");
         final String NAMESPACE = KEY_NAMESPACE + "";
         final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
         final String METHOD_NAME = Utility.Method_FETCH_PROJECTFILE;
@@ -406,7 +426,7 @@ public class ShowJobFiles_Fragment extends Fragment {
 
         request.addProperty("Job_id", jobtxt_id);
         request.addProperty("clientID", compID);
-        request.addProperty("id_pk", FileId);
+        request.addProperty("id_pk", "0");
         request.addProperty("masterID", masterId);
         request.addProperty("file_status", "");
         request.addProperty("DealerID", dealerId);
@@ -505,28 +525,39 @@ public class ShowJobFiles_Fragment extends Fragment {
 
     }
 
+    private void refreshAdapter() {
+
+        PathAdapter mAdapter = new PathAdapter(List_Path);
+        path_recyclerView.setAdapter(mAdapter);
+
+
+    }
+
+    private void refreshPath(int position, List<PathProjectFile> _pathList) {
+        if (position < _pathList.size()) {
+            List<PathProjectFile> tempPathList = new ArrayList<>();
+            for (int i = 0; i <= position; i++) {
+                tempPathList.add(_pathList.get(i));
+            }
+            List_Path.clear();
+            List_Path.addAll(tempPathList);
+        }
+
+    }
+
     class get_jobFiles_Acyntask extends AsyncTask<Void, Void, Void> {
-
         ProgressDialog progressDoalog;
-
         @Override
         protected Void doInBackground(Void... params) {
-
-
             if (tab.equalsIgnoreCase("0")) {
-
                 fettch_job_list();
             } else if (tab.equalsIgnoreCase("1")) {
-
                 fettch_job_by_Client_list();
-
             } else if (tab.equalsIgnoreCase("2")) {
                 List_ProjectFileFolder.clear();
                 fetch_projectfiles_FOLDER();
                 fetch_projectfiles_FILES();
             }
-
-
             return null;
         }
 
@@ -581,10 +612,7 @@ public class ShowJobFiles_Fragment extends Fragment {
                 }
                 projectFiles_adapter = new ProjectFiles_adapter(getActivity(), List_ProjectFileFolder);
                 jobs_list_View.setAdapter(projectFiles_adapter);
-
             }
-
-
             if (pullToRefresh.isRefreshing()) {
                 pullToRefresh.setRefreshing(false);
             }
@@ -1213,7 +1241,7 @@ public class ShowJobFiles_Fragment extends Fragment {
 
                 if (isImage) {
 
-                    String url = listProjectFiles.get(i).getFILE_iconLink();
+                    String url = "https://drive.google.com/thumbnail?id=" + listProjectFiles.get(i).getFILE_googleID();
 
                     Glide.with(getActivity()).load(url).listener(new RequestListener<Drawable>() {
                         @Override
@@ -1268,15 +1296,37 @@ public class ShowJobFiles_Fragment extends Fragment {
             holder.parentView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    masterId = listProjectFiles.get(i).getFOLDER_fileIDPK();
+                    //FileId = listProjectFiles.get(i).getFOLDER_fileIDPK();
+                    String folderName = listProjectFiles.get(i).getFOLDER_fileCat();
                     if (isFolder.equals("1")) {   // FOLDER
-                         masterId =listProjectFiles.get(i).getFILE_masterfolderID();
-                         FileId = listProjectFiles.get(i).getFOLDER_fileIDPK();
+                        showFolderData(folderName);
 
-                        if (new ConnectionDetector(getActivity()).isConnectingToInternet()) {
-                            new get_jobFiles_Acyntask().execute();
-                        } else {
-                            Toast.makeText(getActivity(), Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
-                        }
+                    }else {
+                        /*String url = "https://drive.google.com/thumbnail?id=" + listProjectFiles.get(i).getFILE_googleID();
+                        String filename = listProjectFiles.get(i).getFILE_originalFilename();
+                        Intent i = new Intent(getActivity(), FullscreenWebViewNew.class);
+                        i.putExtra("url", url);
+                        i.putExtra("FileName", filename);
+                        startActivity(i);*/
+
+
+                        String FileId=listProjectFiles.get(i).getFILE_idPk();
+                        String ImgName=listProjectFiles.get(i).getFILE_originalFilename();
+                        String jobID=listProjectFiles.get(i).getFILE_jobId();
+                        String googleId=listProjectFiles.get(i).getFILE_googleID();
+
+
+                        Intent intent = new Intent(context, ProjectFileDetailActivityNonClient.class);
+                        intent.putExtra("FileId", FileId);
+                        intent.putExtra("FileName", ImgName);
+                        intent.putExtra("jobID", jobID);
+                        intent.putExtra("googleId", googleId);
+                        intent.putExtra("masterId", listProjectFiles.get(i).getFILE_masterfolderID());
+
+                        startActivity(intent);
+
+
 
                     }
                 }
@@ -1284,13 +1334,27 @@ public class ShowJobFiles_Fragment extends Fragment {
 
 
 
-
             return view;
         }
 
+        private void showFolderData(String folderName) {
+
+            try {
+                List_Path.add(new PathProjectFile(folderName + " >", masterId));
+                refreshAdapter();
+            } catch (Exception e) {
+                e.getMessage();
+            }
+
+            if (new ConnectionDetector(getActivity()).isConnectingToInternet()) {
+                new get_jobFiles_Acyntask().execute();
+            } else {
+                Toast.makeText(getActivity(), Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
+            }
+        }
 
         class Holder {
-            TextView tv_file_name, tv_job_name, tv_dated, tv_status,tv_folder_name;
+            TextView tv_file_name, tv_job_name, tv_dated, tv_status, tv_folder_name;
             ImageView thumbnail;
             Button index_no;
             LinearLayout parentView, ll_file;
@@ -1301,4 +1365,59 @@ public class ShowJobFiles_Fragment extends Fragment {
 
 
     }
+
+    public class PathAdapter extends RecyclerView.Adapter<PathAdapter.BookViewHolder> {
+
+        private List<PathProjectFile> pathList;
+
+        public PathAdapter(List<PathProjectFile> pathList) {
+            this.pathList = pathList;
+        }
+
+        @Override
+        public BookViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View itemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.project_file_path, parent, false);
+
+            return new BookViewHolder(itemView);
+        }
+
+        @Override
+        public void onBindViewHolder(BookViewHolder holder, final int position) {
+            holder.path.setText(pathList.get(position).getName());
+            holder.path.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    masterId = pathList.get(position).getMasterId();
+                    if (new ConnectionDetector(getActivity()).isConnectingToInternet()) {
+                        new get_jobFiles_Acyntask().execute();
+                    } else {
+                        Toast.makeText(getActivity(), Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
+                    }
+
+                    refreshPath(position, pathList);
+                    refreshAdapter();
+
+
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return pathList.size();
+        }
+
+        public class BookViewHolder extends RecyclerView.ViewHolder {
+
+            public TextView path;
+
+            public BookViewHolder(View view) {
+                super(view);
+
+                path = (TextView) view.findViewById(R.id.tv_path);
+            }
+        }
+    }
+
 }

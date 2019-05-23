@@ -195,7 +195,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:gravity="left"
-                                android:text="Company Name" />
+                                android:text="Company" />
 
                             <TextView
                                 android:id="@+id/tv_comp_name"
@@ -217,10 +217,10 @@
                             <TextView
                                 style="@style/CustomTextView_title"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
+                                android:layout_height="match_parent"
                                 android:layout_weight="1"
                                 android:gravity="left"
-                                android:text="Job Name" />
+                                android:text="Job" />
 
                             <TextView
                                 android:id="@+id/tv_job_name"

@@ -12,12 +12,14 @@ import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Gravity;
@@ -38,6 +40,11 @@ import com.android.volley.Request.Method;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -202,25 +209,60 @@ public class SubmitClockTime extends BaseActivity {
             clientname.setText(nam);
         }
         merchantname = (ImageView) findViewById(R.id.merchantname);
-        options = new DisplayImageOptions.Builder()
-                .showStubImage(R.drawable.skylinelogopng)
-
-                .showImageForEmptyUri(R.drawable.skylinelogopng)
-                .showImageOnFail(R.drawable.skylinelogopng)
-                .cacheInMemory(true)
-                .cacheOnDisc(true)
-                .bitmapConfig(Bitmap.Config.RGB_565)
-                .build();
+//        options = new DisplayImageOptions.Builder()
+//                .showStubImage(R.drawable.skylinelogopng)
+//
+//                .showImageForEmptyUri(R.drawable.skylinelogopng)
+//                .showImageOnFail(R.drawable.skylinelogopng)
+//                .cacheInMemory(true)
+//                .cacheOnDisc(true)
+//                .bitmapConfig(Bitmap.Config.RGB_565)
+//                .build();
 
         String imageloc = sp.getString("imglo", "");
-        if (imageloc.equals("") || imageloc.equalsIgnoreCase("")) {
-            ed.putString("imglo", "").commit();
-            missing.setVisibility(View.GONE);
-        } else {
-            clientname.setVisibility(View.GONE);
-            missing.setVisibility(View.VISIBLE);
-            imageLoadery.displayImage(imageloc, missing, options);
-        }
+//        if (imageloc.equals("") || imageloc.equalsIgnoreCase("")) {
+//            ed.putString("imglo", "").commit();
+//            missing.setVisibility(View.GONE);
+//        } else {
+//            clientname.setVisibility(View.GONE);
+//            missing.setVisibility(View.VISIBLE);
+//            imageLoadery.displayImage(imageloc, missing, options);
+//        }
+
+
+
+      Glide.with(SubmitClockTime.this).load(imageloc).listener(new RequestListener<Drawable>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+
+                String names = sp.getString("client_name", "");
+                String nam = sp.getString("name", "");
+                if (names != "") {
+                    clientname.setText(names);
+                } else {
+                    clientname.setText(nam);
+                }
+
+                missing.setVisibility(View.GONE);
+                clientname.setVisibility(View.VISIBLE);
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                missing.setVisibility(View.VISIBLE);
+                clientname.setVisibility(View.GONE);
+                    return false;
+            }
+        })
+                .into(missing);
+
+
+
+
+
+
+
         ed.putString("upload", "").commit();
         wjobid = sp.getString("jobid", "s");
         wuname = sp.getString("tname", "");

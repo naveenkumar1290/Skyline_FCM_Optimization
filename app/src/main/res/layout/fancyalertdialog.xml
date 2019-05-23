@@ -89,9 +89,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="35dp"
 
-                        android:background="@drawable/button_shape"
+                        android:background="@drawable/round_corner_btn2_new"
                         android:text="Rate"
-                        android:textColor="#ffffff" />
+                        android:textColor="#16C3F7"
+                        />
 
 
                     <!--   </LinearLayout>-->
@@ -111,10 +112,10 @@
                         android:id="@+id/positiveBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="35dp"
-                        android:background="@drawable/button_shape"
+                        android:background="@drawable/round_corner_btn2_new"
                         android:text="Ok"
 
-                        android:textColor="#ffffff" />
+                        android:textColor="#16C3F7" />
                     <!--  android:textColor="#ffffff"-->
 
                     <!--  </LinearLayout>-->

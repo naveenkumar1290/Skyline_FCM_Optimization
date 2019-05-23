@@ -1,4 +1,4 @@
-package planet.info.skyline.client;
+package planet.info.skyline;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -56,25 +56,23 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import planet.info.skyline.FullscreenImageView;
-import planet.info.skyline.FullscreenWebView;
-import planet.info.skyline.R;
-import planet.info.skyline.controller.AppController;
 import planet.info.skyline.crash_report.ConnectionDetector;
-//import planet.info.skyline.httpimage.HttpImageManager;
 import planet.info.skyline.model.ProjectPhoto;
 import planet.info.skyline.model.ProjectPhotoComment;
 import planet.info.skyline.util.FileDownloader;
 import planet.info.skyline.util.Utility;
 
+import static planet.info.skyline.util.Utility.COMP_ID;
 import static planet.info.skyline.util.Utility.KEY_NAMESPACE;
 import static planet.info.skyline.util.Utility.URL_EP2;
 import static planet.info.skyline.util.Utility.isValidEmail;
 
-public class ProjectFileDetailActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
+//import planet.info.skyline.httpimage.HttpImageManager;
+
+public class ProjectFileDetailActivityNonClient extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
     String status = "", Comment = "", SnoozDate = "";
     SharedPreferences sp;
-    String Client_id_Pk, comp_ID, jobID, FileId, dealerId, googleId;
+    String Client_id_Pk, comp_ID, jobID, FileId, dealerId, googleId,masterId;
     // String commentFileShare = "";
     String MailId = "";
     ImageView img_share, thumbnail, img_download;
@@ -101,7 +99,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_project_file_detail);
+        setContentView(R.layout.activity_project_file_detail_non_clientl);
 
 
         setTitle(Utility.getTitle("Details"));
@@ -111,9 +109,11 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
 
-        Client_id_Pk = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        comp_ID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
-        dealerId = sp.getString(Utility.CLIENT_LOGIN_DealerID, "");
+       Client_id_Pk = "0";
+
+
+        comp_ID = sp.getString(Utility.COMPANY_ID_BILLABLE, "");
+        dealerId = sp.getString(Utility.DEALER_ID, "");
 
         //  ProjectPhoto mPhoto = (ProjectPhoto) getIntent().getSerializableExtra("obj");
         FileId = getIntent().getStringExtra("FileId");
@@ -121,11 +121,14 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
         jobID = getIntent().getStringExtra("jobID");
         googleId = getIntent().getStringExtra("googleId");
 
-        Button btn_Approve, btn_RevisionNeeded, btn_Snooze;
+        masterId = getIntent().getStringExtra("masterId");
+
+
+        Button btn_Approve, btn_RevisionNeeded, btn_Snooze,btn_Comment;
         btn_Approve = findViewById(R.id.btn_Approve);
         btn_RevisionNeeded = findViewById(R.id.btn_PevisionNeeded);
         btn_Snooze = findViewById(R.id.btn_Snooze);
-
+        btn_Comment= findViewById(R.id.btn_Comment);
 
         thumbnail = findViewById(R.id.thumbnail);
         img_share = findViewById(R.id.img_share);
@@ -163,6 +166,13 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
                 Dialog_ShareFile();
             }
         });
+        btn_Comment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                status = "5";
+                Dialog_EnterComment();
+            }
+        });
         img_download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -186,15 +196,13 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
 
         if (isImage) {
 
-
-//
 //            Uri myUri = Uri.parse(url);
 //            Bitmap bitmap = mHttpImageManager.loadImage(new HttpImageManager.LoadRequest(myUri, thumbnail));
 //            if (bitmap != null) {
 //                thumbnail.setImageBitmap(bitmap);
 //            }
 
-            Glide.with(ProjectFileDetailActivity.this).load(url).listener(new RequestListener<Drawable>() {
+            Glide.with(ProjectFileDetailActivityNonClient.this).load(url).listener(new RequestListener<Drawable>() {
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     spinner.setVisibility(View.GONE);
@@ -243,7 +251,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
                 if (isImage) {
 
 
-                    Intent i = new Intent(ProjectFileDetailActivity.this, FullscreenImageView.class);
+                    Intent i = new Intent(ProjectFileDetailActivityNonClient.this, FullscreenImageView.class);
                     i.putExtra("url", url);
                     startActivity(i);
 
@@ -251,7 +259,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
                 } else if (isDoc || isWord ||isPdf||isText|| isExcel) {
 
 
-                    Intent i = new Intent(ProjectFileDetailActivity.this, FullscreenWebView.class);
+                    Intent i = new Intent(ProjectFileDetailActivityNonClient.this, FullscreenWebView.class);
                     i.putExtra("url", url);
                     startActivity(i);
 
@@ -261,7 +269,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
                     startActivity(intent);
 
                 } else {
-                    Toast.makeText(ProjectFileDetailActivity.this, "Unrecognized file format ! Please download to view the file!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProjectFileDetailActivityNonClient.this, "Unrecognized file format ! Please download to view the file!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -279,10 +287,10 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
     }
 
     private void CallApiProjectPhotoDetail() {
-        if (new ConnectionDetector(ProjectFileDetailActivity.this).isConnectingToInternet()) {
+        if (new ConnectionDetector(ProjectFileDetailActivityNonClient.this).isConnectingToInternet()) {
             new Async_ProjectPhotoDetail().execute();
         } else {
-            Toast.makeText(ProjectFileDetailActivity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+            Toast.makeText(ProjectFileDetailActivityNonClient.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -302,7 +310,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
     }
 
     public void Dialog_EnterComment() {
-        final Dialog dialog_comment = new Dialog(ProjectFileDetailActivity.this);
+        final Dialog dialog_comment = new Dialog(ProjectFileDetailActivityNonClient.this);
         dialog_comment.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog_comment.setContentView(R.layout.enter_comment);
 
@@ -351,12 +359,12 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
                 } else {
 
                     dialog_comment.dismiss();
-                    if (new ConnectionDetector(ProjectFileDetailActivity.this).isConnectingToInternet()) {
+                    if (new ConnectionDetector(ProjectFileDetailActivityNonClient.this).isConnectingToInternet()) {
                         new Async_ShareFileToGuest().execute();
 
                        // new   Async_ChangeFileStatus.execute();
                     } else {
-                        Toast.makeText(ProjectFileDetailActivity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+                        Toast.makeText(ProjectFileDetailActivityNonClient.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -373,7 +381,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
     }
 
     public void Dialog_ShareFile() {
-        final Dialog dialog_comment = new Dialog(ProjectFileDetailActivity.this);
+        final Dialog dialog_comment = new Dialog(ProjectFileDetailActivityNonClient.this);
         dialog_comment.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog_comment.setContentView(R.layout.enter_comment_mail);
 
@@ -418,10 +426,10 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
                 } else {
 
                     dialog_comment.dismiss();
-                    if (new ConnectionDetector(ProjectFileDetailActivity.this).isConnectingToInternet()) {
+                    if (new ConnectionDetector(ProjectFileDetailActivityNonClient.this).isConnectingToInternet()) {
                         new Async_ShareFileToGuest().execute();
                     } else {
-                        Toast.makeText(ProjectFileDetailActivity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+                        Toast.makeText(ProjectFileDetailActivityNonClient.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -496,6 +504,10 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
     }
 
     public void ShareFileToGuest(String mail_id) {
+
+       String userID = sp.getString("clientid", "");
+
+
         final String NAMESPACE = KEY_NAMESPACE + "";
         final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
         final String SOAP_ACTION = KEY_NAMESPACE + "SaveProjectFileComment";
@@ -510,10 +522,12 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
         request.addProperty("JobID", jobID);
         request.addProperty("ImgName", "");
         request.addProperty("FileUrl", "");
-        request.addProperty("isClient", "1");
+        request.addProperty("isClient", "0");
         request.addProperty("ClientUserID", Client_id_Pk);
         request.addProperty("MailIDs", mail_id);
-        request.addProperty("CommentBy", "0");
+        request.addProperty("CommentBy", userID);
+
+
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
         envelope.dotNet = true;
@@ -524,9 +538,9 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
 
             SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
             String result = SoapPrimitiveresult.toString();
-            JSONObject jsonObject = new JSONObject(result);
+          //  JSONObject jsonObject = new JSONObject(result);
 
-            JSONArray jsonArray = jsonObject.getJSONArray("cds");
+          //  JSONArray jsonArray = jsonObject.getJSONArray("cds");
 
 
         } catch (Exception e) {
@@ -537,10 +551,10 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
 
     public void download_file(String file_name1) {
 
-        if (new ConnectionDetector(ProjectFileDetailActivity.this).isConnectingToInternet()) {
+        if (new ConnectionDetector(ProjectFileDetailActivityNonClient.this).isConnectingToInternet()) {
             new DownloadFile().execute("https://drive.google.com/thumbnail?id=" + googleId, file_name1);
         } else {
-            Toast.makeText(ProjectFileDetailActivity.this, Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ProjectFileDetailActivityNonClient.this, Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
         }
 
 
@@ -551,14 +565,15 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
 
         final String NAMESPACE = KEY_NAMESPACE + "";
         final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "GetProjectFileforClient";
-        final String METHOD_NAME = "GetProjectFileforClient";
+        final String SOAP_ACTION = KEY_NAMESPACE +Utility.Method_FETCH_PROJECTFILE;
+        final String METHOD_NAME = Utility.Method_FETCH_PROJECTFILE;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("Job_id", jobID);
-        request.addProperty("id_pk", FileId);
-        request.addProperty("file_status", "");
-        request.addProperty("Dealer_ID", dealerId);
         request.addProperty("clientID", comp_ID);
+        request.addProperty("id_pk", FileId);
+        request.addProperty("masterID", masterId);
+        request.addProperty("file_status", "");
+        request.addProperty("DealerID", dealerId);
 
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
@@ -576,36 +591,84 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
             try {
 
                 JSONObject jsonObject1 = jsonArray.getJSONObject(0);
-                int nu_comment_id = jsonObject1.getInt("degree");
+
+
+                /*************************************/
+                int id_pk = jsonObject1.getInt("id_pk");
+                int Job_id = jsonObject1.getInt("Job_id");
+                int clientID = jsonObject1.getInt("clientID");
+                String GoogleID = jsonObject1.getString("GoogleID");
+                String OriginalFilename = jsonObject1.getString("OriginalFilename");
+                String CreatedDate = jsonObject1.getString("CreatedDate");
+                String ModifyDate = jsonObject1.getString("ModifyDate");
+                String status = jsonObject1.getString("status");
+                String Description = jsonObject1.getString("Description");
+                String masterfolderID = jsonObject1.getString("masterfolderID");
+                String parentfolderID = jsonObject1.getString("parentfolderID");
+                String path = jsonObject1.getString("path");
+                String uploadedBy = jsonObject1.getString("uploadedBy");
+                String txt_job = jsonObject1.getString("txt_job");
+                String txt_C_Name = jsonObject1.getString("txt_C_Name");
+                String Internal_Status = jsonObject1.getString("Internal_Status");
+                String LastActionDate = jsonObject1.getString("LastActionDate");
+                String Client_Status = jsonObject1.getString("Client_Status");
+                String UploadbyName = jsonObject1.getString("UploadbyName");
+                String iconLink = jsonObject1.getString("iconLink");
+                String FileType = jsonObject1.getString("FileType");
+                String ApprovalRequired = jsonObject1.getString("ApprovalRequired");
+                String PGoogleID = jsonObject1.getString("PGoogleID");
+                String degree = jsonObject1.getString("degree");
+                String d1 = jsonObject1.getString("d1");
+
+                mPhoto = new ProjectPhoto(
+                        0, 0,
+                        0, CreatedDate, txt_job, "",
+                        "", Job_id, LastActionDate, CreatedDate,
+
+                        0, "", id_pk, Job_id,
+                        0, clientID, 0,
+                        "", 0, 0,
+
+                        id_pk, id_pk, "",
+
+                        OriginalFilename, OriginalFilename,
+
+                        Client_Status, Internal_Status,
+
+                        Description, "",
+                        id_pk, "");
+
+                /**************************************/
+
+
+
+
+
+
+          /*      int nu_comment_id = jsonObject1.getInt("degree");
                 int ddl_job_status = jsonObject1.getInt("status");
                 int cl = 0;
-
                 String dt = jsonObject1.getString("FileType");
                 String job = jsonObject1.getString("txt_job");
                 String fsize = "";
                 String latestcom1 = jsonObject1.getString("iconLink");
                 int job_id = jsonObject1.getInt("Job_id");
                 String actiondate = jsonObject1.getString("LastActionDate");
-
                 String createdate = jsonObject1.getString("CreatedDate");
                 int nu_approveedit_by_client = 0;
                 String latestcom = jsonObject1.getString("UploadbyName");
                 int fileid = jsonObject1.getInt("id_pk");
-
                 int jid = jsonObject1.getInt("Job_id");
                 int View_status_for_client = 0;
                 int nu_client_id = jsonObject1.getInt("clientID");
                 int nu_reject_by_client = jsonObject1.getInt("uploadedBy");
                 String snoozDate = "";
-
                 int snooz = 0;
                 int nu_approve_by_client = 0;
                 int INT_FID = jsonObject1.getInt("id_pk");
-
                 int INT_FileID = jsonObject1.getInt("id_pk");
                 String VCHAR_Heading = jsonObject1.getString("GoogleID");
                 String FILE_NAME_question = jsonObject1.getString("GoogleID");
-
                 String FILE_NAME = jsonObject1.getString("OriginalFilename");
                 String Action_statusOLD = jsonObject1.getString("txt_C_Name");
                 String Action_status = jsonObject1.getString("Client_Status");
@@ -613,6 +676,9 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
                 String file_heading = "";
                 int id = 0;
                 String ImgName = "";
+
+
+
 
                 mPhoto = new ProjectPhoto(
                         nu_comment_id, ddl_job_status,
@@ -631,7 +697,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
 
                         Descr, file_heading,
                         id, ImgName);
-
+*/
 
             } catch (Exception e) {
                 e.getMessage();
@@ -744,12 +810,15 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
     private void setData() {
 
         TextView tv_file_name, tv_job_name,
-                tv_upload_dated, tv_last_action_dated, tv_status, tv_file_desc;
+                tv_upload_dated, tv_last_action_dated, tv_status, tv_file_desc,tv_Client_status;
         tv_file_name = findViewById(R.id.tv_file_name);
         tv_job_name = findViewById(R.id.tv_job_name);
         tv_upload_dated = findViewById(R.id.tv_upload_dated);
         tv_last_action_dated = findViewById(R.id.tv_last_action_dated);
         tv_status = findViewById(R.id.tv_status);
+        tv_Client_status = findViewById(R.id.tv_client_status);
+
+
         tv_file_desc = findViewById(R.id.tv_file_desc);
         try {
             jobID = mPhoto.getJobId() + "";
@@ -758,7 +827,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
             recyclerView.setLayoutManager(mLayoutManager);
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            mAdapter = new MoviesAdapter(ProjectFileDetailActivity.this, list_ProjectPhotoComment);
+            mAdapter = new MoviesAdapter(ProjectFileDetailActivityNonClient.this, list_ProjectPhotoComment);
             recyclerView.setAdapter(mAdapter);
             /*recycler*/
 
@@ -769,6 +838,9 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
             final String Action_status = mPhoto.getActionStatus();
             final String ImgName = mPhoto.getFILENAME();
             final String Descr = mPhoto.getDescr();
+
+
+            final String Client_Status =         mPhoto.getActionStatusOLD();
 
             if (ImgName == null || ImgName.trim().equals("")) {
                 tv_file_name.setText("Not available");
@@ -809,6 +881,22 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
                 tv_last_action_dated.setText(lastActiondate);
             }
 
+
+            if (Client_Status == null || Client_Status.trim().equals("")) {
+                tv_Client_status.setText("Not available");
+            }else {
+                tv_Client_status.setText(Client_Status);
+                if (Client_Status.equalsIgnoreCase("Rejected")) {
+                    tv_Client_status.setTextColor(getResources().getColor(R.color.red));
+                } else if (Client_Status.equalsIgnoreCase("Approved")) {
+                    tv_Client_status.setTextColor(getResources().getColor(R.color.main_green_color));
+                } else if (Client_Status.equalsIgnoreCase("Snoozed")) {
+                    tv_Client_status.setTextColor(getResources().getColor(R.color.snoozed));
+                } else {
+                    tv_Client_status.setTextColor(getResources().getColor(R.color.main_orange_light_color));
+                }
+            }
+
             if (Action_status == null || Action_status.trim().equals("")) {
                 tv_status.setText("Not available");
             } else {
@@ -838,7 +926,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
         final String METHOD_NAME = "GetProjectFileComment";
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("ProjectFileID", FileId);
-        request.addProperty("isClient", "1");
+        request.addProperty("isClient", "0");
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
         envelope.dotNet = true;
@@ -861,7 +949,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
                     int jobid = jsonObject1.getInt("JobID");
                     int id = jsonObject1.getInt("CommentID");
                     int fileid = 0;
-                    int clientid = jsonObject1.getInt("ClientUserID");
+                    int clientid = 0;
                     int client_v_st = 0;
                     int vr_comment_by = 0;
                     int Id_Pk = 0;
@@ -895,7 +983,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
     }
 
     public void Dialog_EnterComment_Snoozed() {
-        final Dialog dialog_comment = new Dialog(ProjectFileDetailActivity.this);
+        final Dialog dialog_comment = new Dialog(ProjectFileDetailActivityNonClient.this);
         dialog_comment.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog_comment.setContentView(R.layout.enter_comment_snoozed);
         dialog_comment.getWindow().setBackgroundDrawable(
@@ -946,10 +1034,10 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
                 } else {
 
                     dialog_comment.dismiss();
-                    if (new ConnectionDetector(ProjectFileDetailActivity.this).isConnectingToInternet()) {
+                    if (new ConnectionDetector(ProjectFileDetailActivityNonClient.this).isConnectingToInternet()) {
                         new Async_ShareFileToGuest().execute();
                     } else {
-                        Toast.makeText(ProjectFileDetailActivity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+                        Toast.makeText(ProjectFileDetailActivityNonClient.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -989,7 +1077,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
 
         Calendar calendar = Calendar.getInstance();
         DatePickerDialog dpd = DatePickerDialog.newInstance(
-                ProjectFileDetailActivity.this,
+                ProjectFileDetailActivityNonClient.this,
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH));
@@ -1006,7 +1094,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
         dpd.setYearRange(1985, 2028);
         calendar.add(Calendar.DATE, 1);
         dpd.setMinDate(calendar);
-        dpd.show(ProjectFileDetailActivity.this.getFragmentManager(), "dialog");
+        dpd.show(ProjectFileDetailActivityNonClient.this.getFragmentManager(), "dialog");
 
 
     }
@@ -1019,7 +1107,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
         protected void onPreExecute() {
             super.onPreExecute();
 
-            progressDoalog = new ProgressDialog(ProjectFileDetailActivity.this);
+            progressDoalog = new ProgressDialog(ProjectFileDetailActivityNonClient.this);
             progressDoalog.setMessage("Please wait....");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
@@ -1048,7 +1136,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progressDoalog = new ProgressDialog(ProjectFileDetailActivity.this);
+            progressDoalog = new ProgressDialog(ProjectFileDetailActivityNonClient.this);
             progressDoalog.setMessage("Please wait....");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
@@ -1133,7 +1221,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
             super.onPreExecute();
             // showDialog(progress_bar_type);
 
-            progressDoalog = new ProgressDialog(ProjectFileDetailActivity.this);
+            progressDoalog = new ProgressDialog(ProjectFileDetailActivityNonClient.this);
             progressDoalog.setMessage("Downloading, please wait...");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.show();
@@ -1144,7 +1232,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
             super.onPostExecute(path);
             progressDoalog.dismiss();
             try {
-                Toast.makeText(ProjectFileDetailActivity.this, "File downloaded successfully !" +
+                Toast.makeText(ProjectFileDetailActivityNonClient.this, "File downloaded successfully !" +
                         "  " + "Location:" + path, Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 e.getMessage();
@@ -1161,7 +1249,7 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
         protected void onPreExecute() {
             super.onPreExecute();
 
-            progressDoalog = new ProgressDialog(ProjectFileDetailActivity.this);
+            progressDoalog = new ProgressDialog(ProjectFileDetailActivityNonClient.this);
             progressDoalog.setMessage("Please wait....");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);

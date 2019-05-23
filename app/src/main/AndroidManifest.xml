@@ -346,6 +346,10 @@
             android:screenOrientation="sensorPortrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:name=".ProjectFileDetailActivityNonClient"
+            android:screenOrientation="sensorPortrait"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
             android:name=".FullscreenWebView"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label=""
