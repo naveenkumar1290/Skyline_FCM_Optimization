@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -114,9 +115,17 @@ public class Show_Jobs_Activity_New extends AppCompatActivity implements TabLayo
                 try {
                     if (position == 0) {
                         _menu.findItem(R.id.menu_share).setVisible(true);
-                    } else {
+                        setTitle(Utility.getTitle("Job File(s)"));
+
+                    } else  if (position == 1) {
                         _menu.findItem(R.id.menu_share).setVisible(false);
+                        setTitle(Utility.getTitle("Client File(s)"));
                     }
+                    else  if (position == 2) {
+                        _menu.findItem(R.id.menu_share).setVisible(false);
+                        setTitle(Utility.getTitle("Project File(s)"));
+                    }
+
                 }catch (Exception e){
                     e.getMessage();
                 }
@@ -127,34 +136,6 @@ public class Show_Jobs_Activity_New extends AppCompatActivity implements TabLayo
 
             }
         });
-
-        /*viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                tabLayout.setScrollPosition(position, 0f, true);
-             try {
-                 if (position == 1) {
-                     _menu.findItem(R.id.menu_share).setVisible(false);
-                 } else {
-                     _menu.findItem(R.id.menu_share).setVisible(true);
-                 }
-             }catch (Exception e){
-                 e.getMessage();
-             }
-            }
-
-            @Override
-            public void onPageScrolled(int arg0, float arg1, int arg2) {
-
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int arg0) {
-
-
-            }
-        });
-*/
 
     }
 
@@ -183,7 +164,8 @@ public class Show_Jobs_Activity_New extends AppCompatActivity implements TabLayo
         switch (item.getItemId()) {
             case android.R.id.home:
                 // API 5+ solution
-                onBackPressed();
+             //   onBackPressed();
+                onNavigateUp();
                 return true;
             case R.id.menu_share:
 
@@ -233,7 +215,7 @@ public class Show_Jobs_Activity_New extends AppCompatActivity implements TabLayo
             intent.putExtra("BUNDLE", args);
             startActivity(intent);
 
-            finish();
+        //    finish();
 
         }
 
@@ -247,4 +229,17 @@ public class Show_Jobs_Activity_New extends AppCompatActivity implements TabLayo
     public void setProjectPhotoList(List<HashMap<String, String>> list) {
         list_ProjectPhotos = list;
     }
+
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+
+    }
+
+    @Override
+    public boolean onNavigateUp() {
+        finish();
+        return super.onNavigateUp();
+    }
+
 }

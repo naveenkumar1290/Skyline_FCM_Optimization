@@ -104,11 +104,31 @@ public class ShowJobFiles_Fragment extends Fragment {
         path_recyclerView.setItemAnimator(new DefaultItemAnimator());
 
 
+       /* mLayoutManager = new GridLayoutManager(getActivity(), 2);
+        mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                switch (adapter.getItemViewType(position)) {
+                    case MenuAdapter.ITEM:
+                        return 1;
+                    case MenuAdapter.FULLSIZE:
+                        return 2;
+                    default:
+                        return 1;
+                }
+            }
+        });
+        recyclerView.setLayoutManager(mLayoutManager);*/
+
+
+
+
+
         pullToRefresh = rootView.findViewById(R.id.pullToRefresh);
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-
+                masterId=List_Path.get(List_Path.size()-1).getMasterId();
                 if (new ConnectionDetector(getActivity()).isConnectingToInternet()) {
                     new get_jobFiles_Acyntask().execute();
                 } else {
@@ -1287,8 +1307,35 @@ public class ShowJobFiles_Fragment extends Fragment {
                 holder.tv_job_name.setText(listProjectFiles.get(i).getFILE_txtJob());
                 holder.tv_dated.setText(listProjectFiles.get(i).getFILE_modifyDate());
                 holder.tv_status.setText(listProjectFiles.get(i).getFILE_clientStatus());
-                holder.tv_comp_name.setText(listProjectFiles.get(i).getFILE_txtCName());
                 holder.tv_internal_status.setText(listProjectFiles.get(i).getFILE_internalStatus());
+                holder.tv_comp_name.setText(listProjectFiles.get(i).getFILE_txtCName());
+
+
+                String Client_Status=listProjectFiles.get(i).getFILE_clientStatus();
+                if (Client_Status.equalsIgnoreCase("Rejected")) {
+                    holder.tv_status.setTextColor(getResources().getColor(R.color.red));
+                } else if (Client_Status.equalsIgnoreCase("Approved")) {
+                    holder.tv_status.setTextColor(getResources().getColor(R.color.main_green_color));
+                } else if (Client_Status.equalsIgnoreCase("Snoozed")) {
+                    holder.tv_status.setTextColor(getResources().getColor(R.color.snoozed));
+                } else {
+                    holder.tv_status.setTextColor(getResources().getColor(R.color.main_orange_light_color));
+                }
+
+
+                String internalStatus=listProjectFiles.get(i).getFILE_internalStatus();
+                if (internalStatus.equalsIgnoreCase("Rejected")) {
+                    holder.tv_internal_status.setTextColor(getResources().getColor(R.color.red));
+                } else if (internalStatus.equalsIgnoreCase("Approved")) {
+                    holder.tv_internal_status.setTextColor(getResources().getColor(R.color.main_green_color));
+                } else if (internalStatus.equalsIgnoreCase("Snoozed")) {
+                    holder.tv_internal_status.setTextColor(getResources().getColor(R.color.snoozed));
+                } else {
+                    holder.tv_internal_status.setTextColor(getResources().getColor(R.color.main_orange_light_color));
+                }
+
+
+
 
             } catch (Exception e) {
                 e.getMessage();

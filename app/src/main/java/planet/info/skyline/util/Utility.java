@@ -173,6 +173,9 @@ public class Utility {
 
     public static final String CLOCK_IN = "Clock In";
     public static final String CLOCK_OUT = "Clock Out";
+    public static final String isFrom_PROJECT_FILE = "sFrom_PROJECT_FILE";
+    public static final String Client_Mail = "Client_Mail";
+    public static final int PROJECT_FILE_GET_CLIENT_MAILS = 222;
     /**************************************************************************************/
 
     //Method

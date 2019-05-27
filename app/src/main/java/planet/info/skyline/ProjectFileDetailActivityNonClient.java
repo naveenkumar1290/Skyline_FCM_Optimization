@@ -48,6 +48,7 @@ import org.ksoap2.transport.HttpTransportSE;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,6 +57,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import planet.info.skyline.client.ProjectFileDetailActivity;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.ProjectPhoto;
 import planet.info.skyline.model.ProjectPhotoComment;
@@ -163,7 +165,15 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
             @Override
             public void onClick(View view) {
                 status = "8";
-                Dialog_ShareFile();
+                Intent intent = new Intent(ProjectFileDetailActivityNonClient.this, SharePhotosToClientActivity.class);
+                Bundle args = new Bundle();
+                intent.putExtra("BUNDLE", args);
+                intent.putExtra(Utility.isFrom_PROJECT_FILE, "true");
+                startActivityForResult(intent,Utility.PROJECT_FILE_GET_CLIENT_MAILS);
+
+
+
+
             }
         });
         btn_Comment.setOnClickListener(new View.OnClickListener() {
@@ -180,7 +190,9 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
             }
         });
 
-        final String url = "https://drive.google.com/thumbnail?id=" + googleId;
+        final String url = "https://drive.google.com/open?id=" + googleId;
+
+
         if (FileName.contains(".")) {
             fileExt = FileName.substring(FileName.lastIndexOf("."));
         }
@@ -196,13 +208,9 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
 
         if (isImage) {
 
-//            Uri myUri = Uri.parse(url);
-//            Bitmap bitmap = mHttpImageManager.loadImage(new HttpImageManager.LoadRequest(myUri, thumbnail));
-//            if (bitmap != null) {
-//                thumbnail.setImageBitmap(bitmap);
-//            }
 
-            Glide.with(ProjectFileDetailActivityNonClient.this).load(url).listener(new RequestListener<Drawable>() {
+            final String url_thumbnail = "https://drive.google.com/thumbnail?id=" + googleId;
+            Glide.with(ProjectFileDetailActivityNonClient.this).load(url_thumbnail).listener(new RequestListener<Drawable>() {
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     spinner.setVisibility(View.GONE);
@@ -380,7 +388,7 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
 
     }
 
-    public void Dialog_ShareFile() {
+    public void Dialog_ShareFile(String mail_id) {
         final Dialog dialog_comment = new Dialog(ProjectFileDetailActivityNonClient.this);
         dialog_comment.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog_comment.setContentView(R.layout.enter_comment_mail);
@@ -395,7 +403,8 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
 
         final EditText et_Mail = (EditText) dialog_comment.findViewById(R.id.et_Mail);
         final EditText et_comment = (EditText) dialog_comment.findViewById(R.id.et_comment);
-
+        et_Mail.setText(mail_id);
+       // et_Mail.setVisibility(View.GONE);
         Button Btn_Done = (Button) dialog_comment.findViewById(R.id.Btn_Done);
         Button Btn_Cancel = (Button) dialog_comment.findViewById(R.id.Btn_Cancel);
 
@@ -1386,5 +1395,21 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
 
             }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==Utility.PROJECT_FILE_GET_CLIENT_MAILS)
+        {
+
+           if (resultCode == Activity.RESULT_CANCELED) {
+                return;
+            }
+            String selected_mails=data.getStringExtra(Utility.Client_Mail);
+            Dialog_ShareFile(selected_mails);
+        }
+
     }
 }

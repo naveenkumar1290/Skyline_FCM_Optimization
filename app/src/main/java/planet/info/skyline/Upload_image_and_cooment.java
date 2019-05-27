@@ -539,9 +539,6 @@ public class Upload_image_and_cooment extends AppCompatActivity implements Progr
 
     }
 
-
-    //
-
     public void dialog_sharePhotos() {
         final Dialog showd = new Dialog(Upload_image_and_cooment.this);
         showd.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -1006,9 +1003,6 @@ public class Upload_image_and_cooment extends AppCompatActivity implements Progr
             e.printStackTrace();
         }
     }
-
-
-    // for job descripition--->
 
     public void diloge_for_company_name()    /////by aman kaushik
     {
@@ -1624,13 +1618,6 @@ public class Upload_image_and_cooment extends AppCompatActivity implements Progr
 
     }
 
-
-// new work ----?
-
-    public String getImageName(String path) {
-
-        return "";
-    }
 
     public String get_JobName_by_SWOId(String SWO_id) {
         String jobName = "";
@@ -2292,49 +2279,6 @@ public class Upload_image_and_cooment extends AppCompatActivity implements Progr
 
     }
 
-//    private void dispatchTakePictureIntent() {
-//        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        // Ensure that there's a camera activity to handle the intent
-//        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-//            // Create the File where the photo should go
-//            File photoFile = null;
-//            try {
-//                photoFile = createImageFile();
-//            } catch (IOException ex) {
-//                // Error occurred while creating the File
-//
-//            }
-//            // Continue only if the File was successfully created
-//            if (photoFile != null) {
-//                try {
-//                    Uri photoURI = FileProvider.getUriForFile(Upload_image_and_cooment.this,
-//                            Upload_image_and_cooment.this.getPackageName() + ".android.fileprovider",
-//                            photoFile);
-//                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-//                    startActivityForResult(takePictureIntent, AppConstants.CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
-//                } catch (Exception e) {
-//                    e.getCause();
-//
-//                }
-//            }
-//        }
-//    }
-//
-//    private File createImageFile() throws IOException {
-//        // Create an image file name
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-//        String imageFileName = "JPEG_" + timeStamp + "_";
-//        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-//        File image = File.createTempFile(
-//                imageFileName,  /* prefix */
-//                ".jpg",         /* suffix */
-//                storageDir      /* directory */
-//        );
-//
-//        // Save a file: path for use with ACTION_VIEW intents
-//        mCurrentPhotoPath = image.getAbsolutePath();
-//        return image;
-//    }
 
     private void captureImage() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);

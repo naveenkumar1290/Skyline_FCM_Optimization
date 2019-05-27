@@ -67,13 +67,14 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
 
     String comment = "";
     boolean api_error = false;
+    String isFromProjectFile = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_share_photos_to_client);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        setTitle(Utility.getTitle("Select Client(s)"));
         listview_Clients = (ListView) findViewById(R.id.cart_listview);
 
         tv_msg = (TextView) findViewById(R.id.tv_msg);
@@ -87,6 +88,16 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.getCause();
         }
+        try {
+            Intent intent = getIntent();
+            if (intent.hasExtra(Utility.isFrom_PROJECT_FILE)) {
+                isFromProjectFile = intent.getExtras().getString(Utility.isFrom_PROJECT_FILE);
+            }
+
+        } catch (Exception e) {
+            e.getCause();
+        }
+
 
         sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
         ed = sp.edit();
@@ -160,7 +171,6 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
 
     public void getClientUserList() {
         list_ClientUser = new ArrayList<>();
-
         final String NAMESPACE = KEY_NAMESPACE + "";
         final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
         final String SOAP_ACTION = KEY_NAMESPACE + "GetClientUserList";
@@ -202,7 +212,6 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         }
 
     }
-
 
 
     public void ShareProjectFile(String LID, String UID, String Mail, String CID, String JID, String FID, String comment) {
@@ -260,7 +269,7 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
                 new ColorDrawable(android.graphics.Color.TRANSPARENT));
         dialog_comment.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
         dialog_comment.setCancelable(false);
-        if(!dialog_comment.isShowing()) {
+        if (!dialog_comment.isShowing()) {
             dialog_comment.show();
         }
 
@@ -287,9 +296,9 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
                 if (comment.length() < 1) {
                     Toast.makeText(getApplicationContext(), "Please enter comment!", Toast.LENGTH_SHORT).show();
                 } else {
-                 //   Utility.hideKeyboard(SharePhotosToClientActivity.this);
+                    //   Utility.hideKeyboard(SharePhotosToClientActivity.this);
 
-                 //   dialog_comment.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                    //   dialog_comment.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
                     dialog_comment.dismiss();
                     if (new ConnectionDetector(context).isConnectingToInternet()) {
@@ -330,8 +339,119 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        finish();
-        startActivity(new Intent(SharePhotosToClientActivity.this, MainActivity.class));
+      /*  if (isFromProjectFile.equals("true")) {
+            finish();
+        }*/
+
+     //   startActivity(new Intent(SharePhotosToClientActivity.this, MainActivity.class));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // API 5+ solution
+                onBackPressed();
+                return true;
+            case R.id.menu_done:
+
+                sendMail();
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_sharefiles, menu);
+        // _menu = menu;
+
+        return true;
+    }
+
+    void sendMail() {
+        String selectedMail="";
+        Utility.hideKeyboard(SharePhotosToClientActivity.this);
+        list_selected_Client.clear();
+        api_error = false;
+        for (int i = 0; i < list_all_Client.size(); i++) {
+            if (list_all_Client.get(i).isChecked()) {
+                list_selected_Client.add(list_all_Client.get(i));
+               selectedMail= selectedMail+list_all_Client.get(i).getTxt_Mail()+",";
+            }
+        }
+
+        if (list_selected_Client == null || list_selected_Client.size() < 1) {
+            Toast.makeText(getApplicationContext(), "No client selected!",
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            selectedMail = selectedMail.substring(0, selectedMail.length() - 1);
+            // Dialog_EnterComment();
+            Boolean isValid = ValidateEmail();
+            if (isValid) {
+                if (isFromProjectFile.equals("true")) {
+
+                    Intent intent=new Intent(SharePhotosToClientActivity.this,ProjectFileDetailActivityNonClient.class);
+                    intent.putExtra(Utility.Client_Mail,selectedMail);
+                    setResult(Utility.PROJECT_FILE_GET_CLIENT_MAILS,intent);
+                    finish();//finishing activity
+
+                } else {
+                    Dialog_EnterComment();
+                }
+            }
+
+
+        }
+    }
+
+    public void Mail(String LID, String UID, String Mail, String CID, String JID, String FID) {
+        list_ClientUser = new ArrayList<>();
+
+        final String NAMESPACE = KEY_NAMESPACE + "";
+        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
+        final String SOAP_ACTION = KEY_NAMESPACE + "mail";
+        final String METHOD_NAME = "mail";
+        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
+
+        request.addProperty("LID", LID);
+        request.addProperty("UID", UID);
+        request.addProperty("Mail", Mail);
+        request.addProperty("CID", CID);
+        request.addProperty("JID", JID);
+        request.addProperty("FID", FID);
+
+
+        Log.e("Api called", request.toString());
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE httpTransport = new HttpTransportSE(URL);
+        try {
+            httpTransport.call(SOAP_ACTION, envelope);
+
+            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
+            String result = SoapPrimitiveresult.toString();
+
+            Log.e("Api result", result);
+
+            if (result.equalsIgnoreCase("fail")) {
+                api_error = true;
+            } else {
+                api_error = false;
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            api_error = true;
+            Log.e("Api result err", String.valueOf(e.getMessage()));
+        }
+
     }
 
     class Async_ClientUserList extends AsyncTask<Void, Void, Void> {
@@ -425,7 +545,7 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
                 holder.ename = (TextView) convertview.findViewById(R.id.ename);
                 holder.mail_Id = (EditText) convertview.findViewById(R.id.mail_Id);
                 holder.checkBox = (CheckBox) convertview.findViewById(R.id.checkBox);
-               // holder.imgvw_ok = (ImageView) convertview.findViewById(R.id.imgvw_ok);
+                // holder.imgvw_ok = (ImageView) convertview.findViewById(R.id.imgvw_ok);
 
 
                 convertview.setTag(holder);
@@ -512,14 +632,6 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
             });
 
 
-           /* holder.imgvw_ok.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Utility.hideKeyboard(SharePhotosToClientActivity.this);
-                }
-            });
-*/
-
             return convertview;
         }
 
@@ -587,7 +699,7 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
             for (int i = 0; i < list_selected_Client.size(); i++) {
                 String Mail_1 = list_selected_Client.get(i).getTxt_Mail();
                 String UID_1 = list_selected_Client.get(i).getId_Pk();
-               // if (api_error) break;
+                // if (api_error) break;
                 Mail(LID, UID_1, Mail_1, CID, JID, FID);
             }
 
@@ -618,104 +730,6 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
 
 
         }
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                // API 5+ solution
-                onBackPressed();
-                return true;
-            case R.id.menu_done:
-
-                sendMail();
-
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_sharefiles, menu);
-       // _menu = menu;
-
-        return true;
-    }
-
-    void sendMail(){
-        Utility.hideKeyboard(SharePhotosToClientActivity.this);
-        list_selected_Client.clear();
-        api_error = false;
-        for (int i = 0; i < list_all_Client.size(); i++) {
-            if (list_all_Client.get(i).isChecked()) {
-                list_selected_Client.add(list_all_Client.get(i));
-            }
-        }
-
-
-        if (list_selected_Client == null || list_selected_Client.size() < 1) {
-            Toast.makeText(getApplicationContext(), "No client selected!",
-                    Toast.LENGTH_SHORT).show();
-        } else {
-
-            // Dialog_EnterComment();
-
-            Boolean isValid = ValidateEmail();
-            if (isValid) {
-                Dialog_EnterComment();
-            }
-
-
-        }
-    }
-
-    public void Mail(String LID, String UID, String Mail, String CID, String JID, String FID) {
-        list_ClientUser = new ArrayList<>();
-
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "mail";
-        final String METHOD_NAME = "mail";
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-
-        request.addProperty("LID", LID);
-        request.addProperty("UID", UID);
-        request.addProperty("Mail", Mail);
-        request.addProperty("CID", CID);
-        request.addProperty("JID", JID);
-        request.addProperty("FID", FID);
-
-
-        Log.e("Api called", request.toString());
-
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-
-            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
-            String result = SoapPrimitiveresult.toString();
-
-            Log.e("Api result", result);
-
-            if (result.equalsIgnoreCase("fail")) {
-                api_error = true;
-            } else {
-                api_error = false;
-            }
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            api_error = true;
-            Log.e("Api result err", String.valueOf(e.getMessage()));
-        }
-
     }
 
 }
