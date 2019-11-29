@@ -2,8 +2,9 @@
 package planet.info.skyline.model;
 
 
+import java.io.Serializable;
 
-public class Awo {
+public class Awo implements  Serializable {
 
     private String iDPK;
     private String jOBID;

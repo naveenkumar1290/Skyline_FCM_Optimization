@@ -2,7 +2,6 @@ package planet.info.skyline.client;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
@@ -49,21 +48,22 @@ import java.util.Arrays;
 import java.util.Date;
 
 
-import planet.info.skyline.FullscreenImageView;
-import planet.info.skyline.FullscreenWebView;
-import planet.info.skyline.LoginActivity;
-import planet.info.skyline.MainActivity;
+import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.tech.fullscreenview.FullscreenImageView;
+import planet.info.skyline.tech.fullscreenview.FullscreenWebView;
 import planet.info.skyline.R;
-import planet.info.skyline.Show_Jobs_Activity;
-import planet.info.skyline.controller.AppController;
 import planet.info.skyline.crash_report.ConnectionDetector;
 
 import planet.info.skyline.model.ProjectPhoto;
 import planet.info.skyline.util.FileDownloader;
 import planet.info.skyline.util.Utility;
 
-import static planet.info.skyline.util.Utility.KEY_NAMESPACE;
-import static planet.info.skyline.util.Utility.URL_EP2;
+import static planet.info.skyline.network.Api.API_GetClientFileByID;
+import static planet.info.skyline.network.Api.API_ShowClientFileByJobeID;
+import static planet.info.skyline.network.Api.API_deleteFile;
+import static planet.info.skyline.network.Api.API_updateclientfiles;
+import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
+import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
 public class ClientFileDetailActivity extends AppCompatActivity {
     String status = "", Comment = "";
@@ -333,9 +333,9 @@ public class ClientFileDetailActivity extends AppCompatActivity {
     public void updateFileDetails() {
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "updateclientfiles";
-        final String METHOD_NAME = "updateclientfiles";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_updateclientfiles;
+        final String METHOD_NAME =API_updateclientfiles;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
 
         request.addProperty("ImgName", str_fileName);
@@ -491,9 +491,9 @@ public class ClientFileDetailActivity extends AppCompatActivity {
     public void getProjectPhotoDetail() {
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "ShowClientFileByJobeID";
-        final String METHOD_NAME = "ShowClientFileByJobeID";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_ShowClientFileByJobeID;
+        final String METHOD_NAME = API_ShowClientFileByJobeID;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("clientUserID", Client_id_Pk);//
         request.addProperty("jobID", jobID);//
@@ -586,9 +586,9 @@ public class ClientFileDetailActivity extends AppCompatActivity {
     public void getProjectPhotoDetailNew() {
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "GetClientFileByID";
-        final String METHOD_NAME = "GetClientFileByID";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_GetClientFileByID;
+        final String METHOD_NAME = API_GetClientFileByID;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("id", FileId);//
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
@@ -676,9 +676,9 @@ public class ClientFileDetailActivity extends AppCompatActivity {
     public void DeleteFile() {
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "deleteFile";
-        final String METHOD_NAME = "deleteFile";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_deleteFile;
+        final String METHOD_NAME = API_deleteFile;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("Fileid", mPhoto.getINTFileID()+"");//
         request.addProperty("doneby", doneBy);//

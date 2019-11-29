@@ -31,10 +31,16 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.City;
 import planet.info.skyline.model.Country;
 import planet.info.skyline.model.State;
+import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.util.Utility;
 
-import static planet.info.skyline.util.Utility.KEY_NAMESPACE;
-import static planet.info.skyline.util.Utility.URL_EP2;
+import static planet.info.skyline.network.Api.API_BindCityByStateID;
+import static planet.info.skyline.network.Api.API_BindCountry;
+import static planet.info.skyline.network.Api.API_BindStateByCountryID;
+import static planet.info.skyline.network.Api.API_GetClientUserInfo;
+import static planet.info.skyline.network.Api.API_UpdateClientUser;
+import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
+import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
 public class UpdateUserInfoActivity extends AppCompatActivity {
 
@@ -107,9 +113,9 @@ public class UpdateUserInfoActivity extends AppCompatActivity {
 
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "GetClientUserInfo";
-        final String METHOD_NAME = "GetClientUserInfo";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_GetClientUserInfo;
+        final String METHOD_NAME = API_GetClientUserInfo;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("ID", UserID);
 
@@ -177,9 +183,9 @@ public class UpdateUserInfoActivity extends AppCompatActivity {
         CountryList.clear();
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "BindCountry";
-        final String METHOD_NAME = "BindCountry";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_BindCountry;
+        final String METHOD_NAME = API_BindCountry;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
 
 
@@ -219,9 +225,9 @@ public class UpdateUserInfoActivity extends AppCompatActivity {
         StateList.add(new State("-1", "-Select State-"));
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "BindStateByCountryID";
-        final String METHOD_NAME = "BindStateByCountryID";
+        final String URL =SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_BindStateByCountryID;
+        final String METHOD_NAME =API_BindStateByCountryID;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("Str_country", CountryId);
 
@@ -262,9 +268,9 @@ public class UpdateUserInfoActivity extends AppCompatActivity {
 
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "BindCityByStateID";
-        final String METHOD_NAME = "BindCityByStateID";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_BindCityByStateID;
+        final String METHOD_NAME = API_BindCityByStateID;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("Str_State", StateId);
 
@@ -348,9 +354,9 @@ public class UpdateUserInfoActivity extends AppCompatActivity {
     public void UpdateUserInfo() {
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "UpdateClientUser";
-        final String METHOD_NAME = "UpdateClientUser";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_UpdateClientUser;
+        final String METHOD_NAME = API_UpdateClientUser;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("Fname", et_Fname.getText().toString().trim());
         request.addProperty("Lname", et_Lname.getText().toString().trim());

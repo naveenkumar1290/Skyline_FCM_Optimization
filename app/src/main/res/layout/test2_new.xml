@@ -45,6 +45,43 @@
                     android:layout_height="1dp"
                     android:background="@color/btn_text_sky_blue" />
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_swo_awo_info"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:visibility="visible"
+                android:orientation="horizontal"
+
+                android:weightSum="4">
+                <TextView
+                    android:id="@+id/tv_title_awo_swo"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="2"
+                    android:gravity="center_vertical"
+                    android:text="AWO #/SWO #"
+                    android:textSize="14dp"
+                    android:textStyle="bold" />
+
+
+                <TextView
+                    android:id="@+id/tv_awo_swo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="2"
+                    android:gravity="center_vertical"
+                    android:text=""
+                    android:textStyle="bold"
+                    android:textSize="14dp" />
+
+            </LinearLayout>
+
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

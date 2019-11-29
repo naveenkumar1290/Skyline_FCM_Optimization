@@ -3,7 +3,8 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_exibitpower">Exibitpower</string>
-
+    <string name="action_search">Search</string>
+    <string name="search_hint">Type name…</string>
     <string name="title_activity_homeact">Homeact</string>
     <string name="title_activity_selectmissing">Selectmissing</string>
     <string name="title_activity_allmissingcreates">Allmissingcreates</string>

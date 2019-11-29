@@ -1,0 +1,313 @@
+package planet.info.skyline.tech.billable_timesheet;
+
+
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
+import planet.info.skyline.R;
+import planet.info.skyline.RequestControler.MyAsyncTask;
+import planet.info.skyline.RequestControler.ResponseInterface;
+import planet.info.skyline.crash_report.ConnectionDetector;
+import planet.info.skyline.home.MainActivity;
+import planet.info.skyline.network.Api;
+import planet.info.skyline.old_activity.BaseActivity;
+import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.util.Utility;
+
+public class Clock_Submit_Type_Activity extends BaseActivity {
+    ImageView imgvw_Company_Logo, homeimg;
+    TextView clientname;
+    Button btn_StopWork, btn_FinishWork, btnChangeTimeCode, btn_PauseWork;
+    ProgressDialog pDialog;
+
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.activity_danage_refurbish_new);
+
+        btn_PauseWork = findViewById(R.id.btn_PauseWork);
+        btn_StopWork = findViewById(R.id.btn_StopWork);
+        btn_FinishWork = findViewById(R.id.btn_FinishWork);
+        btnChangeTimeCode = findViewById(R.id.btnChangeTimeCode);
+
+        homeimg = (ImageView) findViewById(R.id.homeimg);
+
+        homeimg.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Clock_Submit_Type_Activity.this, MainActivity.class));
+                finish();
+
+            }
+        });
+
+        imgvw_Company_Logo = (ImageView) findViewById(R.id.imgvw_Company_Logo);
+        imgvw_Company_Logo.setVisibility(View.VISIBLE);
+        clientname = (TextView) findViewById(R.id.txtvw_Company_Name);
+        clientname.setText("");
+
+        pDialog = new ProgressDialog(Clock_Submit_Type_Activity.this);
+        pDialog.setMessage("Kindly wait");
+        pDialog.setCancelable(false);
+
+        String names = Shared_Preference.getCLIENT(this);
+        String nam = Shared_Preference.getCLIENT_NAME(this);
+        if (names != "") {
+            clientname.setText(names);
+        } else {
+            clientname.setText(nam);
+        }
+
+        String imageloc = Shared_Preference.getCLIENT_IMAGE_LOGO_URL(this);
+
+        Glide.with(Clock_Submit_Type_Activity.this).load(imageloc).listener(new RequestListener<Drawable>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                String names = Shared_Preference.getCLIENT(Clock_Submit_Type_Activity.this);
+                String nam = Shared_Preference.getCLIENT_NAME(Clock_Submit_Type_Activity.this);
+                if (names != "") {
+                    clientname.setText(names);
+                } else {
+                    clientname.setText(nam);
+                }
+
+                imgvw_Company_Logo.setVisibility(View.GONE);
+                clientname.setVisibility(View.VISIBLE);
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                imgvw_Company_Logo.setVisibility(View.VISIBLE);
+                clientname.setVisibility(View.GONE);
+                return false;
+            }
+        })
+                .into(imgvw_Company_Logo);
+
+
+        Shared_Preference.setUPLOAD(this, "");
+
+              btn_PauseWork.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (new ConnectionDetector(Clock_Submit_Type_Activity.this).isConnectingToInternet()) {
+                    Intent ii = new Intent(Clock_Submit_Type_Activity.this, SubmitTimesheet.class);
+                    ii.putExtra("aman_status", 0);
+                    startActivity(ii);
+                    finish();
+
+                } else {
+                    Toast.makeText(Clock_Submit_Type_Activity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+                }
+
+
+            }
+        });
+        btn_StopWork.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {//stop
+
+                if (new ConnectionDetector(getApplicationContext()).isConnectingToInternet()) {
+                    Intent ii = new Intent(Clock_Submit_Type_Activity.this, SubmitTimesheet.class);
+                    ii.putExtra("aman_status", 1);
+                    startActivity(ii);
+                    finish();
+
+                } else {
+                    Toast.makeText(getApplicationContext(), Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+                }
+
+
+            }
+        });
+
+
+        btnChangeTimeCode.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (new ConnectionDetector(getApplicationContext()).isConnectingToInternet()) {
+                    Intent ii = new Intent(Clock_Submit_Type_Activity.this, SubmitTimesheet.class);
+                    ii.putExtra("aman_status", 100);
+                    startActivity(ii);
+
+
+                } else {
+                    Toast.makeText(getApplicationContext(), Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+                }
+
+
+            }
+        });
+
+
+        btn_FinishWork.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (new ConnectionDetector(Clock_Submit_Type_Activity.this).isConnectingToInternet()) {
+                    dialog_FinishWithJob();
+                } else {
+                    Toast.makeText(Clock_Submit_Type_Activity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(Clock_Submit_Type_Activity.this, MainActivity.class));
+        finish();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Utility.showChatHead(Clock_Submit_Type_Activity.this);
+    }
+
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.danage_refurbish, menu);
+        return true;
+    }
+
+    public void dialog_FinishWithJob() {
+
+
+        final Dialog showd = new Dialog(Clock_Submit_Type_Activity.this);
+        showd.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        showd.setContentView(R.layout.alerfinishwithjob_new);
+        showd.getWindow().setBackgroundDrawable(
+                new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        showd.setCancelable(true);
+        showd.setCanceledOnTouchOutside(false);
+        TextView nofo = (TextView) showd.findViewById(R.id.Btn_No);
+        TextView yesfo = (TextView) showd.findViewById(R.id.Btn_Yes);
+        TextView NoCrate = (TextView) showd.findViewById(R.id.noCrate);
+        ImageView close = (ImageView) showd.findViewById(R.id.close);
+        TextView texrtdesc = (TextView) showd.findViewById(R.id.texrtdesc);
+        nofo.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                try {
+                    showd.dismiss();
+                } catch (Exception e) {
+                    e.getMessage();
+                }
+
+
+            }
+        });
+        close.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                try {
+                    showd.dismiss();
+                } catch (Exception e) {
+                    e.getMessage();
+                }
+
+
+            }
+        });
+        NoCrate.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (new ConnectionDetector(Clock_Submit_Type_Activity.this).isConnectingToInternet()) {
+                    Intent i = new Intent(getApplicationContext(),
+                            SubmitTimesheet.class);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(i);
+                    finish();
+
+                } else {
+                    Toast.makeText(Clock_Submit_Type_Activity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
+        yesfo.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Clock_Submit_Type_Activity.this, ClientLeavingWithCrate.class));
+                try {
+                    showd.dismiss();
+                } catch (Exception e) {
+                    e.getMessage();
+                }
+            }
+        });
+
+
+        try {
+            showd.show();
+        } catch (Exception e) {
+            e.getMessage();
+        }
+
+
+    }
+
+    public void showprogressdialog() {
+        try {
+            pDialog.show();
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
+
+    public void hideprogressdialog() {
+
+        pDialog.dismiss();
+
+    }
+
+
+}

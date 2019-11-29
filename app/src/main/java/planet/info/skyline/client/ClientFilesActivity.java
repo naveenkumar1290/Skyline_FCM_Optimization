@@ -88,35 +88,36 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
-import planet.info.skyline.AppConstants;
-import planet.info.skyline.CustomMultiPartEntity;
 import planet.info.skyline.R;
-import planet.info.skyline.Upload_image_and_cooment;
 import planet.info.skyline.adapter.CompanyNameAdapter;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.Job;
 import planet.info.skyline.model.Myspinner_timezone;
 import planet.info.skyline.model.ProjectPhoto;
-import planet.info.skyline.retrofit_multipart.ApiService;
-import planet.info.skyline.retrofit_multipart.ProgressRequestBody;
+import planet.info.skyline.network.API_Interface;
+import planet.info.skyline.network.ProgressRequestBody;
+import planet.info.skyline.network.REST_API_Client;
+import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.old_activity.AppConstants;
+import planet.info.skyline.old_activity.CustomMultiPartEntity;
+import planet.info.skyline.tech.runtime_permission.PermissionActivity;
+import planet.info.skyline.tech.shared_preference.Shared_Preference;
 import planet.info.skyline.util.CameraUtils;
 import planet.info.skyline.util.Utility;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
-import static planet.info.skyline.util.Utility.KEY_NAMESPACE;
-import static planet.info.skyline.util.Utility.URL_EP2;
+import static planet.info.skyline.network.Api.API_AllRecentlyUuploadedFiles;
+import static planet.info.skyline.network.Api.API_BindJob;
+import static planet.info.skyline.network.Api.API_saveclientFileByClient;
+import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
+import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
-//import com.aditya.filebrowser.Constants;
-//import com.aditya.filebrowser.FileChooser;
 
 public class ClientFilesActivity extends AppCompatActivity implements ProgressRequestBody.UploadCallbacks {
 
@@ -152,13 +153,13 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
     AlertDialog alertDialog1;
     /**/
     SwipeRefreshLayout pullToRefresh;
+    ProgressDialog uploadProgressDialog;
+    int Count_Image_Uploaded = 0;
     //  SwipeRefreshLayout mSwipeRefreshLayout;
     private Menu menu;
     private RecyclerView recyclerView;
     private MoviesAdapter mAdapter;
-    ProgressDialog uploadProgressDialog;
-    int Count_Image_Uploaded = 0;
-    ApiService apiService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -248,9 +249,9 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
 
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "BindJob";
-        final String METHOD_NAME = "BindJob";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_BindJob;
+        final String METHOD_NAME = API_BindJob;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("ClientID", comp_ID);
 
@@ -339,7 +340,6 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
     }
 
 
-
     public void getProjectPhotos2() {
         list_ProjectPhotos.clear();
         ArrayList<ProjectPhoto> yetToBeReviewd = new ArrayList<>();
@@ -349,9 +349,9 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
 
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "AllRecentlyUuploadedFiles";
-        final String METHOD_NAME = "AllRecentlyUuploadedFiles";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_AllRecentlyUuploadedFiles;
+        final String METHOD_NAME = API_AllRecentlyUuploadedFiles;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
 
         request.addProperty("clientUserID", Client_id_Pk);//
@@ -474,8 +474,7 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
 
     }
 
-    public void dialog_select_job()
-    {
+    public void dialog_select_job() {
 
         final Dialog dialog_companyName = new Dialog(ClientFilesActivity.this);
         dialog_companyName.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -827,38 +826,11 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
             public void onClick(View v) {
                 dialog.dismiss();
 
-               /*
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-                File folder = new File(extStorageDirectory, "Exhibit Power");
-
-                if (!folder.exists()) {
-                    folder.mkdir();
-                }
-                File folder1 = new File(folder, "Camera");
-                if (!folder1.exists()) {
-                    folder1.mkdir();
-                }
-
-                String unique_id = Utility.getUniqueId();
-
-                file1 = new File(folder1, unique_id + "_FromCamera.jpg");
-                Uri mImageCaptureUri = FileProvider.getUriForFile(ClientFilesActivity.this, ClientFilesActivity.this.getApplicationContext().getPackageName() + ".provider", file1);
-                try {
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT,
-                            mImageCaptureUri);
-                    intent.putExtra("return-data", true);
-                    startActivityForResult(intent,
-                            AppConstants.CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }*/
-
-                if (CameraUtils.checkPermissions(getApplicationContext())) {
+                if (PermissionActivity.CheckingPermissionIsEnabledOrNot(ClientFilesActivity.this)) {
                     captureImage();
                 } else {
-                    requestCameraPermission(MEDIA_TYPE_IMAGE);
+                    Intent i = new Intent(getApplicationContext(), PermissionActivity.class);
+                    startActivityForResult(i, Utility.REQUEST_CODE_PERMISSIONS);
                 }
 
 
@@ -1090,6 +1062,8 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
                 }
 
                 dialog_Image_Description();
+            } else if (requestCode == Utility.REQUEST_CODE_PERMISSIONS) {
+                opendilogforattachfileandimage_custom();
             }
         } else {
 
@@ -1135,8 +1109,10 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
         Button Btn_Back = (Button) dialog_image.findViewById(R.id.Btn_Back);
 
 
-        String clid = sp.getString("clientid", "");
-        String name = sp.getString("tname", "");
+        // String clid = sp.getString("clientid", "");
+        String clid = Shared_Preference.getLOGIN_USER_ID(this);
+        // String name = sp.getString("tname", "");
+        String name = Shared_Preference.getLOGIN_USERNAME(ClientFilesActivity.this);
         //nks
 
 
@@ -1183,7 +1159,7 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
 
                     /////////////////////
                     if (new ConnectionDetector(ClientFilesActivity.this).isConnectingToInternet()) {
-                      //  new async_UploadFiles().execute();
+                        //  new async_UploadFiles().execute();
                         multipartImageUpload();
                     } else {
                         Toast.makeText(ClientFilesActivity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
@@ -1337,9 +1313,9 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
 
         String UploadedPhotoID = "";
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "saveclientFileByClient";
-        final String METHOD_NAME = "saveclientFileByClient";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_saveclientFileByClient;
+        final String METHOD_NAME = API_saveclientFileByClient;
 
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("CompID", CompID);
@@ -1389,7 +1365,6 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
         list_imageSize.clear();
         list_UploadImageName.clear();
     }
-
 
 
     private void captureImage() {
@@ -1459,6 +1434,160 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
                 }).show();
     }
 
+    private void multipartImageUpload() {
+        if (Count_Image_Uploaded < list_ImageDescData.size())
+            Count_Image_Uploaded++;
+        uploadProgressDialog = new ProgressDialog(ClientFilesActivity.this);
+        // uploadProgressDialog.setMessage("Uploading , Please wait..");
+        uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_ImageDescData.size() + ", Please wait..");
+        uploadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        uploadProgressDialog.setIndeterminate(false);
+        uploadProgressDialog.setProgress(0);
+        uploadProgressDialog.setMax(100);
+        uploadProgressDialog.setCancelable(false);
+        uploadProgressDialog.show();
+
+        //  initRetrofitClient();
+
+        try {
+            /**/
+            MultipartBody.Part[] surveyImagesParts = new MultipartBody.Part[list_ImageDescData.size()];
+            for (int index = 0; index < list_ImageDescData.size(); index++) {
+                File file = new File(list_ImageDescData.get(index).get(Utility.KEY_imagePath));
+                ProgressRequestBody surveyBody = new ProgressRequestBody(file, this);
+                surveyImagesParts[index] = MultipartBody.Part.createFormData("images[]", file.getName(), surveyBody);
+
+                long Size = file.length();
+                totalSize = totalSize + Size;
+                list_imageSize.add(String.valueOf(Size / 1000));//kb
+            }
+            String jid = list_ImageDescData.get(0).get(Utility.KEY_Jobid_or_swoid);
+            String url = URL_EP2 + "/UploadFileHandler.ashx?jid=" + jid;
+            /**/
+
+
+            API_Interface APIInterface = REST_API_Client.getClient().create(API_Interface.class);
+
+            Call<ResponseBody> req = APIInterface.uploadMedia(surveyImagesParts, url);
+            req.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                    String result = "";
+                    Count_Image_Uploaded = 0;
+                    if (String.valueOf(response.code()).equals("200")) {
+                        try {
+                            uploadProgressDialog.setProgress(100);
+                            String responseStr = response.body().string();
+                            if (!responseStr.contains("api_error")) {
+                                String s[] = responseStr.split(",");
+                                List<String> stringList = new ArrayList<String>(Arrays.asList(s)); //new Ar
+                                list_UploadImageName = new ArrayList<String>(stringList);
+
+                                result = "1";
+                            } else {
+                                result = "0";
+                            }
+                        } catch (Exception e) {
+                            e.getMessage();
+                            result = "0";
+                        }
+                        if (result.equalsIgnoreCase("1")) {
+                            new async_LinkUploadedFiles().execute();
+                        }
+
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Upload Failed!", Toast.LENGTH_SHORT).show();
+                        dialog_photo_upload_failed();
+
+                    }
+
+
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    try {
+                        if (uploadProgressDialog.isShowing())
+                            uploadProgressDialog.dismiss();
+                    } catch (Exception e) {
+                        e.getMessage();
+                    }
+                    Count_Image_Uploaded = 0;
+                    Toast.makeText(getApplicationContext(), "Upload failed!", Toast.LENGTH_SHORT).show();
+                    t.printStackTrace();
+                    dialog_photo_upload_failed();
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onProgressUpdate(int percentage) {
+        // textView.setText(percentage + "%");
+        uploadProgressDialog.setProgress(percentage);
+    }
+
+    @Override
+    public void onError() {
+        //  textView.setText("Uploaded Failed!");
+    }
+
+    @Override
+    public void onFinish() {
+        if (Count_Image_Uploaded < list_ImageDescData.size())
+            Count_Image_Uploaded++;
+        uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_ImageDescData.size() + ", Please wait..");
+
+    }
+
+    @Override
+    public void uploadStart() {
+        //  textView.setText("0%");
+    }
+
+    private void dialog_photo_upload_failed() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(ClientFilesActivity.this);
+        LayoutInflater inflater = LayoutInflater.from(ClientFilesActivity.this);
+        final View dialogView = inflater.inflate(R.layout.dialog_yes_no, null);
+        dialogView.setBackgroundDrawable(
+                new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialogBuilder.setView(dialogView);
+        final TextView title = dialogView.findViewById(R.id.textView1rr);
+        final TextView message = dialogView.findViewById(R.id.texrtdesc);
+
+        final Button positiveBtn = dialogView.findViewById(R.id.Btn_Yes);
+        final Button negativeBtn = dialogView.findViewById(R.id.Btn_No);
+        ImageView close = (ImageView) dialogView.findViewById(R.id.close);
+        close.setVisibility(View.INVISIBLE);
+        // dialogBuilder.setTitle("Device Details");
+        title.setText("Failed!");
+        message.setText("Image(s) not uploaded!");
+        positiveBtn.setText("Ok");
+        negativeBtn.setText("No");
+        negativeBtn.setVisibility(View.GONE);
+        positiveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertDialog.dismiss();
+
+            }
+        });
+        negativeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog = dialogBuilder.create();
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.setCancelable(false);
+        alertDialog.show();
+    }
+
     private class Async_ProjectPhotos extends AsyncTask<Void, Void, Void> {
 
         ProgressDialog progressDoalog;
@@ -1524,7 +1653,18 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
         }
     }
 
-
+  /*  private void initRetrofitClient() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(100, TimeUnit.SECONDS)
+                .readTimeout(100, TimeUnit.SECONDS)
+                .writeTimeout(1000, TimeUnit.SECONDS)
+                .build();
+        try {
+            APIInterface = new Retrofit.Builder().baseUrl(URL_EP2).client(client).build().create(API_Interface.class);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }*/
 
     public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MyViewHolder> {
         private List<ProjectPhoto> moviesList;
@@ -1997,18 +2137,18 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
         protected void onPreExecute() {
             //showprogressdialog();
             super.onPreExecute();
-           try {
-               progressDialog = new ProgressDialog(getApplicationContext());
-               progressDialog.setMessage("Uploading, Please wait..");
-               progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-               progressDialog.setIndeterminate(false);
-               progressDialog.setProgress(0);
-               progressDialog.setMax(100);
-               progressDialog.setCancelable(false);
-               progressDialog.show();
-           }catch (Exception e){
-               e.getMessage();
-           }
+            try {
+                progressDialog = new ProgressDialog(getApplicationContext());
+                progressDialog.setMessage("Uploading, Please wait..");
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                progressDialog.setIndeterminate(false);
+                progressDialog.setProgress(0);
+                progressDialog.setMax(100);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+            } catch (Exception e) {
+                e.getMessage();
+            }
 
         }
 
@@ -2148,8 +2288,6 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
                 dialog_photo_upload_failed();
 
 
-
-
             }
             callApiProjectPhotos();
 
@@ -2158,172 +2296,8 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
 
     }
 
-
-    private void multipartImageUpload() {
-        if (Count_Image_Uploaded < list_ImageDescData.size())
-            Count_Image_Uploaded++;
-        uploadProgressDialog = new ProgressDialog(ClientFilesActivity.this);
-        // uploadProgressDialog.setMessage("Uploading , Please wait..");
-        uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_ImageDescData.size() + ", Please wait..");
-        uploadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        uploadProgressDialog.setIndeterminate(false);
-        uploadProgressDialog.setProgress(0);
-        uploadProgressDialog.setMax(100);
-        uploadProgressDialog.setCancelable(false);
-        uploadProgressDialog.show();
-
-        initRetrofitClient();
-
-        try {
-            /**/
-            MultipartBody.Part[] surveyImagesParts = new MultipartBody.Part[list_ImageDescData.size()];
-            for (int index = 0; index < list_ImageDescData.size(); index++) {
-                File file = new File(list_ImageDescData.get(index).get(Utility.KEY_imagePath));
-                ProgressRequestBody surveyBody = new ProgressRequestBody(file, this);
-                surveyImagesParts[index] = MultipartBody.Part.createFormData("images[]", file.getName(), surveyBody);
-
-                long Size = file.length();
-                totalSize = totalSize + Size;
-                list_imageSize.add(String.valueOf(Size / 1000));//kb
-            }
-            String jid = list_ImageDescData.get(0).get(Utility.KEY_Jobid_or_swoid);
-            String url = URL_EP2 + "/UploadFileHandler.ashx?jid=" + jid;
-            /**/
-            Call<ResponseBody> req = apiService.uploadMedia(surveyImagesParts, url);
-            req.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-
-                    String result = "";
-                    Count_Image_Uploaded = 0;
-                    if (String.valueOf(response.code()).equals("200")) {
-                        try {
-                            uploadProgressDialog.setProgress(100);
-                            String responseStr = response.body().string();
-                            if (!responseStr.contains("api_error")) {
-                                String s[] = responseStr.split(",");
-                                List<String> stringList = new ArrayList<String>(Arrays.asList(s)); //new Ar
-                                list_UploadImageName = new ArrayList<String>(stringList);
-
-                                result = "1";
-                            } else {
-                                result = "0";
-                            }
-                        } catch (Exception e) {
-                            e.getMessage();
-                            result = "0";
-                        }
-                        if (result.equalsIgnoreCase("1")) {
-                            new async_LinkUploadedFiles().execute();
-                        }
-
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Upload Failed!", Toast.LENGTH_SHORT).show();
-                        dialog_photo_upload_failed();
-
-                    }
-
-
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    try {
-                        if (uploadProgressDialog.isShowing())
-                            uploadProgressDialog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-                    Count_Image_Uploaded = 0;
-                    Toast.makeText(getApplicationContext(), "Upload failed!", Toast.LENGTH_SHORT).show();
-                    t.printStackTrace();
-                    dialog_photo_upload_failed();
-                }
-            });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void initRetrofitClient() {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(100, TimeUnit.SECONDS)
-                .readTimeout(100, TimeUnit.SECONDS)
-                .writeTimeout(1000, TimeUnit.SECONDS)
-                .build();
-        try {
-            apiService = new Retrofit.Builder().baseUrl(URL_EP2).client(client).build().create(ApiService.class);
-        } catch (Exception e) {
-            e.getMessage();
-        }
-    }
-
-    @Override
-    public void onProgressUpdate(int percentage) {
-        // textView.setText(percentage + "%");
-        uploadProgressDialog.setProgress(percentage);
-    }
-
-    @Override
-    public void onError() {
-        //  textView.setText("Uploaded Failed!");
-    }
-
-    @Override
-    public void onFinish() {
-        if (Count_Image_Uploaded < list_ImageDescData.size())
-            Count_Image_Uploaded++;
-        uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_ImageDescData.size() + ", Please wait..");
-
-    }
-
-    @Override
-    public void uploadStart() {
-        //  textView.setText("0%");
-    }
-
-    private void dialog_photo_upload_failed() {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(ClientFilesActivity.this);
-        LayoutInflater inflater = LayoutInflater.from(ClientFilesActivity.this);
-        final View dialogView = inflater.inflate(R.layout.dialog_yes_no, null);
-        dialogView.setBackgroundDrawable(
-                new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        dialogBuilder.setView(dialogView);
-        final TextView title = dialogView.findViewById(R.id.textView1rr);
-        final TextView message = dialogView.findViewById(R.id.texrtdesc);
-
-        final Button positiveBtn = dialogView.findViewById(R.id.Btn_Yes);
-        final Button negativeBtn = dialogView.findViewById(R.id.Btn_No);
-        ImageView close = (ImageView) dialogView.findViewById(R.id.close);
-        close.setVisibility(View.INVISIBLE);
-        // dialogBuilder.setTitle("Device Details");
-        title.setText("Failed!");
-        message.setText("Image(s) not uploaded!");
-        positiveBtn.setText("Ok");
-        negativeBtn.setText("No");
-        negativeBtn.setVisibility(View.GONE);
-        positiveBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                alertDialog.dismiss();
-
-            }
-        });
-        negativeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                alertDialog.dismiss();
-            }
-        });
-        alertDialog = dialogBuilder.create();
-        alertDialog.setCanceledOnTouchOutside(false);
-        alertDialog.setCancelable(false);
-        alertDialog.show();
-    }
-
     public class async_LinkUploadedFiles extends AsyncTask<String, Integer, String> {
-      //  ProgressDialog progressDialog;
+        //  ProgressDialog progressDialog;
 
         @Override
         protected void onPreExecute() {
@@ -2348,37 +2322,36 @@ public class ClientFilesActivity extends AppCompatActivity implements ProgressRe
         protected String doInBackground(String... params) {
 
 
-                    for (int i = 0; i < list_ImageDescData.size(); i++) {
-                        String Jobid_or_swoid = list_ImageDescData.get(i).get(Utility.KEY_Jobid_or_swoid);
-                        String dataa = list_ImageDescData.get(i).get(Utility.KEY_dataa);
-                        String imagename = list_UploadImageName.get(i);//list_ImageDescData.get(i).get(Utility.KEY_imagename);
-                        String image_size = list_imageSize.get(i);
-                        String name = list_ImageDescData.get(i).get(Utility.KEY_name);
-                        String clid = list_ImageDescData.get(i).get(Utility.KEY_clid);
-                        String job_or_swo = list_ImageDescData.get(i).get(Utility.KEY_job_or_swo);
+            for (int i = 0; i < list_ImageDescData.size(); i++) {
+                String Jobid_or_swoid = list_ImageDescData.get(i).get(Utility.KEY_Jobid_or_swoid);
+                String dataa = list_ImageDescData.get(i).get(Utility.KEY_dataa);
+                String imagename = list_UploadImageName.get(i);//list_ImageDescData.get(i).get(Utility.KEY_imagename);
+                String image_size = list_imageSize.get(i);
+                String name = list_ImageDescData.get(i).get(Utility.KEY_name);
+                String clid = list_ImageDescData.get(i).get(Utility.KEY_clid);
+                String job_or_swo = list_ImageDescData.get(i).get(Utility.KEY_job_or_swo);
 
-                        int count = 0;
-                        if (i == list_ImageDescData.size() - 1) {
-                            count = list_ImageDescData.size();
-                        }
+                int count = 0;
+                if (i == list_ImageDescData.size() - 1) {
+                    count = list_ImageDescData.size();
+                }
 
-                        enterdata(comp_ID, Client_id_Pk, loginUserName,
-                                jobID, imagename, imagename, dataa, image_size,
-                                Agency, String.valueOf(count));
+                enterdata(comp_ID, Client_id_Pk, loginUserName,
+                        jobID, imagename, imagename, dataa, image_size,
+                        Agency, String.valueOf(count));
 
 
-                    }
+            }
 
 
             return "";
         }
 
 
-
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-          //  progressDialog.dismiss();
+            //  progressDialog.dismiss();
             for (int i = 0; i < list_TempImagePath.size(); i++) {
                 String TempImagePath = list_TempImagePath.get(i);
                 Utility.delete(TempImagePath);

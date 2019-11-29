@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="20dp"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:layout_weight="1"
+        android:orientation="vertical"
+     >
+
+
+    <ImageView
+
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+android:src="@drawable/ic_photo_camera_black_24dp"
+        />
+
+    <TextView
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Access to your camera?"
+        android:textSize="20sp"
+        android:layout_marginTop="50dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="We would need to access your camera for taking photograph"
+        android:textSize="17sp" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_allow_permission"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_marginTop="0dp"
+        android:background="@drawable/round_corner_btn2_new"
+        android:gravity="center"
+        android:text="Allow"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/btn_text_sky_blue" />
+</LinearLayout>

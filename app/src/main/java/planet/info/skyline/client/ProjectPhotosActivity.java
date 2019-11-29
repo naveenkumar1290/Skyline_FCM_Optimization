@@ -67,16 +67,18 @@ import java.util.List;
 
 import planet.info.skyline.R;
 import planet.info.skyline.adapter.CompanyNameAdapter;
-import planet.info.skyline.controller.AppController;
 import planet.info.skyline.crash_report.ConnectionDetector;
 //import planet.info.skyline.httpimage.HttpImageManager;
 import planet.info.skyline.model.Job;
 import planet.info.skyline.model.Myspinner_timezone;
 import planet.info.skyline.model.ProjectPhoto;
+import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.util.Utility;
 
-import static planet.info.skyline.util.Utility.KEY_NAMESPACE;
-import static planet.info.skyline.util.Utility.URL_EP2;
+import static planet.info.skyline.network.Api.API_BindJob;
+import static planet.info.skyline.network.Api.API_ShowProjectphotosByJobeID;
+import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
+import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
 public class ProjectPhotosActivity extends AppCompatActivity {
 
@@ -181,9 +183,9 @@ public class ProjectPhotosActivity extends AppCompatActivity {
 
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "BindJob";
-        final String METHOD_NAME = "BindJob";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_BindJob;
+        final String METHOD_NAME = API_BindJob;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("ClientID", comp_ID);
 
@@ -279,9 +281,9 @@ public class ProjectPhotosActivity extends AppCompatActivity {
         ArrayList<ProjectPhoto> Rejected = new ArrayList<>();
 
         final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + "ShowProjectphotosByJobeID";
-        final String METHOD_NAME = "ShowProjectphotosByJobeID";
+        final String URL = SOAP_API_Client.BASE_URL;
+        final String SOAP_ACTION = KEY_NAMESPACE + API_ShowProjectphotosByJobeID;
+        final String METHOD_NAME =API_ShowProjectphotosByJobeID;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
         request.addProperty("jobId", jobID);
         request.addProperty("comp_ID", comp_ID);
