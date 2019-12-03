@@ -89,7 +89,7 @@ import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
 
 
 public class MainActivity extends BaseActivity implements ResponseInterface {
-    private static final int CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE = 100;
+
     private static final int WIFI_SETTING_REQUEST_CODE = 458;
     private static final int MOBILE_DATA_SETTING_REQUEST_CODE = 459;
 
@@ -160,7 +160,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == Utility.OVERLAY_PERMISSION_REQUEST_CODE) {
+        if (requestCode == Utility.CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE) {
             {
             }
         } else if (requestCode == WIFI_SETTING_REQUEST_CODE) {
@@ -287,7 +287,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             Set_Billable_Row();
         } else {
             final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
-            startActivityForResult(intent, CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
+            startActivityForResult(intent, Utility.CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
         }
 
 
@@ -314,7 +314,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         // オーバレイパーミッションの表示
         if (isShowOverlayPermission) {
             final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
-            startActivityForResult(intent, CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
+            startActivityForResult(intent,Utility.CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
         }
 
 
@@ -358,19 +358,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
     }
 
-    public boolean checkDrawOverlayPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (!Settings.canDrawOverlays(this)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + getPackageName()));
-            startActivityForResult(intent, Utility.OVERLAY_PERMISSION_REQUEST_CODE);
-            return false;
-        } else {
-            return true;
-        }
-    }
+
 
     public void INITIALIZE_VIEWS() {
 
@@ -442,7 +430,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             public void onClick(View view) {
 
 
-                if (checkDrawOverlayPermission()) {
+                if (Utility.checkDrawOverlayPermission(MainActivity.this)) {
                     boolean isTimerRunningFromAdminClockModule = Shared_Preference.getTIMER_STARTED_FROM_ADMIN_CLOCK_MODULE(context);
                     if (!isTimerRunningFromAdminClockModule) {
                         Shared_Preference.setIS_STARTING_BILLABLE_JOB(context, false);

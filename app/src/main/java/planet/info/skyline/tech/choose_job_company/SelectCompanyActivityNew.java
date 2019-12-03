@@ -2,13 +2,9 @@ package planet.info.skyline.tech.choose_job_company;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -28,15 +24,12 @@ import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.ksoap2.SoapEnvelope;
-import org.ksoap2.serialization.SoapObject;
-import org.ksoap2.serialization.SoapPrimitive;
-import org.ksoap2.serialization.SoapSerializationEnvelope;
-import org.ksoap2.transport.HttpTransportSE;
 
 import java.util.ArrayList;
 
 import planet.info.skyline.R;
+import planet.info.skyline.RequestControler.MyAsyncTask;
+import planet.info.skyline.RequestControler.ResponseInterface;
 import planet.info.skyline.adapter.AllJobsAdapter;
 import planet.info.skyline.adapter.CompanyNameAdapterNew2;
 import planet.info.skyline.adapter.JobNameAdapterNew2;
@@ -47,20 +40,12 @@ import planet.info.skyline.model.Company;
 import planet.info.skyline.model.Job_2;
 import planet.info.skyline.model.SWO_Details;
 import planet.info.skyline.network.Api;
-import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.tech.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.swo.SwoListActivity;
 import planet.info.skyline.util.Utility;
 
-import static planet.info.skyline.network.Api.API_BindJob;
-import static planet.info.skyline.network.Api.API_GetAllDetailbyJobtext_New;
-import static planet.info.skyline.network.Api.API_GetAwoDetailByJob;
-import static planet.info.skyline.network.Api.API_GetallJobByDealerID;
-import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
-
-public class SelectCompanyActivityNew extends AppCompatActivity {
+public class SelectCompanyActivityNew extends AppCompatActivity implements ResponseInterface {
     String userRole = "";
-
     String Swo_Id = "";
 
 
@@ -98,12 +83,13 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
     Button Btn_UnassignedSwo;
     LinearLayout ll_BySWO;
 
+    String CompId = "";
 
     public void onCompanySelected1(Company company) {
         txtvw_COMP_NAME_SearchByCompany.setText(company.getEname());
         txtvw_COMP_NAME_SearchByCompany.clearFocus();
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new fetch_Jobs_by_CompID().execute(company.getId());
+            FetchJobsByCompanyID(company.getId());
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -115,7 +101,11 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
         txtvw_JOB_NAME_SearchByCompany.clearFocus();
         if (STARTING_BILLABLE_JOB) {
             if (new ConnectionDetector(context).isConnectingToInternet()) {
-                new Async_fetch_SWO_AWO_List().execute(job.getJobName(), job.getJOB_ID_PK());
+                if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
+                    FetchAWOsByJobID(job.getJOB_ID_PK());
+                } else {
+                    FetchSWOsByJobName(job.getJobName());
+                }
             } else {
                 Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
             }
@@ -129,7 +119,15 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
 
         if (STARTING_BILLABLE_JOB) {
             if (new ConnectionDetector(context).isConnectingToInternet()) {
-                new Async_fetch_SWO_AWO_List().execute(job.getTxt_job(), job.getJob_id_pk());
+                //    new Async_fetch_SWO_AWO_List().execute(job.getTxt_job(), job.getJob_id_pk());
+
+                if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
+                    FetchAWOsByJobID(job.getJob_id_pk());
+                } else {
+                    FetchSWOsByJobName(job.getTxt_job());
+                }
+
+
             } else {
                 Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
             }
@@ -234,11 +232,8 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
             public void onClick(View view) {
                 Search_by_Job = false;
                 Scan_QR_CODE = false;
-                if (new ConnectionDetector(context).isConnectingToInternet()) {
-                    new fetch_Clients().execute();
-                } else {
-                    Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                }
+                FetchCompanyNames();
+
             }
         });
 
@@ -249,7 +244,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
                 Search_by_Job = true;
                 Scan_QR_CODE = false;
                 if (new ConnectionDetector(context).isConnectingToInternet()) {
-                    new getAllJObByDealer().execute();
+                    FetchAllJobsByDealerID();
                 } else {
                     Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
                 }
@@ -290,40 +285,120 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
 
     }
 
-    public void Getcompany_name() {
-        list_company.clear();
-        String dealerId = Shared_Preference.getDEALER_ID(this);
-
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = SOAP_API_Client.BASE_URL;
-        final String METHOD_NAME = Api.API_bindClientByDealer;
-        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
-
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        request.addProperty("dealerID", dealerId);
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
+    private void FetchCompanyNames() {
+        JSONObject jsonObject = new JSONObject();
         try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            Object results = (Object) envelope.getResponse();
-            String resultstring = results.toString();
-            JSONObject jsonObject = new JSONObject(resultstring);
-            JSONArray jsonArray = jsonObject.getJSONArray("cds");
-
-            for (int i = 0; i < jsonArray.length(); i++) {
-
-                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                String comapny_id = jsonObject1.getString("id");
-                String company_name = jsonObject1.getString("Ename");
-                String company_logo = jsonObject1.getString("Imagepath");
-                list_company.add(new Company(comapny_id, company_name, company_logo));
-            }
-
+            String dealerId = Shared_Preference.getDEALER_ID(this);
+            jsonObject.put("dealerID", dealerId);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        if (new ConnectionDetector(context).isConnectingToInternet()) {
+            new MyAsyncTask(this, this, Api.API_bindClientByDealer, jsonObject).execute();
+        } else {
+            Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private void FetchJobsByCompanyID(String Client_ID) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("ClientID", Client_ID);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (new ConnectionDetector(context).isConnectingToInternet()) {
+            new MyAsyncTask(this, this, Api.API_BindJob, jsonObject).execute();
+        } else {
+            Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private void FetchAllJobsByDealerID() {
+        String dealerId = Shared_Preference.getDEALER_ID(this);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("DealerId", dealerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (new ConnectionDetector(context).isConnectingToInternet()) {
+            new MyAsyncTask(this, this, Api.API_GetallJobByDealerID, jsonObject).execute();
+        } else {
+            Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private void FetchAWOsByJobID(String JobId) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("Job", JobId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (new ConnectionDetector(context).isConnectingToInternet()) {
+            new MyAsyncTask(this, this, Api.API_GetAwoDetailByJob, jsonObject).execute();
+        } else {
+            Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private void FetchSWOsByJobName(String Job) {
+        String dealerId = Shared_Preference.getDEALER_ID(this);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("job", Job);
+            jsonObject.put("DealerID", dealerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (new ConnectionDetector(context).isConnectingToInternet()) {
+            new MyAsyncTask(this, this, Api.API_GetSwoByJObDealer, jsonObject).execute();
+        } else {
+            Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private void FetchJobDetailBy_SWO_AWO_Id(String awo_swo_id) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("AWO_SWO", awo_swo_id);
+            if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
+                jsonObject.put("type", "2");
+            } else {
+                jsonObject.put("type", "1");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (new ConnectionDetector(context).isConnectingToInternet()) {
+            new MyAsyncTask(this, this, Api.API_GetJobDetailsBy_SWO_AWO, jsonObject).execute();
+        } else {
+            Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private void FetchJobDetailBy_JobName(String Job) {
+        String dealerId = Shared_Preference.getDEALER_ID(this);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("job", Job);
+            jsonObject.put("dealerid", dealerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (new ConnectionDetector(context).isConnectingToInternet()) {
+            new MyAsyncTask(this, this, Api.API_GetAllDetailbyJobtext_New, jsonObject).execute();
+        } else {
+            Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+        }
+
     }
 
     public void dialog_SearchByCompany() {
@@ -509,7 +584,9 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
 
                 dialog_companyName.dismiss();
                 if (showDialog_SHOW_INFO) {
-                    new get_company_Area(CompanyId).execute(str_JobName);
+                    CompId = CompanyId;
+
+                    FetchJobDetailBy_JobName(str_JobName);
                 } else {
                     SendDataToCallingActivity(CompanyId, JObId, str_CompanyName, str_JobName);
                 }
@@ -522,59 +599,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
     }
 
     public void scanqr() {
-        try {
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.setPackage(getApplicationContext().getPackageName());
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, 1);
-
-        } catch (Exception e) {
-
-            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            startActivity(marketIntent);
-
-        }
-    }
-
-    public void getAllJobsByDealerId() {
-
-        list_AllJobs.clear();
-        String dealerId = Shared_Preference.getDEALER_ID(this);
-
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = SOAP_API_Client.BASE_URL;
-        final String SOAP_ACTION = KEY_NAMESPACE + API_GetallJobByDealerID;
-        final String METHOD_NAME = API_GetallJobByDealerID;
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        request.addProperty("DealerId", dealerId);
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
-            String receivedString = SoapPrimitiveresult.toString();
-            JSONObject jsonObject1 = new JSONObject(receivedString);
-            JSONArray jsonArray = jsonObject1.getJSONArray("cds");
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                String jobName = jsonObject.getString("txt_job");
-                String JobId = jsonObject.getString("job_id_pk");
-                String job_descripition = jsonObject.getString("JOB_DESC").trim();
-                String compID = jsonObject.getString("compID");
-                String companyName = jsonObject.getString("company");
-                list_AllJobs.add(new All_Jobs(JobId, jobName, job_descripition, compID, companyName));
-
-            }
-
-
-        } catch (Exception e) {
-            e.getMessage();
-        }
-
+        Utility.scanqr(SelectCompanyActivityNew.this, 1);
 
     }
 
@@ -702,7 +727,8 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
                     str_CompanyName = job.getCompany();
 
                     if (showDialog_SHOW_INFO) {
-                        new get_company_Area(CompanyId).execute(str_JobName);
+                        CompId = CompanyId;
+                        FetchJobDetailBy_JobName(str_JobName);
                     } else {
                         SendDataToCallingActivity(CompanyId, JObId, str_CompanyName, str_JobName);
                     }
@@ -712,86 +738,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
         });
 
 
-    }
-
-    public void getAwoListByJobID(String JobId) {
-        list_Awo.clear();
-
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = SOAP_API_Client.BASE_URL;
-        final String SOAP_ACTION = KEY_NAMESPACE + API_GetAwoDetailByJob;
-        final String METHOD_NAME = API_GetAwoDetailByJob;
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        request.addProperty("Job", JobId);//nks
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                SoapEnvelope.VER11);
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            Object results = (Object) envelope.getResponse();
-            String resultstring = results.toString();
-            JSONArray jsonArray = new JSONArray(resultstring);
-
-            for (int k = 0; k < (jsonArray.length()); k++) {
-                JSONObject json_obj = jsonArray.getJSONObject(k);
-                String ID_PK = json_obj.getString("ID_PK");
-                String JOB_ID = json_obj.getString("JOB_ID");
-                String swo_name = json_obj.getString("swo_name");
-                String tech_id = "";
-                String SWO_Status_new = json_obj.getString("SWO_Status_new");
-                list_Awo.add(new Awo(ID_PK, JOB_ID, swo_name, tech_id, SWO_Status_new));
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
-
-
-    }
-
-    public void GetSwoListByJob(String job) {
-        list_SWO.clear();
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = SOAP_API_Client.BASE_URL;
-        final String METHOD_NAME = Api.API_GetSwoByJObDealer;
-        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
-
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-
-        String dealerId = Shared_Preference.getDEALER_ID(this);
-        request.addProperty("job", job);
-        request.addProperty("DealerID", dealerId);
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            Object results = (Object) envelope.getResponse();
-            String resultstring = results.toString();
-            JSONObject jsonObject = new JSONObject(resultstring);
-            JSONArray jsonArray = jsonObject.getJSONArray("cds");
-
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                String swo_id = jsonObject1.getString("swo_id");
-                String JOB_ID = jsonObject1.getString("JOB_ID");
-                String JOB_DESC = jsonObject1.getString("JOB_DESC");
-                String COMP_ID = jsonObject1.getString("COMP_ID");
-                String SWO_NAME = jsonObject1.getString("swo_name");
-                String SWO_Status_new = jsonObject1.getString("SWO_Status_new");
-                String TXT_JOB = jsonObject1.getString("txt_job");
-
-                list_SWO.add(new SWO_Details(JOB_ID, JOB_DESC, COMP_ID, SWO_NAME, TXT_JOB, SWO_Status_new, swo_id, SWO_NAME));
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -822,7 +768,9 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    new async_getJobDetailsBySwoId().execute(Swo_Id);
+
+                    FetchJobDetailBy_SWO_AWO_Id(Swo_Id);
+
                 } else {
                     Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
                     return;
@@ -889,47 +837,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
 
     }
 
-    public void fetch_Jobs(String id) {
-
-        list_Jobs.clear();
-
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = SOAP_API_Client.BASE_URL;
-        final String SOAP_ACTION = KEY_NAMESPACE + API_BindJob;
-        final String METHOD_NAME = API_BindJob;
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        request.addProperty("ClientID", id);
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-
-            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
-            String result = SoapPrimitiveresult.toString();
-            JSONObject jsonObject = new JSONObject(result);
-            JSONArray jsonArray = jsonObject.getJSONArray("cds");
-
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                String job_id = jsonObject1.getString("JOB_ID_PK");
-                String jobName = jsonObject1.getString("JobName");
-                String job_descripition = jsonObject1.getString("txt_Job");
-                String status = jsonObject1.getString("Status");
-                String show = jsonObject1.getString("ShowName");
-                String jobtype = jsonObject1.getString("JOB_TYPE");
-
-                list_Jobs.add(new Job_2(job_id, job_descripition, show, jobName, jobtype, status));
-
-            }
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private void SendDataToCallingActivity(String CompanyId, String JObId, String CompanyName, String JobName) {
         Intent returnIntent = new Intent();
         returnIntent.putExtra("CompID", CompanyId);
@@ -957,31 +864,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
-    }
-
-    public String fetch_JobDetailByJobName(String id) {
-        String receivedString = "";
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = SOAP_API_Client.BASE_URL;
-        final String SOAP_ACTION = KEY_NAMESPACE + API_GetAllDetailbyJobtext_New;
-        final String METHOD_NAME = API_GetAllDetailbyJobtext_New;
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        String dealerId = Shared_Preference.getDEALER_ID(this);
-
-        request.addProperty("job", id);
-        request.addProperty("dealerid", dealerId);
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
-            receivedString = SoapPrimitiveresult.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return receivedString;
     }
 
     private void dialog_SHOW_Info(final String CompanyID, final String JobID, final String CompanyName, final String JobName, final String JobType, final String JobDesc, final String Status, final String ShowName, final String AWO_SWO_Name) {
@@ -1122,144 +1004,50 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
         return job_;
     }
 
-    private class Async_fetch_SWO_AWO_List extends AsyncTask<String, Void, Void> {
-        ProgressDialog progressDoalog;
+    @Override
+    public void handleResponse(String responseString, String api) {
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressDoalog = new ProgressDialog(context);
-            progressDoalog.setMessage(getString(R.string.Loading_text));
-            progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDoalog.setCancelable(false);
+
+        if (api.equalsIgnoreCase(Api.API_bindClientByDealer)) {
+            list_company.clear();
             try {
-                progressDoalog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-
-        }
-
-        @Override
-        protected Void doInBackground(String... param) {
-            String jobName = param[0];
-            String jobId = param[1];
-
-            if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
-                // if (userRole.equals(Utility.USER_ROLE_APC) || userRole.equals(Utility.USER_ROLE_ARTIST)) {
-                getAwoListByJobID(jobId);
-            } else {
-                GetSwoListByJob(jobName);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            try {
-                progressDoalog.dismiss();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-            //if (userRole.equals(Utility.USER_ROLE_APC) || userRole.equals(Utility.USER_ROLE_ARTIST)) {
-            if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
-                if (list_Awo.size() < 1) {
-                    if (Search_by_Job) txtvw_JOB_NAME_SearchByJob.setText("");
-                    else txtvw_JOB_NAME_SearchByCompany.setText("");
-                    String msg = "You cannot book time to a Job without a Art Work Order.";
-                    validation_dialog(msg);
-                }
-            } else if (list_SWO.size() < 1) {   //tech
-
-                if (Search_by_Job) txtvw_JOB_NAME_SearchByJob.setText("");
-                else txtvw_JOB_NAME_SearchByCompany.setText("");
-                String msg = "You cannot book time to a Job without a Service Work Order.";
-                validation_dialog(msg);
-            }
-        }
-    }
-
-    private class fetch_Clients extends AsyncTask<Void, Void, Void> {
-
-        final ProgressDialog ringProgressDialog =
-                new ProgressDialog(context);
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            try {
-                ringProgressDialog.setMessage(getString(R.string.Loading_text));
-                ringProgressDialog.setCancelable(false);
-                ringProgressDialog.setCanceledOnTouchOutside(false);
-
-                try {
-                    ringProgressDialog.show();
-                } catch (Exception e) {
-                    e.getMessage();
+                JSONObject jsonObject = new JSONObject(responseString);
+                JSONArray jsonArray = jsonObject.getJSONArray("cds");
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject1 = jsonArray.getJSONObject(i);
+                    String comapny_id = jsonObject1.getString("id");
+                    String company_name = jsonObject1.getString("Ename");
+                    String company_logo = jsonObject1.getString("Imagepath");
+                    list_company.add(new Company(comapny_id, company_name, company_logo));
                 }
 
-
             } catch (Exception e) {
-                e.getMessage();
+                e.printStackTrace();
             }
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            //    Send();
-            Getcompany_name();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-
-            try {
-                ringProgressDialog.dismiss();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-
             if (list_company != null && list_company.size() > 0) {
                 dialog_SearchByCompany();
             } else {
                 Toast.makeText(context, "No data found!", Toast.LENGTH_LONG).show();
             }
-        }
-    }
-
-    private class fetch_Jobs_by_CompID extends AsyncTask<String, Void, Void> {
-
-        final ProgressDialog ringProgressDialog = new ProgressDialog(context);
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            fetch_Jobs(strings[0]);
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //  ringProgressDialog.setTitle("Kindly wait ...")
-            ringProgressDialog.setMessage(getString(R.string.Loading_text));
-            ringProgressDialog.setCancelable(false);
+        } else if (api.equalsIgnoreCase(Api.API_BindJob)) {
+            list_Jobs.clear();
             try {
-                ringProgressDialog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-        }
+                JSONObject jsonObject = new JSONObject(responseString);
+                JSONArray jsonArray = jsonObject.getJSONArray("cds");
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject1 = jsonArray.getJSONObject(i);
+                    String job_id = jsonObject1.getString("JOB_ID_PK");
+                    String jobName = jsonObject1.getString("JobName");
+                    String job_descripition = jsonObject1.getString("txt_Job");
+                    String status = jsonObject1.getString("Status");
+                    String show = jsonObject1.getString("ShowName");
+                    String jobtype = jsonObject1.getString("JOB_TYPE");
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            try {
-                ringProgressDialog.dismiss();
+                    list_Jobs.add(new Job_2(job_id, job_descripition, show, jobName, jobtype, status));
+
+                }
             } catch (Exception e) {
-                e.getMessage();
+                e.printStackTrace();
             }
             if (list_Jobs.size() < 1) {
                 txtvw_JOB_NAME_SearchByCompany.setText("");
@@ -1273,185 +1061,124 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
                 txtvw_JOB_NAME_SearchByCompany.setAdapter(jobDescAdapter);
                 txtvw_JOB_NAME_SearchByCompany.setDropDownHeight(550);
             }
-
-        }
-    }
-
-    private class getAllJObByDealer extends AsyncTask<Void, Void, Integer> {
-        ProgressDialog progressDialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            progressDialog = new ProgressDialog(context);
-            progressDialog.setMessage(getString(R.string.Loading_text));
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDialog.setCancelable(false);
+        } else if (api.equalsIgnoreCase(Api.API_GetallJobByDealerID)) {
+            list_AllJobs.clear();
             try {
-                progressDialog.show();
+                JSONObject jsonObject1 = new JSONObject(responseString);
+                JSONArray jsonArray = jsonObject1.getJSONArray("cds");
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    String jobName = jsonObject.getString("txt_job");
+                    String JobId = jsonObject.getString("job_id_pk");
+                    String job_descripition = jsonObject.getString("JOB_DESC").trim();
+                    String compID = jsonObject.getString("compID");
+                    String companyName = jsonObject.getString("company");
+                    list_AllJobs.add(new All_Jobs(JobId, jobName, job_descripition, compID, companyName));
+                }
             } catch (Exception e) {
-                e.getMessage();
-            }
-        }
-
-        @Override
-        protected Integer doInBackground(Void... voids) {
-            getAllJobsByDealerId();
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer aVoid) {
-            try {
-                progressDialog.dismiss();
-                dialog_SearchByJob();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-
-
-        }
-    }
-
-    private class async_getJobDetailsBySwoId extends AsyncTask<String, Void, JSONObject> {
-        ProgressDialog pDialog;
-
-        @Override
-        protected void onPreExecute() {
-            pDialog = new ProgressDialog(context);
-            pDialog.setMessage("Kindly wait");
-            pDialog.setCancelable(false);
-            try {
-                pDialog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-            super.onPreExecute();
-        }
-
-
-        @Override
-        protected JSONObject doInBackground(String... param) {
-
-            JSONObject js_obj = new JSONObject();
-            String awo_swo_id = param[0];
-            final String NAMESPACE = KEY_NAMESPACE;
-            final String URL = SOAP_API_Client.BASE_URL;
-            final String METHOD_NAME = Api.API_GetJobDetailsBy_SWO_AWO;
-            final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
-
-            SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-            request.addProperty("AWO_SWO", awo_swo_id);
-            if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
-                request.addProperty("type", "2");
-            } else {
-                request.addProperty("type", "1");
-            }
-
-
-            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                    SoapEnvelope.VER11);
-            envelope.dotNet = true;
-            envelope.setOutputSoapObject(request);
-            HttpTransportSE httpTransport = new HttpTransportSE(URL);
-
-            try {
-                httpTransport.call(SOAP_ACTION, envelope);
-                Object results = (Object) envelope.getResponse();
-                String resultstring = results.toString();
-                JSONObject jsonObject = new JSONObject(resultstring);
-                JSONArray jsonArray = jsonObject.getJSONArray("cds");
-                js_obj = jsonArray.getJSONObject(0);
-            } catch (Exception e) {
-
                 e.printStackTrace();
             }
-            return js_obj;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject js_obj) {
-            super.onPostExecute(js_obj);
-            Utility.hideKeyboard((Activity) context);
+            dialog_SearchByJob();
+        } else if (api.equalsIgnoreCase(Api.API_GetAwoDetailByJob)) {
+            list_Awo.clear();
             try {
-                pDialog.dismiss();
+
+                JSONArray jsonArray = new JSONArray(responseString);
+                for (int k = 0; k < (jsonArray.length()); k++) {
+                    JSONObject json_obj = jsonArray.getJSONObject(k);
+                    String ID_PK = json_obj.getString("ID_PK");
+                    String JOB_ID = json_obj.getString("JOB_ID");
+                    String swo_name = json_obj.getString("swo_name");
+                    String tech_id = "";
+                    String SWO_Status_new = json_obj.getString("SWO_Status_new");
+                    list_Awo.add(new Awo(ID_PK, JOB_ID, swo_name, tech_id, SWO_Status_new));
+                }
+
             } catch (Exception e) {
-                e.getMessage();
+                e.printStackTrace();
             }
-
-            if (js_obj.length() == 0) {
-                if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
-                    Toast.makeText(getApplicationContext(), "Please scan a valid qr code of AWO!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Please scan a valid qr code of SWO!", Toast.LENGTH_SHORT).show();
-                }
-                return;
+            if (list_Awo.size() < 1) {
+                if (Search_by_Job) txtvw_JOB_NAME_SearchByJob.setText("");
+                else txtvw_JOB_NAME_SearchByCompany.setText("");
+                String msg = "You cannot book time to a Job without a Art Work Order.";
+                validation_dialog(msg);
             }
-
+        } else if (api.equalsIgnoreCase(Api.API_GetSwoByJObDealer)) {
+            list_SWO.clear();
             try {
-                String login_dealerId = Shared_Preference.getDEALER_ID(context);
-                String job_id = js_obj.getString("job_id");
-                String jobName = js_obj.getString("jobName");
-                String JOB_TYPE = js_obj.getString("JOB_TYPE");
-                String jobstatus = js_obj.getString("jobstatus");
-                String companyName = js_obj.getString("company");
-                String Show_Name = js_obj.getString("Show_Name");
-                String desciption = js_obj.getString("desciption");
-                String SWO_Status_new = js_obj.getString("SWO_Status_new");
-                String dealerID = js_obj.getString("dealerID");
-                String comp_id = js_obj.getString("compID");
-                String Swo_Awo_Name = "";
-                if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
-                    Swo_Awo_Name = js_obj.getString("AwoName");
-                } else {
-                    Swo_Awo_Name = js_obj.getString("SwoName");
+                JSONObject jsonObject = new JSONObject(responseString);
+                JSONArray jsonArray = jsonObject.getJSONArray("cds");
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject1 = jsonArray.getJSONObject(i);
+                    String swo_id = jsonObject1.getString("swo_id");
+                    String JOB_ID = jsonObject1.getString("JOB_ID");
+                    String JOB_DESC = jsonObject1.getString("JOB_DESC");
+                    String COMP_ID = jsonObject1.getString("COMP_ID");
+                    String SWO_NAME = jsonObject1.getString("swo_name");
+                    String SWO_Status_new = jsonObject1.getString("SWO_Status_new");
+                    String TXT_JOB = jsonObject1.getString("txt_job");
+                    list_SWO.add(new SWO_Details(JOB_ID, JOB_DESC, COMP_ID, SWO_NAME, TXT_JOB, SWO_Status_new, swo_id, SWO_NAME));
                 }
 
-                if (showDialog_SHOW_INFO) {
-                    if (!dealerID.equals(login_dealerId)) {
-                        Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (list_SWO.size() < 1) {
+                if (Search_by_Job) txtvw_JOB_NAME_SearchByJob.setText("");
+                else txtvw_JOB_NAME_SearchByCompany.setText("");
+                String msg = "You cannot book time to a Job without a Service Work Order.";
+                validation_dialog(msg);
+            }
+        } else if (api.equalsIgnoreCase(Api.API_GetJobDetailsBy_SWO_AWO)) {
+            try {
+                JSONObject jsonObject = new JSONObject(responseString);
+                JSONArray jsonArray = jsonObject.getJSONArray("cds");
+                JSONObject js_obj = jsonArray.getJSONObject(0);
+                if (js_obj == null || js_obj.length() == 0) {
+                    if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
+                        Toast.makeText(getApplicationContext(), "Please scan a valid qr code of AWO!", Toast.LENGTH_SHORT).show();
                     } else {
-                        dialog_SHOW_Info(comp_id, job_id, companyName, jobName, JOB_TYPE, desciption, jobstatus, Show_Name, Swo_Awo_Name);
+                        Toast.makeText(getApplicationContext(), "Please scan a valid qr code of SWO!", Toast.LENGTH_SHORT).show();
                     }
+                    return;
                 } else {
-                    SendDataToCallingActivity(comp_id, job_id, companyName, jobName);
+                    String login_dealerId = Shared_Preference.getDEALER_ID(context);
+                    String job_id = js_obj.getString("job_id");
+                    String jobName = js_obj.getString("jobName");
+                    String JOB_TYPE = js_obj.getString("JOB_TYPE");
+                    String jobstatus = js_obj.getString("jobstatus");
+                    String companyName = js_obj.getString("company");
+                    String Show_Name = js_obj.getString("Show_Name");
+                    String desciption = js_obj.getString("desciption");
+                    String SWO_Status_new = js_obj.getString("SWO_Status_new");
+                    String dealerID = js_obj.getString("dealerID");
+                    String comp_id = js_obj.getString("compID");
+                    String Swo_Awo_Name = "";
+                    if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
+                        Swo_Awo_Name = js_obj.getString("AwoName");
+                    } else {
+                        Swo_Awo_Name = js_obj.getString("SwoName");
+                    }
+
+                    if (showDialog_SHOW_INFO) {
+                        if (!dealerID.equals(login_dealerId)) {
+                            Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            dialog_SHOW_Info(comp_id, job_id, companyName, jobName, JOB_TYPE, desciption, jobstatus, Show_Name, Swo_Awo_Name);
+                        }
+                    } else {
+                        SendDataToCallingActivity(comp_id, job_id, companyName, jobName);
+                    }
                 }
+
             } catch (Exception e) {
-                e.getMessage();
-                Toast.makeText(getApplicationContext(), "Some error occurred!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
             }
-        }
-
-    }
-
-    private class get_company_Area extends AsyncTask<String, Void, String> {
-        final ProgressDialog ringProgressDialog = new ProgressDialog(context);
-        String CompanyId = "";
-
-        get_company_Area(String Comp_Id) {
-            this.CompanyId = Comp_Id;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            ringProgressDialog.setMessage(getString(R.string.Loading_text));
-            ringProgressDialog.setCancelable(false);
-            ringProgressDialog.show();
-        }
-
-        @Override
-        protected String doInBackground(String... par) {
-            return fetch_JobDetailByJobName(par[0]);
-        }
-
-        @Override
-        protected void onPostExecute(String Result) {
-            super.onPostExecute(Result);
-            ringProgressDialog.dismiss();
+        } else if (api.equalsIgnoreCase(Api.API_GetAllDetailbyJobtext_New)) {
             try {
-                JSONObject jsonObject = new JSONObject(Result);
+                JSONObject jsonObject = new JSONObject(responseString);
                 JSONArray jsonArray = jsonObject.getJSONArray("cds");
                 if (jsonArray != null && jsonArray.length() > 0) {
                     JSONObject jsonObject1 = jsonArray.getJSONObject(0);
@@ -1462,12 +1189,13 @@ public class SelectCompanyActivityNew extends AppCompatActivity {
                     String Status = jsonObject1.getString("Status");
                     String compname = jsonObject1.getString("compname");
                     String JOB_ID_PK = jsonObject1.getString("JOB_ID_PK");
-                    dialog_SHOW_Info(CompanyId, JOB_ID_PK, compname, JobName, JOB_TYPE, txt_Job, Status, ShowName, "");
+                    dialog_SHOW_Info(CompId, JOB_ID_PK, compname, JobName, JOB_TYPE, txt_Job, Status, ShowName, "");
                 }
             } catch (Exception e) {
-                e.getMessage();
+                e.printStackTrace();
             }
         }
     }
+
 
 }

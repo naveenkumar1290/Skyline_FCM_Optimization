@@ -38,6 +38,7 @@ import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.tech.billable_timesheet.Clock_Submit_Type_Activity;
 import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
@@ -136,20 +137,8 @@ public class Updatecreatelocation extends BaseActivity {
 
             mylocation = "";
         }
-        try {
 
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE"); // "PRODUCT_MODE for bar codes
-
-            startActivityForResult(intent, 1);
-
-        } catch (Exception e) {
-
-            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            startActivity(marketIntent);
-
-        }
+        Utility.scanqr(this,1);
 
 
         options = new DisplayImageOptions.Builder()

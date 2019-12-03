@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -29,14 +30,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-
 import java.io.File;
 import java.io.IOException;
 
 import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
+import planet.info.skyline.tech.runtime_permission.PermissionActivity;
+import planet.info.skyline.tech.upload_photo.Upload_image_and_cooment_New;
 import planet.info.skyline.util.FileDownloader;
+import planet.info.skyline.util.Utility;
 
 
 /**
@@ -48,6 +50,8 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
     static final int NONE = 0;
     static final int DRAG = 1;
     static final int ZOOM = 2;
+    //private View mContentView;
+    static final int RequestPermissionCode = 100;
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -91,10 +95,6 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
     float oldDist = 1f;
     //NetworkImageView mContentView;
     ImageView mContentView;
-    EditText et_mobile, et_password;
-    android.app.Dialog alertDialog;
-    //private View mContentView;
-    static final int RequestPermissionCode =100;
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -112,6 +112,8 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
+    EditText et_mobile, et_password;
+    android.app.Dialog alertDialog;
     String url_web, FileName;
     private View mControlsView;
     private final Runnable mShowPart2Runnable = new Runnable() {
@@ -150,7 +152,6 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
         FileName = getIntent().getStringExtra("FileName");
 
 
-
         final ProgressDialog progressDoalog = new ProgressDialog(FullscreenWebViewNew.this);
         progressDoalog.setMessage(getString(R.string.Loading_text));
         progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -159,7 +160,7 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
 
 
         WebView webView = (WebView) findViewById(R.id.webView);
-       // webView.getSettings().setJavaScriptEnabled(true);
+        // webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setUseWideViewPort(true);
         webView.getSettings().setBuiltInZoomControls(true);
@@ -187,7 +188,7 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
         });
 
 
-        webView.loadUrl( url_web);
+        webView.loadUrl(url_web);
         mContentView.setOnTouchListener(FullscreenWebViewNew.this);
 
 
@@ -408,19 +409,16 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.download) {
-
-            if(CheckingPermissionIsEnabledOrNot())
-            {
+            if (PermissionActivity.CheckingPermissionIsEnabledOrNot(this)) {
                 if (new ConnectionDetector(FullscreenWebViewNew.this).isConnectingToInternet()) {
-                    new DownloadFile().execute(url_web,FileName );
+                    new DownloadFile().execute(url_web, FileName);
                 } else {
                     Toast.makeText(FullscreenWebViewNew.this, "No internet", Toast.LENGTH_SHORT).show();
                 }
+            } else {
+                Intent i = new Intent(getApplicationContext(), PermissionActivity.class);
+                startActivityForResult(i, Utility.REQUEST_CODE_PERMISSIONS);
             }
-            else{
-                RequestMultiplePermission();
-            }
-
 
 
 
@@ -429,6 +427,47 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    private void dialog_Saved(String path) {
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.fancyalertdialog, null);
+        dialogBuilder.setView(dialogView);
+
+
+        final TextView title = dialogView.findViewById(R.id.title);
+        final TextView message = dialogView.findViewById(R.id.message);
+        final Button positiveBtn = dialogView.findViewById(R.id.positiveBtn);
+        final Button negativeBtn = dialogView.findViewById(R.id.negativeBtn);
+
+
+        // dialogBuilder.setTitle("Device Details");
+        title.setText("Saved successfully!");
+        message.setText(path);
+        positiveBtn.setText("OK");
+        negativeBtn.setText("No");
+        negativeBtn.setVisibility(View.GONE);
+        positiveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertDialog.dismiss();
+                finish();
+
+            }
+        });
+        negativeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertDialog.dismiss();
+            }
+        });
+
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
+
     }
 
     class DownloadFile extends AsyncTask<String, Void, String> {///this class make in adapter for downloading the pdf
@@ -493,108 +532,6 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
             }
         }
 
-
-    }
-    public void checkWritePermission(){
-        if(CheckingPermissionIsEnabledOrNot())
-        {
-
-        }
-        else{
-            RequestMultiplePermission();
-        }
-    }
-
-    private void RequestMultiplePermission() {
-
-        // Creating String Array with Permissions.
-        ActivityCompat.requestPermissions(FullscreenWebViewNew.this, new String[]
-                {
-                        //    Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-
-                }, RequestPermissionCode);
-
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-
-            case RequestPermissionCode:
-
-                if (grantResults.length > 0) {
-
-                    //  boolean Location = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    boolean WriteExtrenalStorage = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-
-                    if (WriteExtrenalStorage){ //&& Location ) {
-
-                        //  Toast.makeText(HomeActivity.this, "Permission Granted", Toast.LENGTH_LONG).show();
-
-                        if (new ConnectionDetector(FullscreenWebViewNew.this).isConnectingToInternet()) {
-                            new DownloadFile().execute(url_web,FileName );
-                        } else {
-                            Toast.makeText(FullscreenWebViewNew.this, "No internet", Toast.LENGTH_SHORT).show();
-                        }
-
-
-
-                    }
-                    else {
-                        Toast.makeText(FullscreenWebViewNew.this,"Permission Denied", Toast.LENGTH_LONG).show();
-
-                    }
-                }
-
-                break;
-        }
-    }
-    public boolean CheckingPermissionIsEnabledOrNot() {
-
-        //      int FirstPermissionResult = ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION);
-        int SecondPermissionResult = ContextCompat.checkSelfPermission(FullscreenWebViewNew.this.getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        return
-                //   FirstPermissionResult == PackageManager.PERMISSION_GRANTED &&
-                SecondPermissionResult == PackageManager.PERMISSION_GRANTED;
-    }
-    private void dialog_Saved(String path) {
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = this.getLayoutInflater();
-        final View dialogView = inflater.inflate(R.layout.fancyalertdialog, null);
-        dialogBuilder.setView(dialogView);
-
-
-        final TextView title = dialogView.findViewById(R.id.title);
-        final TextView message = dialogView.findViewById(R.id.message);
-        final Button positiveBtn = dialogView.findViewById(R.id.positiveBtn);
-        final Button negativeBtn = dialogView.findViewById(R.id.negativeBtn);
-
-
-        // dialogBuilder.setTitle("Device Details");
-        title.setText("Saved successfully!");
-        message.setText(path);
-        positiveBtn.setText("OK");
-        negativeBtn.setText("No");
-        negativeBtn.setVisibility(View.GONE);
-        positiveBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                alertDialog.dismiss();
-                      finish();
-
-            }
-        });
-        negativeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                alertDialog.dismiss();
-            }
-        });
-
-        alertDialog = dialogBuilder.create();
-        alertDialog.show();
 
     }
 }

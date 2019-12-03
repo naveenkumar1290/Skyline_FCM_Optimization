@@ -57,11 +57,8 @@ public class ShowWhatsInside_MainActivity extends BaseActivity {
             public void onClick(View v) {
                 ll_view.setVisibility(View.GONE);
 
-                Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-                intent.setPackage(getApplicationContext().getPackageName());
-                intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                startActivityForResult(intent, REQUEST_CODE);
 
+                Utility.scanqr(ShowWhatsInside_MainActivity.this,REQUEST_CODE);
 
             }
         });

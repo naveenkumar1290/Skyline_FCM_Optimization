@@ -74,6 +74,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import planet.info.skyline.R;
 import planet.info.skyline.floating_view.ChatHeadService;
+import planet.info.skyline.home.LoginActivity;
 import planet.info.skyline.model.LaborCode;
 import planet.info.skyline.model.OverlapTimesheet;
 import planet.info.skyline.model.SavedTask;
@@ -94,7 +95,7 @@ public class Utility {
     // public static final String TIMER_STARTED_FROM_ADMIN_CLOCK_MODULE = "TimerStartedFromAdminClockModule";
     public static final String CLIENT_ID_FOR_NON_BILLABLE = "CLIENT_ID_FOR_NON_BILLABLE";
     public static final String IS_NON_BILLABLE_IN_FRONT = "IS_NONBILLABLE_IN_FRONT";
-    public static final int OVERLAY_PERMISSION_REQUEST_CODE = 113;
+  //  public static final int OVERLAY_PERMISSION_REQUEST_CODE = 113;
 
     public static final String SHOW_JOB_FILE_NEW = "SHOW_JOB_FILE_NEW";
     public static final String KEY_CRATE_ID = "KEY_CRATE_ID";
@@ -126,7 +127,7 @@ public class Utility {
     public static final Integer REQUEST_CODE_COMPLETED_DATE = 3;
     public static final Integer REQUEST_CODE_PERMISSIONS = 145;
     public static final String PAUSED_TIME = "PAUSED_TIME";
-
+    public static final int CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE = 100;
     //public static final String KEY_JOB_ID_FOR_JOBFILES = "KEY_JOB_ID_FOR_JOBFILES";
     // public static final String CLOCK_START_TIME = "CLOCK_START_TIME";
 
@@ -291,6 +292,19 @@ public class Utility {
             e.getMessage();
         }
         return date3;
+    }
+    public static boolean checkDrawOverlayPermission(Activity context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        if (!Settings.canDrawOverlays(context)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + context.getPackageName()));
+           context.startActivityForResult(intent, Utility.CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public static boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
@@ -2058,4 +2072,21 @@ public class Utility {
         return AllPermissionGranted;
     }
 
+
+
+    public static  void scanqr(Activity activity,int RequestCode) {
+        try {
+            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+            intent.setPackage(activity.getApplicationContext().getPackageName());
+            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+            activity.startActivityForResult(intent,RequestCode);
+
+        } catch (Exception e) {
+
+            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
+            activity.startActivity(marketIntent);
+
+        }
+    }
 }

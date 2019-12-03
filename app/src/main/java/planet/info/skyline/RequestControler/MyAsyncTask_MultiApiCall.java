@@ -16,21 +16,20 @@ import java.util.Iterator;
 
 import planet.info.skyline.R;
 import planet.info.skyline.network.SOAP_API_Client;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
 
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
 
 // The types specified here are the input data type, the progress type, and the result type
-public class MyAsyncTaskNew extends AsyncTask<Void, Void, JSONObject> {
+public class MyAsyncTask_MultiApiCall extends AsyncTask<Void, Void, JSONObject> {
 
     Context context;
-    private ResponseInterfaceNew responseInterface;
+    private ResponseInterface_MultiApiCall responseInterface;
 
     private JSONArray INPUT_JsonArray;
     private ProgressDialog pDialog;
 
 
-    public MyAsyncTaskNew(Context context, ResponseInterfaceNew responseInterface, JSONArray INPUT) {
+    public MyAsyncTask_MultiApiCall(Context context, ResponseInterface_MultiApiCall responseInterface, JSONArray INPUT) {
         this.context = context;
         this.responseInterface = responseInterface;
         this.INPUT_JsonArray = INPUT;

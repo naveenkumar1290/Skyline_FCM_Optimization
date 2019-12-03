@@ -15,7 +15,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -41,9 +40,8 @@ import java.util.List;
 import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;
 import planet.info.skyline.R;
-import planet.info.skyline.RequestControler.MyAsyncTask;
-import planet.info.skyline.RequestControler.MyAsyncTaskNew;
-import planet.info.skyline.RequestControler.ResponseInterfaceNew;
+import planet.info.skyline.RequestControler.MyAsyncTask_MultiApiCall;
+import planet.info.skyline.RequestControler.ResponseInterface_MultiApiCall;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.DamageDetail;
 import planet.info.skyline.model.ItemType;
@@ -52,7 +50,6 @@ import planet.info.skyline.network.Api;
 import planet.info.skyline.network.ProgressRequestBody;
 import planet.info.skyline.network.REST_API_Client;
 import planet.info.skyline.old_activity.AppConstants;
-import planet.info.skyline.tech.non_billable_timesheet.NonBillable_jobs;
 import planet.info.skyline.tech.shared_preference.Shared_Preference;
 import planet.info.skyline.util.CameraUtils;
 import planet.info.skyline.util.Utility;
@@ -63,7 +60,7 @@ import retrofit2.Response;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
-public class DamageReportNew extends AppCompatActivity implements ProgressRequestBody.UploadCallbacks, ResponseInterfaceNew
+public class DamageReportNew extends AppCompatActivity implements ProgressRequestBody.UploadCallbacks, ResponseInterface_MultiApiCall
 {
 
 
@@ -145,7 +142,7 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
         }
 
         if (new ConnectionDetector(DamageReportNew.this).isConnectingToInternet()) {
-            new MyAsyncTaskNew(this, this, jsonArray).execute();
+            new MyAsyncTask_MultiApiCall(this, this, jsonArray).execute();
         } else {
             Toast.makeText(DamageReportNew.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }

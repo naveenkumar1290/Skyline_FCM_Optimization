@@ -27,7 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import planet.info.skyline.R;
+import planet.info.skyline.tech.billable_timesheet.ClientLeavingWithCrate;
 import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.util.Utility;
 import planet.info.skyline.util.Utils;
 
 
@@ -80,19 +82,7 @@ Editor ed;
 			public void onClick(View v) {
 
 				showd.dismiss();
-				try {
-
-					Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-					intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-					startActivityForResult(intent, 1);
-
-				} catch (Exception e)
-				{
-					Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-					Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-					startActivity(marketIntent);
-
-				}
+				Utility.scanqr(Scanworklocationstart.this,1);
 			}
 		});
 		close.setOnClickListener(new OnClickListener() {

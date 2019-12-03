@@ -69,6 +69,7 @@ import planet.info.skyline.network.REST_API_Client;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.AppConstants;
 import planet.info.skyline.old_activity.BaseActivity;
+import planet.info.skyline.old_activity.Selectmissing;
 import planet.info.skyline.tech.runtime_permission.PermissionActivity;
 import planet.info.skyline.tech.shared_preference.Shared_Preference;
 import planet.info.skyline.util.CameraUtils;
@@ -187,41 +188,13 @@ public class ClientLeavingWithCrate extends BaseActivity implements ProgressRequ
                 .showImageOnFail(R.drawable.skylinelogopng).cacheInMemory(true)
                 .cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565).build();
 
-        try {
-
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.setPackage(getApplicationContext().getPackageName());
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, 1);
-        } catch (Exception e) {
-
-            Uri marketUri = Uri
-                    .parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            startActivity(marketIntent);
-
-        }
+   Utility.scanqr(ClientLeavingWithCrate.this,1);
 
         nofr.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                try {
-                    Intent intent = new Intent(
-                            "com.google.zxing.client.android.SCAN");
-                    intent.setPackage(getApplicationContext().getPackageName());
-                    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                    startActivityForResult(intent, 1);
-
-                } catch (Exception e) {
-
-                    Uri marketUri = Uri
-                            .parse("market://details?id=com.google.zxing.client.android");
-                    Intent marketIntent = new Intent(Intent.ACTION_VIEW,
-                            marketUri);
-                    startActivity(marketIntent);
-
-                }
+                Utility.scanqr(ClientLeavingWithCrate.this,1);
 
             }
         });
@@ -229,21 +202,7 @@ public class ClientLeavingWithCrate extends BaseActivity implements ProgressRequ
 
             @Override
             public void onClick(View v) {
-                try {
-                    Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-                    intent.setPackage(getApplicationContext().getPackageName());
-                    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                    startActivityForResult(intent, 2);
-
-                } catch (Exception e) {
-
-                    Uri marketUri = Uri
-                            .parse("market://details?id=com.google.zxing.client.android");
-                    Intent marketIntent = new Intent(Intent.ACTION_VIEW,
-                            marketUri);
-                    startActivity(marketIntent);
-
-                }
+                Utility.scanqr(ClientLeavingWithCrate.this,2);
 
             }
         });
@@ -667,22 +626,7 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
 
             @Override
             public void onClick(View v) {
-                try {
-                    Intent intent = new Intent(
-                            "com.google.zxing.client.android.SCAN");
-                    intent.setPackage(getApplicationContext().getPackageName());
-                    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                    startActivityForResult(intent, 2);
-
-                } catch (Exception e) {
-
-                    Uri marketUri = Uri
-                            .parse("market://details?id=com.google.zxing.client.android");
-                    Intent marketIntent = new Intent(Intent.ACTION_VIEW,
-                            marketUri);
-                    startActivity(marketIntent);
-
-                }
+                Utility.scanqr(ClientLeavingWithCrate.this,2);
 
 
                 try {
@@ -1287,21 +1231,7 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
     }
 
     public void sacancrtaeandopenanother(int bits) {
-        try {
-
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.setPackage(getApplicationContext().getPackageName());
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, bits);
-
-        } catch (Exception e) {
-
-            Uri marketUri = Uri
-                    .parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            startActivity(marketIntent);
-
-        }
+        Utility.scanqr(ClientLeavingWithCrate.this,bits);
     }
 
     public void showmain() {
@@ -1428,22 +1358,7 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
     }
 
     public void qcanqrcode(int c) {
-
-        try {
-
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.setPackage(getApplicationContext().getPackageName());
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, c);
-
-        } catch (Exception e) {
-
-            Uri marketUri = Uri
-                    .parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            startActivity(marketIntent);
-
-        }
+        Utility.scanqr(ClientLeavingWithCrate.this,c);
     }
 
     public void validation_diloge() {
@@ -1484,21 +1399,7 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
                 }
 
 
-                try {
-                    Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-                    intent.setPackage(getApplicationContext().getPackageName());
-                    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                    startActivityForResult(intent, 2);
-
-                } catch (Exception e) {
-
-                    Uri marketUri = Uri
-                            .parse("market://details?id=com.google.zxing.client.android");
-                    Intent marketIntent = new Intent(Intent.ACTION_VIEW,
-                            marketUri);
-                    startActivity(marketIntent);
-
-                }
+                Utility.scanqr(ClientLeavingWithCrate.this,2);
             }
         });
 
@@ -1720,16 +1621,7 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
                 //
                 if (!isMainCrateAlreadySelected) {
 
-                    try {
-                        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-                        intent.setPackage(getApplicationContext().getPackageName());
-                        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                        startActivityForResult(intent, 10);
-
-                    } catch (Exception e) {
-                        e.getMessage();
-
-                    }
+                    Utility.scanqr(ClientLeavingWithCrate.this,10);
 
                 } else {
 
@@ -1832,19 +1724,7 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
                 }
 
 
-                try {
-                    Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-                    intent.setPackage(getApplicationContext().getPackageName());
-                    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                    startActivityForResult(intent, extra);
-
-                } catch (Exception e) {
-                    Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-                    Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-                    marketIntent.setPackage(getApplicationContext().getPackageName());
-                    startActivity(marketIntent);
-
-                }
+                Utility.scanqr(ClientLeavingWithCrate.this,extra);
             }
         });
 

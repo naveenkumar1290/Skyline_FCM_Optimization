@@ -48,7 +48,7 @@ import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
 
 public class NonBillable_List_Activity extends BaseActivity {
-    private static final int CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE = 100;
+
     ProgressDialog pDialog;
     ListView l1;
     String nextact, webhit, clientidme;
@@ -159,7 +159,7 @@ public class NonBillable_List_Activity extends BaseActivity {
         // オーバレイパーミッションの表示
         if (isShowOverlayPermission) {
             final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
-            startActivityForResult(intent, CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
+            startActivityForResult(intent, Utility.CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
         }
     }
 

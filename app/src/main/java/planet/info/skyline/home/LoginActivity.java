@@ -56,8 +56,8 @@ import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
 
 public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnRequestPermissionsResultCallback {
 
-    static final int RequestPermissionCode = 100;
-    private static final int CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE = 100;
+//    static final int RequestPermissionCode = 100;
+
     EditText ed_username, ed_passwo;
     TextView rl_btnRegister;
     ProgressDialog pDialog;
@@ -70,11 +70,11 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
 
     JSONArray jsonArray = new JSONArray();
     ArrayList<ClientModel> List_Client = new ArrayList<>();
-    String[] Permissions = {
+ /*   String[] Permissions = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA,
             Manifest.permission.READ_PHONE_STATE
-    };
+    };*/
 
 
     @Override
@@ -301,8 +301,6 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
 
     public void dialog_user_detail() {
 
-        /**/
-
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.alertfornamemobilenumber_new, null);
@@ -380,7 +378,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //  is equal our requested code for draw permission
-        if (requestCode == CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE) {
+        if (requestCode == Utility.CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE) {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (Settings.canDrawOverlays(LoginActivity.this)) {
@@ -390,8 +388,8 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
                     //Permission Not Granted by Overlay!!!
                     //Do your Stuff
                     Toast.makeText(LoginActivity.this, "Please allow the permission." + System.getProperty("line.separator") + " This will be used to show the clock ! ", Toast.LENGTH_SHORT).show();
-                    //   final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + LoginActivity.this.getPackageName()));
-                    //   startActivityForResult(intent, CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
+
+
                 }
 
             }
@@ -434,13 +432,13 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
 
     }
 
-    private void RequestMultiplePermission() {
+ /*   private void RequestMultiplePermission() {
         // Creating String Array with Permissions.
         ActivityCompat.requestPermissions(LoginActivity.this, Permissions, RequestPermissionCode);
 
     }
-
-    @Override
+*/
+  /*  @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
 
@@ -450,7 +448,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
                     boolean Camera = grantResults[1] == PackageManager.PERMISSION_GRANTED;
                     if (ReadExternalStorage && Camera) {
 
-                        checkDrawOverlayPermission();
+                        Utility.checkDrawOverlayPermission(LoginActivity.this);
 
                     } else {
                         Toast.makeText(LoginActivity.this, "Permission Denied", Toast.LENGTH_LONG).show();
@@ -474,7 +472,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
         return AllPermissionGranted;
     }
 
-
+*/
     public void UpdateTokenOnServer() {
 
 
@@ -512,19 +510,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
         }
     }
 
-    public boolean checkDrawOverlayPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (!Settings.canDrawOverlays(LoginActivity.this)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + getPackageName()));
-            startActivityForResult(intent, Utility.OVERLAY_PERMISSION_REQUEST_CODE);
-            return false;
-        } else {
-            return true;
-        }
-    }
+
 
     private void getToken() {
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {

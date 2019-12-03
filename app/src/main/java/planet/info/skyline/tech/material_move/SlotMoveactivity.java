@@ -43,6 +43,7 @@ import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.BaseActivity;
+import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
 import planet.info.skyline.tech.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
@@ -1994,16 +1995,10 @@ Service Production CoordinatorScanValue : 1
     }
 
     private void Launch_QR_Scanner(int RequestCode) {
-        try {
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.setPackage(getApplicationContext().getPackageName());
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, RequestCode);
-        } catch (Exception e) {
-            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            startActivity(marketIntent);
-        }
+
+        Utility.scanqr(SlotMoveactivity.this,RequestCode);
+
+
     }
 
 }

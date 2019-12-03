@@ -53,6 +53,7 @@ import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.model.Misingcreate;
 import planet.info.skyline.model.Selectcreate;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.tech.billable_timesheet.ClientLeavingWithCrate;
 import planet.info.skyline.tech.billable_timesheet.Clock_Submit_Type_Activity;
 import planet.info.skyline.tech.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
@@ -548,28 +549,7 @@ public class Selectmissing extends BaseActivity {
     };
 
     public void callifworkwithnonbillable(int x) {
-        try {
-            // if (x == 7) {
-            // Toast.makeText(Selectmissing.this,
-            // "Please scan workstation where you work",
-            // Toast.LENGTH_LONG).show();
-            // }
-            // if (x == 8) {
-            // Toast.makeText(Selectmissing.this, "Please scan Labour-code",
-            // Toast.LENGTH_LONG).show();
-            // }
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, x);
-
-        } catch (Exception e) {
-
-            Uri marketUri = Uri
-                    .parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            startActivity(marketIntent);
-
-        }
+        Utility.scanqr(Selectmissing.this,x);
     }
 
     @Override
