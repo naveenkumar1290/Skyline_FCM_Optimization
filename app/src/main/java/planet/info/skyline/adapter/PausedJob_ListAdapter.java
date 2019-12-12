@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import planet.info.skyline.R;
 import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.model.PausedJob;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 
 /**
  * Created by Admin on 7/7/2017.

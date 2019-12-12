@@ -49,6 +49,7 @@ import java.util.Date;
 
 
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.fullscreenview.FullscreenImageView;
 import planet.info.skyline.tech.fullscreenview.FullscreenWebView;
 import planet.info.skyline.R;
@@ -67,7 +68,7 @@ import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
 public class ClientFileDetailActivity extends AppCompatActivity {
     String status = "", Comment = "";
-    SharedPreferences sp;
+
     String Client_id_Pk, comp_ID, jobID, FileId, dealerId, doneBy;
     String commentFileShare = "", MailId = "";
     ImageView img_update, thumbnail, img_download, img_delete;
@@ -99,12 +100,14 @@ public class ClientFileDetailActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     //    mHttpImageManager = ((AppController) ClientFileDetailActivity.this.getApplication()).getHttpImageManager();
 
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
+        Client_id_Pk =Shared_Preference.getCLIENT_LOGIN_userID(ClientFileDetailActivity.this);
 
-        Client_id_Pk = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        comp_ID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
-        dealerId = sp.getString(Utility.CLIENT_LOGIN_DealerID, "");
-        doneBy = sp.getString(Utility.CLIENT_LOGIN_UserName, "");
+        comp_ID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(ClientFileDetailActivity.this);
+
+        dealerId =
+                Shared_Preference.getCLIENT_LOGIN_DealerID(ClientFileDetailActivity.this);
+        doneBy = Shared_Preference.getCLIENT_LOGIN_UserName(ClientFileDetailActivity.this);
 
         //  ProjectPhoto mPhoto = (ProjectPhoto) getIntent().getSerializableExtra("obj");
         FileId = getIntent().getStringExtra("FileId");

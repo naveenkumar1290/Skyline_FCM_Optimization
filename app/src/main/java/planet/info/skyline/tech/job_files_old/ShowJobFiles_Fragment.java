@@ -61,7 +61,7 @@ import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.PathProjectFile;
 import planet.info.skyline.model.ProjectFileFolder;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.util.FileDownloader;
 import planet.info.skyline.util.Utility;
@@ -358,12 +358,8 @@ public class ShowJobFiles_Fragment extends Fragment {
 
     public void fetch_projectfiles_FOLDER() {
 
-        //  int index = 1;
-
-
-       // String userRole = sp.getString(Utility.LOGIN_USER_ROLE, "");
         final String userRole = Shared_Preference.getUSER_ROLE(getActivity());
-       // String dealerId = sp.getString(Utility.DEALER_ID, "");
+
         String dealerId = Shared_Preference.getDEALER_ID(getActivity());
 
         final String NAMESPACE = KEY_NAMESPACE + "";
@@ -429,10 +425,9 @@ public class ShowJobFiles_Fragment extends Fragment {
 
     public void fetch_projectfiles_FILES() {
 
-       // String userRole = sp.getString(Utility.LOGIN_USER_ROLE, "");
-       // String dealerId = sp.getString(Utility.DEALER_ID, "");
+
         String dealerId = Shared_Preference.getDEALER_ID(getActivity());
-      //  String compID = sp.getString(Utility.COMPANY_ID_BILLABLE, "");
+
         String compID =   Shared_Preference.getCOMPANY_ID_BILLABLE(getActivity());
 
         final String NAMESPACE = KEY_NAMESPACE + "";

@@ -35,6 +35,7 @@ import planet.info.skyline.home.LoginActivity;
 import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_GetClientNotification;
@@ -48,7 +49,7 @@ public class ClientHomeActivity extends AppCompatActivity implements View.OnClic
             ll_ManageUser, ll_Notification,
             ll_Help, ll_logout_new, ll_ProjectPhotos, ll_Proof_Renders, ll_ProjectFiles, ll_ClientFiles;
     Context context;
-    SharedPreferences sp;
+
     ImageView imgvw_client_logo;
     TextView tv_ver;
     boolean doubleBackToExitPressedOnce = false;
@@ -63,12 +64,12 @@ public class ClientHomeActivity extends AppCompatActivity implements View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client_home);
-        sp = getApplicationContext().getSharedPreferences("skyline", Context.MODE_PRIVATE);
+
         imgvw_client_logo = findViewById(R.id.client_logo);
         btn_count = findViewById(R.id.count);
         btn_count.setVisibility(View.INVISIBLE);
         //textView1rr
-        String user = sp.getString(Utility.CLIENT_LOGIN_UserName, "");
+        String user =Shared_Preference.getCLIENT_LOGIN_UserName(ClientHomeActivity.this);
         TextView tv_user = findViewById(R.id.textView1rr);
         tv_user.setText("Welcome\n" + user);
 
@@ -112,8 +113,12 @@ public class ClientHomeActivity extends AppCompatActivity implements View.OnClic
 /**********************************************************************************/
         context = ClientHomeActivity.this;
 
-        Client_id_Pk = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        comp_ID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
+        Client_id_Pk = Shared_Preference.getCLIENT_LOGIN_userID(ClientHomeActivity.this);
+
+
+        comp_ID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(ClientHomeActivity.this);
+
 
 
         setClientLogo();
@@ -144,9 +149,7 @@ public class ClientHomeActivity extends AppCompatActivity implements View.OnClic
 
 
     private void setClientLogo() {
-        // client_logo.set
-
-        String imgeName = sp.getString(Utility.CLIENT_LOGIN_Imagepath, "");
+        String imgeName = Shared_Preference.getCLIENT_LOGIN_Imagepath(ClientHomeActivity.this);
         String imagePath = SOAP_API_Client.URL_EP2 + "/register/Client_logo/" + imgeName;
         Glide
                 .with(context)
@@ -261,10 +264,10 @@ public class ClientHomeActivity extends AppCompatActivity implements View.OnClic
                 @Override
                 public void onClick(View view) {
                     alertDialog.dismiss();
-                    boolean result = sp.edit().clear().commit();
+                    boolean result =Shared_Preference.delete_SharedPreference(ClientHomeActivity.this);
                     if (result) {
 
-                        Utility.setLoginFalse(ClientHomeActivity.this);
+                        Shared_Preference.setLoginFalse(ClientHomeActivity.this);
                         finish();
                         Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                         startActivity(i);

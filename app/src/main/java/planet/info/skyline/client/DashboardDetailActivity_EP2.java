@@ -48,6 +48,7 @@ import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.ProjectPhoto;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_ProofRenderByStatus;
@@ -59,7 +60,7 @@ public class DashboardDetailActivity_EP2 extends AppCompatActivity {
     Context context;
     TextView tv_msg;
     ArrayList<ProjectPhoto> list_ProjectPhotos = new ArrayList<>();
-    SharedPreferences sp;
+
     String Client_id_Pk, comp_ID, jobID, job_Name, dealerId, Agency;
     String status = "";
     private RecyclerView recyclerView;
@@ -77,18 +78,21 @@ public class DashboardDetailActivity_EP2 extends AppCompatActivity {
         context = DashboardDetailActivity_EP2.this;
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
 
         /*******************/
         status = getIntent().getExtras().getString("status");
         setTitle(Utility.getTitle(status + " List"));
         /**************/
-        Client_id_Pk = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        comp_ID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
+        Client_id_Pk = Shared_Preference.getCLIENT_LOGIN_userID(DashboardDetailActivity_EP2.this);
+
+        comp_ID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(DashboardDetailActivity_EP2.this);
+
         jobID = "-1"; //by default
         Agency = "0";// by default
         job_Name = getApplicationContext().getResources().getString(R.string.Select_Job);
-        dealerId = sp.getString(Utility.CLIENT_LOGIN_DealerID, "");
+        dealerId =
+                Shared_Preference.getCLIENT_LOGIN_DealerID(DashboardDetailActivity_EP2.this);
         jobID = getIntent().getExtras().getString("job");
         pullToRefresh = findViewById(R.id.pullToRefresh);
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

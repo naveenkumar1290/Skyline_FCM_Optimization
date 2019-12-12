@@ -42,7 +42,7 @@ import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.UsageCharge;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.util.Utility;
 

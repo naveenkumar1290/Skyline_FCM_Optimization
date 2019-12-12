@@ -37,6 +37,7 @@ import planet.info.skyline.controller.AppController;
 import planet.info.skyline.model.OrderStatus;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 public class DashboardDetailActivity_EP1 extends AppCompatActivity {
@@ -44,7 +45,7 @@ public class DashboardDetailActivity_EP1 extends AppCompatActivity {
     Context context;
     TextView tv_msg;
 
-    SharedPreferences sp;
+
     String Client_id_Pk, comp_ID, jobID, job_Name, dealerId, Agency;
     ProgressDialog progressDoalog;
     String status = "";
@@ -65,7 +66,6 @@ public class DashboardDetailActivity_EP1 extends AppCompatActivity {
         context = DashboardDetailActivity_EP1.this;
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
 
         /*******************/
         status = getIntent().getExtras().getString("status");
@@ -80,12 +80,16 @@ public class DashboardDetailActivity_EP1 extends AppCompatActivity {
 
         setTitle(Utility.getTitle(Order + " List"));
         /**************/
-        Client_id_Pk = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        comp_ID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
+        Client_id_Pk =Shared_Preference.getCLIENT_LOGIN_userID(DashboardDetailActivity_EP1.this);
+
+        comp_ID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(DashboardDetailActivity_EP1.this);
+
         jobID = "-1"; //by default
         Agency = "0";// by default
         job_Name = getApplicationContext().getResources().getString(R.string.Select_Job);
-        dealerId = sp.getString(Utility.CLIENT_LOGIN_DealerID, "");
+        dealerId =
+                Shared_Preference.getCLIENT_LOGIN_DealerID(DashboardDetailActivity_EP1.this);
         /***************/
         //   callApiDashboardDeatils();
         /****************/
@@ -112,7 +116,8 @@ public class DashboardDetailActivity_EP1 extends AppCompatActivity {
         list_OrderStatus.clear();
         String client = comp_ID;
         String user = Client_id_Pk;
-        String dealer = sp.getString(Utility.CLIENT_LOGIN_DealerID, "");
+        String dealer =Shared_Preference.getCLIENT_LOGIN_DealerID(DashboardDetailActivity_EP1.this);
+
         String URL = SOAP_API_Client.URL_EP1 + Api.API_GET_ORDER_COUNT + client + "&user=" + user + "&dealer=" + dealer;
 
         JsonObjectRequest bb = new JsonObjectRequest(Request.Method.GET, URL,

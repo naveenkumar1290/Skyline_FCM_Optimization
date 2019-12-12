@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,14 +52,12 @@ import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.model.Misingcreate;
 import planet.info.skyline.model.Selectcreate;
 import planet.info.skyline.network.SOAP_API_Client;
-import planet.info.skyline.tech.billable_timesheet.ClientLeavingWithCrate;
 import planet.info.skyline.tech.billable_timesheet.Clock_Submit_Type_Activity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_missing_crate;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
-import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
 
 public class Selectmissing extends BaseActivity {
@@ -183,16 +180,15 @@ public class Selectmissing extends BaseActivity {
                 .showImageOnFail(R.drawable.skylinelogopng).cacheInMemory(true)
                 .cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565).build();
 
-      //  String imageloc = sp.getString("imglo", "");
         String imageloc =	Shared_Preference.getCLIENT_IMAGE_LOGO_URL(this);
         if (imageloc.equals("") || imageloc.equalsIgnoreCase("")) {
-          //  ed.putString("imglo", "").commit();
+
             Shared_Preference.setCLIENT_IMAGE_LOGO_URL(this,"");
             missingim.setVisibility(View.GONE);
         } else {
             imageLoadery.displayImage(imageloc, missingim, options);
         }
-      //  String name = sp.getString("name", "");
+
         String name  = Shared_Preference.getCLIENT_NAME(Selectmissing.this);
         textView1.setText(name);
         try {
@@ -273,8 +269,7 @@ public class Selectmissing extends BaseActivity {
                         Intent ii = new Intent(Selectmissing.this, Scanworklocationstart.class);
                         ii.putExtra("realselect", result);
                         int x = adapterselect.getCount();
-                        ed.putInt("select_total", x);
-                        ed.commit();
+
                         ii.putExtra("tot", x);
                         startActivity(ii);
                     } else {
@@ -402,40 +397,24 @@ public class Selectmissing extends BaseActivity {
                     @Override
                     public void onResponse(JSONObject obj) {
                         // TODO Auto-generated method stub
-                        // finish();
-                        // java.lang.System.exit(0);
-                        ed.putLong("times", 0);
 
-                        // hideprogressdialog();
+
+
+
                     }
                 }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError arg0) {
                 // TODO Auto-generated method stub
-                // hideprogressdialog();
-                ed.putLong("times", 0);
-                // finish();
-                // java.lang.System.exit(0);
-                // moveTaskToBack(false);
+
+
+
                 Log.e(" mainactivity", arg0.toString());
 
             }
         });
-		/*
-		 * JsonObjectRequest jsonobj =new JsonObjectRequest(urlskyline, null,
-		 * new Response.Listener<JSONObject>() {
-		 * 
-		 * @Override public void onResponse(JSONObject arg0) { // TODO
-		 * Auto-generated method stub
-		 * 
-		 * } }, new Response.ErrorListener() {
-		 * 
-		 * @Override public void onErrorResponse(VolleyError arg0) { // TODO
-		 * Auto-generated method stub
-		 * 
-		 * } });
-		 */
+
         AppController.getInstance().addToRequestQueue(bb);
     }
 
@@ -446,68 +425,8 @@ public class Selectmissing extends BaseActivity {
         return true;
     }
 
-    // private Runnable updateTimerThread = new Runnable() {
-    //
-    //
-    //
-    // public void run() {
-    //
-    //
-    //
-    // timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
-    //
-    //
-    //
-    // updatedTime = timeSwapBuff + timeInMilliseconds;
-    //
-    // ed.putLong("times", updatedTime).commit();
-    //
-    // int secs = (int) (updatedTime / 1000);
-    //
-    // int mins = secs / 60;
-    //
-    // secs = secs % 60;
-    //
-    // int milliseconds = (int) (updatedTime % 1000);
-    //
-    // // timerValue.setText("" + mins + ":"
-    // // + String.format("%02d", secs) + ":"
-    // //
-    // // + String.format("%03d", milliseconds));
-    // // timerValue.setText("Time Clock " + mins + ":"
-    // // + String.format("%02d", secs));// + ":"+ String.format("%03d",
-    // milliseconds));
-    // //Toast.makeText(getApplicationContext(), "select", 100).show();
-    // Log.e("select", "select");
-    // customHandler.postDelayed(this, 1000);
-    //
-    // }
-    //
-    //
-    //
-    // };
 
-    public void stopwork1() {
-       // stopService(new Intent(Selectmissing.this, Timerclass.class));
-        // ed.putLong("times", 0).commit();
-        // customHandler.removeCallbacks(updateTimerThread);
-        // customHandler.removeCallbacksAndMessages(null);
-        // ed.putLong("times", 0).commit();
-        // try {
-        // Thread.sleep(1000);
-        // //ed.remove("times").commit();
-        // ed.putLong("times", 0).commit();
-        // // customHandler.removeCallbacks(updateTimerThread);
-        // finish();
-        // //System.exit(0);
-        // } catch (InterruptedException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
-        // ed.remove("times").commit();
-        // customHandler.removeCallbacks(updateTimerThread);
-        // finish();
-    }
+
 
     @Override
     protected void onPause() {

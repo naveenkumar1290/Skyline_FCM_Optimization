@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import planet.info.skyline.R;
 import planet.info.skyline.client.ClientHomeActivity;
 import planet.info.skyline.model.ClientModel;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -104,31 +105,14 @@ public class SelectClientUser_ListAdapter extends BaseAdapter {
                     String Imagepath = list_ClientUser.get(position).getImagepath();
                     String Masterstatus = list_ClientUser.get(position).getMasterstatus();
 
-/*
-                    SharedPreferences.Editor ed;
-                    ed = sp.edit();
-                    ed.putString(Utility.CLIENT_LOGIN_userID, userID);
-                    ed.putString(Utility.CLIENT_LOGIN_txt_Mail, txt_Mail);
-                    ed.putString(Utility.CLIENT_LOGIN_CompID, CompID);
-                    ed.putString(Utility.CLIENT_LOGIN_CompName, CompName);
-                    ed.putString(Utility.CLIENT_LOGIN_UserName, UserName);
-                    ed.putString(Utility.CLIENT_LOGIN_UserCategory, UserCategory);
-                    ed.putString(Utility.CLIENT_LOGIN_CaType, CaType);
-                    ed.putString(Utility.CLIENT_LOGIN_DealerID, DealerID);
-                    ed.putString(Utility.CLIENT_LOGIN_dtype, dtype);
-                    ed.putString(Utility.CLIENT_LOGIN_Login_Email, Login_Email);
-                    ed.putString(Utility.CLIENT_LOGIN_dealer_name, dealer_name);
-                    ed.putString(Utility.CLIENT_LOGIN_status, status);
-                    ed.putString(Utility.CLIENT_LOGIN_Imagepath, Imagepath);
-                    ed.putString(Utility.CLIENT_LOGIN_Masterstatus, Masterstatus);
-                    ed.apply();*/
-                    Utility.SaveClientLoginData(activity.getApplicationContext(), userID, txt_Mail, CompID, CompName, UserName, UserCategory,
+
+                    Shared_Preference.SaveClientLoginData(activity.getApplicationContext(), userID, txt_Mail, CompID, CompName, UserName, UserCategory,
                             CaType, DealerID, dtype, Login_Email, dealer_name, status, Imagepath, Masterstatus
 
                     );
 
 
-                    Utility.setLoginTrue(activity, Utility.LOGIN_TYPE_CLIENT);
+                    Shared_Preference.setLoginTrue(activity, Shared_Preference.LOGIN_TYPE_CLIENT);
                     Intent i = new Intent(activity, ClientHomeActivity.class);
                     activity.startActivity(i);
                     activity.finish();

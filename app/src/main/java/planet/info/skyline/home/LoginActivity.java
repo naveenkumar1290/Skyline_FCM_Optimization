@@ -1,19 +1,14 @@
 package planet.info.skyline.home;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,7 +42,7 @@ import planet.info.skyline.model.ClientModel;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.tech.runtime_permission.PermissionActivity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_varify_tech;
@@ -315,8 +310,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
         TextView mobil = (TextView) dialogView.findViewById(R.id.mobiledata);
         TextView ok = (TextView) dialogView.findViewById(R.id.okbuton);
         TextView cancel = (TextView) dialogView.findViewById(R.id.cancelbuton);
-       /* String mob = sp.getString("mob", "");
-        String username = sp.getString("tname", "");*/
+
 
         String mob = Shared_Preference.getUSER_MOBILE(this);
         String username = Shared_Preference.getLOGIN_USERNAME(this);
@@ -332,7 +326,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
                  * Bhanu work continue from 6/04/2016
                  */
                 dialog.dismiss();
-                Utility.setLoginTrue(LoginActivity.this, Utility.LOGIN_TYPE_NORMAL);
+                Shared_Preference.setLoginTrue(LoginActivity.this, Shared_Preference.LOGIN_TYPE_NORMAL);
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
@@ -344,8 +338,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                //  ed.putString("tname", "").commit();
-                //  ed.clear().commit();
+
                 Shared_Preference.delete_SharedPreference(LoginActivity.this);
             }
         });
@@ -476,9 +469,9 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
     public void UpdateTokenOnServer() {
 
 
-        // String empId = sp.getString("clientid", "");
+
         String empId = Shared_Preference.getLOGIN_USER_ID(this);
-        // String fcm_token = sp.getString(Utility.FCM_TOKEN, "");
+
         String fcm_token = Shared_Preference.getFCM_TOKEN(this);
 
 
@@ -538,7 +531,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
             if (resultmy == 0) {
                 dialog_user_detail();
             } else if (resultmy == 1) {
-                Utility.setLoginTrue(LoginActivity.this, Utility.LOGIN_TYPE_NORMAL);
+                Shared_Preference.setLoginTrue(LoginActivity.this, Shared_Preference.LOGIN_TYPE_NORMAL);
                 Toast.makeText(getApplicationContext(), "Mobile number not exist!", Toast.LENGTH_LONG).show();
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 finish();
@@ -599,11 +592,11 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
 
                         String Masterstatus = jsonObject.getString("Masterstatus");
 
-                        Utility.SaveClientLoginData(LoginActivity.this, userID, txt_Mail, CompID, CompName, UserName, UserCategory,
+                        Shared_Preference.SaveClientLoginData(LoginActivity.this, userID, txt_Mail, CompID, CompName, UserName, UserCategory,
                                 CaType, DealerID, dtype, Login_Email, dealer_name, status, Imagepath, Masterstatus
                         );
 
-                        Utility.setLoginTrue(LoginActivity.this, Utility.LOGIN_TYPE_CLIENT);
+                        Shared_Preference.setLoginTrue(LoginActivity.this, Shared_Preference.LOGIN_TYPE_CLIENT);
 
                         Intent i = new Intent(LoginActivity.this, ClientHomeActivity.class);
                         startActivity(i);

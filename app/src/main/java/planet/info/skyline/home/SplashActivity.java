@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import planet.info.skyline.R;
 import planet.info.skyline.client.ClientHomeActivity;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 
@@ -18,11 +19,11 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_launcher);
 
         SharedPreferences sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
-        // SharedPreferences.Editor ed = sp.edit();
+
 
 
         Utility.setAppLaunchedFirstTime(SplashActivity.this);
-        boolean isUserLogin = Utility.isLogin(SplashActivity.this);
+        boolean isUserLogin = Shared_Preference.isLogin(SplashActivity.this);
 
 
         if (!isUserLogin) {  // not login
@@ -30,11 +31,9 @@ public class SplashActivity extends AppCompatActivity {
 
         } else {
 
-            String LOGIN_TYPE = Utility.getLoginType(SplashActivity.this);
-            if (LOGIN_TYPE.equals(Utility.LOGIN_TYPE_CLIENT)) {
+            String LOGIN_TYPE = Shared_Preference.getLoginType(SplashActivity.this);
+            if (LOGIN_TYPE.equals(Shared_Preference.LOGIN_TYPE_CLIENT)) {
                 startActivity(new Intent(SplashActivity.this, ClientHomeActivity.class));
-
-
 
             } else {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));

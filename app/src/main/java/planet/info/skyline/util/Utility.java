@@ -74,14 +74,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import planet.info.skyline.R;
 import planet.info.skyline.floating_view.ChatHeadService;
-import planet.info.skyline.home.LoginActivity;
 import planet.info.skyline.model.LaborCode;
 import planet.info.skyline.model.OverlapTimesheet;
 import planet.info.skyline.model.SavedTask;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.tech.billable_timesheet.Clock_Submit_Type_Activity;
 import planet.info.skyline.tech.non_billable_timesheet.NonBillable_jobs;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -141,12 +140,11 @@ public class Utility {
     public static final String MSG_OFFLINE_DATA_SAVE = "Do you want to save data offline? This will be submitted when Internet is available.";
     public static final String SAVED = "Saved successfully!";
     //  public static final String KEY_INCOMPLETE_ASYNC_ARRAY = "INCOMPLETE_ASYNC_ARRAY";
-    public static final String KEY_OVERLAP_TIMESHEET_ARRAY = "OVERLAP_TIMESHEET_ARRAY";
+
     //public static final String KEY_APP_LAUNCHED_FIRST_TIME = "APP_LAUNCHED_FIRST_TIME";
-    public static final String KEY_IS_LOGIN = "IS_LOGIN";
-    public static final String KEY_APP_UPDATE_CHECKED = "APP_UPDATE_CHECKED";
-    public static final String KEY_APP_LATEST_VERSION = "APP_LATEST_VERSION";
-    public static final String KEY_APP_OLD_VERSION = "APP_OLD_VERSION";
+
+
+
     public static final String NON_BILLABLE = "Non-Billable";
     public static final String BILLABLE = "1";
     public static final String CHANGE_TIME_CODE = "2";
@@ -164,31 +162,18 @@ public class Utility {
     public static final String JOB_ID = "JOB_ID";
 
 
+    public static final String TYPE_AWO = "2";
+    public static final String TYPE_SWO = "1";
     /*********************************CLIENT*******************************************/
 
-    public static final String CLIENT_LOGIN_userID = "CLIENT_LOGIN_userID";
-    public static final String CLIENT_LOGIN_txt_Mail = "CLIENT_LOGIN_txt_Mail";
-    public static final String CLIENT_LOGIN_CompID = "CLIENT_LOGIN_CompID";
-    public static final String CLIENT_LOGIN_CompName = "CLIENT_LOGIN_CompName";
-    public static final String CLIENT_LOGIN_UserName = "CLIENT_LOGIN_UserName";
-    public static final String CLIENT_LOGIN_UserCategory = "CLIENT_LOGIN_UserCategory";
-    public static final String CLIENT_LOGIN_CaType = "CLIENT_LOGIN_CaType";
-    public static final String CLIENT_LOGIN_DealerID = "CLIENT_LOGIN_DealerID";
-    public static final String CLIENT_LOGIN_dtype = "CLIENT_LOGIN_dtype";
-    public static final String CLIENT_LOGIN_Login_Email = "CLIENT_LOGIN_Login_Email";
-    public static final String CLIENT_LOGIN_dealer_name = "CLIENT_LOGIN_dealer_name";
-    public static final String CLIENT_LOGIN_status = "CLIENT_LOGIN_status";
-    public static final String CLIENT_LOGIN_Imagepath = "CLIENT_LOGIN_Imagepath";
-    public static final String CLIENT_LOGIN_Masterstatus = "CLIENT_LOGIN_Masterstatus";
-    public static final String LOGIN_TYPE_CLIENT = "LOGIN_TYPE_CLIENT";
-    public static final String LOGIN_TYPE_NORMAL = "LOGIN_TYPE_NORMAL";
-    public static final String LOGIN_TYPE = "LOGIN_TYPE";
+
 
 
     public static final String OVERLAP_TIME_ENTRY = "OVERLAP_TIME_ENTRY";
     public static final String PAUSED_JOB = "PAUSED_JOB";
     public static final int CODE_SELECT_COMPANY = 124;
     public static final int CODE_SELECT_VENDOR = 85;
+    public static final int CODE_SELECT_JOB = 815;
     public static final String KEY_PAUSED_TIMESHEET_ID = "PAUSED_TIMESHEET_ID";
     public static final String IS_JOB_MANDATORY = "IS_JOB_MANDATORY";
     public static final String Show_DIALOG_SHOW_INFO = "DIALOG_SHOW_INFO";
@@ -210,6 +195,9 @@ public class Utility {
     public static final String EditTime = "42";
     public static final String EnterTime = "65";
     public static final String ChangeOrder = "60";
+    public static final String UsageCharge = "40";
+    public static final String Client_Art = "31";
+    public static final String Client_Photo = "37";
     /**************************************************************************************/
 
     //Method
@@ -355,9 +343,7 @@ public class Utility {
     public static void StopRunningClock(Context context) {
 
 
-        SharedPreferences sp;
-        sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-
+        SharedPreferences sp=Shared_Preference.getSharedPreferences(context);
         try {
             Intent i2 = new Intent(context, ChatHeadService.class);
             context.stopService(i2);
@@ -367,11 +353,10 @@ public class Utility {
 
         try {
             if (sp.contains(Shared_Preference.TIMER_STARTED_FROM_ADMIN_CLOCK_MODULE)) {
-                // ed.putBoolean(Utility.TIMER_STARTED_FROM_ADMIN_CLOCK_MODULE, false).apply();//nks
                 Shared_Preference.setTIMER_STARTED_FROM_ADMIN_CLOCK_MODULE(context, false);
             }
             if (sp.contains(Shared_Preference.TIMER_STARTED_FROM_BILLABLE_MODULE)) {
-                // ed.putBoolean(Shared_Preference.TIMER_STARTED_FROM_BILLABLE_MODULE, false).apply();//nks
+
                 Shared_Preference.setTIMER_STARTED_FROM_BILLABLE_MODULE(context, false);
 
 
@@ -390,18 +375,7 @@ public class Utility {
 
     }
 
-    /* public static String getDealerID(Context context) {
-         SharedPreferences.Editor ed;
-         SharedPreferences sp;
-         sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-         return sp.getString(Utility.DEALER_ID, "");
-     }*/
-    /*public static String getUserID(Context context) {
-        SharedPreferences.Editor ed;
-        SharedPreferences sp;
-        sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        return sp.getString("clientid", "");
-    }*/
+
     public static void HideRunningClock(Context context) {
 
         if (isMyServiceRunning(ChatHeadService.class, context)) {
@@ -531,9 +505,7 @@ public class Utility {
         boolean clockRunningForBillableTime = false;
 
         try {
-            SharedPreferences sp;
-            sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-            //boolean isTimerRunningFromAdminClockModule = sp.getBoolean(Utility.TIMER_STARTED_FROM_ADMIN_CLOCK_MODULE, false);
+
             boolean isTimerRunningFromAdminClockModule = Shared_Preference.getTIMER_STARTED_FROM_ADMIN_CLOCK_MODULE(context);
 
             if (isTimerRunningFromAdminClockModule) {
@@ -756,9 +728,7 @@ public class Utility {
 
     public static String get_TotalClockTime(Context context) {
         Date CurrentTime = Utility.getCurrentTime();
-        SharedPreferences sp;
-        sp = context.getSharedPreferences("skyline", MODE_PRIVATE);
-        // String sTime = sp.getString(Utility.CLOCK_START_TIME, "");
+
 
         String sTime = Shared_Preference.getCLOCK_START_TIME(context);
 
@@ -775,10 +745,8 @@ public class Utility {
 
     public static void ResetClock(Context context) {
         String sDate = Utility.getCurrentTimeString();
-        SharedPreferences sp;
-        sp = context.getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
-        //  ed.putString(Utility.CLOCK_START_TIME, sDate).commit();
+
+
         Shared_Preference.setCLOCK_START_TIME(context, sDate);
     }
 
@@ -823,12 +791,9 @@ public class Utility {
 
         boolean val = false;
 
-      //  SharedPreferences sp = context.getSharedPreferences("skyline", MODE_PRIVATE);
-        //  String Str_PrevJobEndTime = sp.getString(Utility.TIMEGAP_JOB_END_TIME, "");
         String Str_PrevJobEndTime = Shared_Preference.getTIMEGAP_JOB_END_TIME(context);
 
 
-        //String Str_NewJobStartTime = sp.getString(Utility.TIMEGAP_JOB_START_TIME, "");
         String Str_NewJobStartTime = Shared_Preference.getTIMEGAP_JOB_START_TIME(context);//dd-MM-yyyy HH:mm:ss
 
         SimpleDateFormat mdformat = new SimpleDateFormat(Utility.DATE_FORMAT);
@@ -857,12 +822,12 @@ public class Utility {
     public static long GetTimeGap(Context context) {
         long Total_Elapsed_Seconds = 0;
 
-        SharedPreferences sp = context.getSharedPreferences("skyline", MODE_PRIVATE);
-        // String Str_PrevJobEndTime = sp.getString(Utility.TIMEGAP_JOB_END_TIME, "");
+
+
         String Str_PrevJobEndTime = Shared_Preference.getTIMEGAP_JOB_END_TIME(context);
 
 
-        //String Str_NewJobStartTime = sp.getString(Utility.TIMEGAP_JOB_START_TIME, "");
+
         String Str_NewJobStartTime = Shared_Preference.getTIMEGAP_JOB_START_TIME(context);//dd-MM-yyyy HH:mm:ss
         SimpleDateFormat mdformat = new SimpleDateFormat(Utility.DATE_FORMAT);
         Date PrevJobEndTime = null;
@@ -966,21 +931,20 @@ public class Utility {
     @SuppressLint("NewApi")
     public static void showChatHead(Context context) {
         // API22以下かチェック
-        SharedPreferences sp;
-        sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
+        SharedPreferences sp=Shared_Preference.getSharedPreferences(context);
 
 
         try {
             boolean is_TIMER_STARTED_FROM_ADMIN_CLOCK_MODULE = false;
             boolean is_TIMER_STARTED_FROM_BILLABLE_MODULE = false;
             if (sp.contains(Shared_Preference.TIMER_STARTED_FROM_ADMIN_CLOCK_MODULE)) {
-                // is_TIMER_STARTED_FROM_ADMIN_CLOCK_MODULE = sp.getBoolean(Shared_Preference.TIMER_STARTED_FROM_ADMIN_CLOCK_MODULE, false);
+
 
                 is_TIMER_STARTED_FROM_ADMIN_CLOCK_MODULE = Shared_Preference.getTIMER_STARTED_FROM_ADMIN_CLOCK_MODULE(context);
 
             }
             if (sp.contains(Shared_Preference.TIMER_STARTED_FROM_BILLABLE_MODULE)) {
-                //  is_TIMER_STARTED_FROM_BILLABLE_MODULE = sp.getBoolean(Utility.TIMER_STARTED_FROM_BILLABLE_MODULE, false);
+
                 is_TIMER_STARTED_FROM_BILLABLE_MODULE = Shared_Preference.getTIMER_STARTED_FROM_BILLABLE_MODULE(context);
             }
 
@@ -1096,12 +1060,11 @@ public class Utility {
     public static void removeIncompleteAsynctask(Context context, String unique_apiId) {
         JSONArray jsonArray = new JSONArray();
 
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
+        SharedPreferences sp=Shared_Preference.getSharedPreferences(context);
+
 
 
         if (sp.contains(Shared_Preference.KEY_INCOMPLETE_ASYNC_ARRAY)) {
-            //  String IncompleteAsyncArray = sp.getString(KEY_INCOMPLETE_ASYNC_ARRAY, "");
             String IncompleteAsyncArray = Shared_Preference.getINCOMPLETE_ASYNC_ARRAY(context);
             try {
                 jsonArray = new JSONArray(IncompleteAsyncArray);
@@ -1118,7 +1081,6 @@ public class Utility {
             } catch (Exception e) {
                 e.getCause();
             }
-            // ed.putString(KEY_INCOMPLETE_ASYNC_ARRAY, jsonArray.toString()).apply();
             Shared_Preference.setINCOMPLETE_ASYNC_ARRAY(context, jsonArray.toString());
         }
         Log.e("AsyncArrAfterRemove", jsonArray.toString());
@@ -1130,7 +1092,7 @@ public class Utility {
         ArrayList<SavedTask> list = new ArrayList<>();
         JSONArray jsonArray = new JSONArray();
         if (Shared_Preference.containsKey(context, Shared_Preference.KEY_INCOMPLETE_ASYNC_ARRAY)) {
-            // String IncompleteAsyncArray = sp.getString(Utility.KEY_INCOMPLETE_ASYNC_ARRAY, "");
+
             String IncompleteAsyncArray = Shared_Preference.getINCOMPLETE_ASYNC_ARRAY(context);
             try {
                 jsonArray = new JSONArray(IncompleteAsyncArray);
@@ -1162,8 +1124,8 @@ public class Utility {
         JSONArray jsonArray = new JSONArray();
         //  JSONObject final_jsonObject = new JSONObject();
 
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
+        SharedPreferences sp =Shared_Preference.getSharedPreferences(context);
+
         JSONObject jsonObject = new JSONObject();
 
 
@@ -1191,18 +1153,20 @@ public class Utility {
             e1.getCause();
         }
 
-        if (sp.contains(KEY_OVERLAP_TIMESHEET_ARRAY)) {
-            String IncompleteAsyncArray = sp.getString(KEY_OVERLAP_TIMESHEET_ARRAY, "");
+        if (sp.contains(Shared_Preference.KEY_OVERLAP_TIMESHEET_ARRAY)) {
+            String IncompleteAsyncArray = Shared_Preference.get_OVERLAP_TIMESHEET_ARRAY(context);
             try {
                 jsonArray = new JSONArray(IncompleteAsyncArray);
                 jsonArray.put(jsonObject);
             } catch (Exception e1) {
                 e1.getCause();
             }
-            ed.putString(KEY_OVERLAP_TIMESHEET_ARRAY, jsonArray.toString()).commit();
+
+            Shared_Preference.set_OVERLAP_TIMESHEET_ARRAY(context,jsonArray.toString());
         } else {
             jsonArray.put(jsonObject);
-            ed.putString(KEY_OVERLAP_TIMESHEET_ARRAY, jsonArray.toString()).commit();
+
+            Shared_Preference.set_OVERLAP_TIMESHEET_ARRAY(context,jsonArray.toString());
         }
 
         Log.e("OverlapArrAfterAdd", jsonArray.toString());
@@ -1214,11 +1178,10 @@ public class Utility {
 
 
         JSONArray jsonArray = new JSONArray();
-        SharedPreferences sp = context.getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
+        SharedPreferences sp =Shared_Preference.getSharedPreferences(context);
 
-        if (sp.contains(Utility.KEY_OVERLAP_TIMESHEET_ARRAY)) {
-            String IncompleteAsyncArray = sp.getString(Utility.KEY_OVERLAP_TIMESHEET_ARRAY, "");
+        if (sp.contains(Shared_Preference.KEY_OVERLAP_TIMESHEET_ARRAY)) {
+            String IncompleteAsyncArray =Shared_Preference.get_OVERLAP_TIMESHEET_ARRAY(context);
             try {
                 jsonArray = new JSONArray(IncompleteAsyncArray);
                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -1256,11 +1219,11 @@ public class Utility {
     public static void removeOverlapTimesheetData(Context context, String unique_apiId) {
         JSONArray jsonArray = new JSONArray();
 
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
+        SharedPreferences sp =Shared_Preference.getSharedPreferences(context);
 
-        if (sp.contains(KEY_OVERLAP_TIMESHEET_ARRAY)) {
-            String IncompleteAsyncArray = sp.getString(KEY_OVERLAP_TIMESHEET_ARRAY, "");
+
+        if (sp.contains(Shared_Preference.KEY_OVERLAP_TIMESHEET_ARRAY)) {
+            String IncompleteAsyncArray = Shared_Preference.get_OVERLAP_TIMESHEET_ARRAY(context);
             try {
                 jsonArray = new JSONArray(IncompleteAsyncArray);
                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -1276,17 +1239,13 @@ public class Utility {
             } catch (Exception e) {
                 e.getCause();
             }
-            ed.putString(KEY_OVERLAP_TIMESHEET_ARRAY, jsonArray.toString()).apply();
+            Shared_Preference.set_OVERLAP_TIMESHEET_ARRAY(context,jsonArray.toString());
         }
         Log.e("overlapArrAfterRemove", jsonArray.toString());
     }
 
     public static void removeAllOverlapTimesheetData(Context context) {
-        JSONArray jsonArray = new JSONArray();
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
-        ed.remove(KEY_OVERLAP_TIMESHEET_ARRAY).apply();
-        Log.e("overlapArrAfterRemove", jsonArray.toString());
+     Shared_Preference.remove_OVERLAP_TIMESHEET_ARRAY(context);
     }
 
     public static boolean isOverlapTimesheetExist(Context context) {
@@ -1296,11 +1255,11 @@ public class Utility {
 
         JSONArray jsonArray = new JSONArray();
 
-        SharedPreferences sp = context.getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
+        SharedPreferences sp =Shared_Preference.getSharedPreferences(context);
 
-        if (Shared_Preference.containsKey(context, Utility.KEY_OVERLAP_TIMESHEET_ARRAY)) {
-            String IncompleteAsyncArray = sp.getString(Utility.KEY_OVERLAP_TIMESHEET_ARRAY, "");
+
+        if (sp.contains(Shared_Preference.KEY_OVERLAP_TIMESHEET_ARRAY)) {
+            String IncompleteAsyncArray = Shared_Preference.get_OVERLAP_TIMESHEET_ARRAY(context);
             try {
                 jsonArray = new JSONArray(IncompleteAsyncArray);
                 if (jsonArray.length() > 0) {
@@ -1317,75 +1276,18 @@ public class Utility {
 
 
     public static void setAppLaunchedFirstTime(Context context) {
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
 
-        //  ed.putBoolean(Utility.KEY_APP_LAUNCHED_FIRST_TIME, true).commit();//nks
         Shared_Preference.setAPP_LAUNCHED_FIRST_TIME(context, true);
 
     }
 
     public static void setAppNotLaunchedFirstTime(Context context) {
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
 
-        //    ed.putBoolean(Utility.KEY_APP_LAUNCHED_FIRST_TIME, false).commit();//nks
         Shared_Preference.setAPP_LAUNCHED_FIRST_TIME(context, false);
 
     }
 
-    public static void setAppUpdateChecked(Context context) {
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
-        ed.putBoolean(Utility.KEY_APP_UPDATE_CHECKED, true).apply();//nks
-    }
 
-    public static void setAppUpdateNotChecked(Context context) {
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
-        ed.putBoolean(Utility.KEY_APP_UPDATE_CHECKED, false).apply();//nks
-    }
-
-    public static void setLatestVersion(Context context, String ver) {
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
-        ed.putString(Utility.KEY_APP_LATEST_VERSION, ver).apply();//nks
-    }
-
-
-    public static void setOldVersion(Context context) {
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
-        ed.putString(Utility.KEY_APP_OLD_VERSION, getAppVersion(context)).apply();//nks
-    }
-
-    public static String getOldVersion(Context context) {
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        if (sp.contains(Utility.KEY_APP_OLD_VERSION)) {
-            return sp.getString(Utility.KEY_APP_OLD_VERSION, "0");
-        } else return "0";
-    }
-
-
-    public static String getLatestVersion(Context context) {
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        if (sp.contains(Utility.KEY_APP_LATEST_VERSION)) {
-            return sp.getString(Utility.KEY_APP_LATEST_VERSION, "0");
-        } else return "0";
-    }
-
-
-    public static String getAppVersion(Context context) {
-        String version = "";
-        try {
-            PackageManager manager = context.getPackageManager();
-            PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
-            version = info.versionName;
-        } catch (Exception e) {
-            e.getMessage();
-        }
-        return version;
-    }
 
 
     public static boolean isAppUpdated(Context context) {
@@ -1393,9 +1295,9 @@ public class Utility {
         boolean appUpdated = false;
 
         if (Utility.isAppUpdateChecked(context)) {
-            Utility.setAppUpdateNotChecked(context);
+            Shared_Preference.setAppUpdateNotChecked(context);
             String version = Utility.getAppVersion(context);
-            String LatestVersion = Utility.getLatestVersion(context);
+            String LatestVersion =Shared_Preference.getLatestVersion(context);
             // if (true) {
             if (LatestVersion.equals(version)) {
                 appUpdated = true;
@@ -1407,10 +1309,10 @@ public class Utility {
     }
 
     public static boolean isAppUpdateChecked(Context context) {
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
+        SharedPreferences sp=Shared_Preference.getSharedPreferences(context);
         boolean checkedForUpdate = false;
-        if (sp.contains(Utility.KEY_APP_UPDATE_CHECKED)) {
-            checkedForUpdate = sp.getBoolean(Utility.KEY_APP_UPDATE_CHECKED, false);
+        if (sp.contains(Shared_Preference.KEY_APP_UPDATE_CHECKED)) {
+            checkedForUpdate = sp.getBoolean(Shared_Preference.KEY_APP_UPDATE_CHECKED, false);
         } else {
             checkedForUpdate = false;
         }
@@ -1472,43 +1374,8 @@ public class Utility {
         });
     }
 
-    public static boolean isLogin(Context context) {
-        SharedPreferences sp;
-        sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        boolean isUserLogin = sp.getBoolean(KEY_IS_LOGIN, false);
-        return isUserLogin;
-    }
-
-    public static void setLoginTrue(Context context, String Login_Type) {
-        SharedPreferences.Editor ed;
-        SharedPreferences sp;
-        sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        ed = sp.edit();
-        ed.putBoolean(KEY_IS_LOGIN, true);
-        ed.putString(LOGIN_TYPE, Login_Type).apply();
-    }
-
-    public static void setLoginFalse(Context context) {
-        SharedPreferences.Editor ed;
-        SharedPreferences sp;
-        sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        ed = sp.edit();
-        ed.putBoolean(KEY_IS_LOGIN, false).apply();
-    }
-
-    public static String getLoginType(Context context) {
-        SharedPreferences sp;
-        sp = context.getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
-        String LoginType = sp.getString(LOGIN_TYPE, "");
-        return LoginType;
-    }
 
     public static Spanned getTitle(String title) {
-/*
-
-        SpannableString ss1 = new SpannableString(title);
-        ss1.setSpan(new AbsoluteSizeSpan(40), 0, title.length(), SPAN_INCLUSIVE_INCLUSIVE);
-*/
 
         return Html.fromHtml("<small>" + title + "</small>");
 
@@ -1767,42 +1634,7 @@ public class Utility {
         return isTimeEqual;
     }
 
-    public static void SaveClientLoginData(Context context,
-                                           String userID,
-                                           String txt_Mail,
-                                           String CompID,
-                                           String CompName,
-                                           String UserName,
-                                           String UserCategory,
-                                           String CaType,
-                                           String DealerID,
-                                           String dtype,
-                                           String Login_Email,
-                                           String dealer_name,
-                                           String status,
-                                           String Imagepath,
-                                           String Masterstatus) {
-        SharedPreferences sp = context.getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed;
-        ed = sp.edit();
 
-        ed.putString(Utility.CLIENT_LOGIN_userID, userID);
-        ed.putString(Utility.CLIENT_LOGIN_txt_Mail, txt_Mail);
-        ed.putString(Utility.CLIENT_LOGIN_CompID, CompID);
-        ed.putString(Utility.CLIENT_LOGIN_CompName, CompName);
-        ed.putString(Utility.CLIENT_LOGIN_UserName, UserName);
-        ed.putString(Utility.CLIENT_LOGIN_UserCategory, UserCategory);
-        ed.putString(Utility.CLIENT_LOGIN_CaType, CaType);
-        ed.putString(Utility.CLIENT_LOGIN_DealerID, DealerID);
-        ed.putString(Utility.CLIENT_LOGIN_dtype, dtype);
-        ed.putString(Utility.CLIENT_LOGIN_Login_Email, Login_Email);
-        ed.putString(Utility.CLIENT_LOGIN_dealer_name, dealer_name);
-        ed.putString(Utility.CLIENT_LOGIN_status, status);
-        ed.putString(Utility.CLIENT_LOGIN_Imagepath, Imagepath);
-        ed.putString(Utility.CLIENT_LOGIN_Masterstatus, Masterstatus);
-
-        ed.apply();
-    }
 
     public static boolean isEntryOverLaps(String new_startTime, String new_endTime, String old_startTime, String old_endTime) {
         boolean isOverLappingEntry = false;
@@ -2089,4 +1921,16 @@ public class Utility {
 
         }
     }
+    public static String getAppVersion(Context context) {
+        String version = "";
+        try {
+            PackageManager manager = context.getPackageManager();
+            PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
+            version = info.versionName;
+        } catch (Exception e) {
+            e.getMessage();
+        }
+        return version;
+    }
+
 }

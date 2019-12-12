@@ -1,7 +1,13 @@
-package planet.info.skyline.tech.shared_preference;
+package planet.info.skyline.shared_preference;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+
+import planet.info.skyline.util.Utility;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 public class Shared_Preference {
@@ -45,6 +51,46 @@ public class Shared_Preference {
 
     private static final String NON_BILLABLE_CODES = "NON_BILLABLE_CODES";
     private static final String ENTER_TIMESHEET_BY_AWO= "ENTER_TIMESHEET_BY_AWO";
+    public static final String KEY_OVERLAP_TIMESHEET_ARRAY = "OVERLAP_TIMESHEET_ARRAY";
+    public static final String KEY_APP_LATEST_VERSION = "APP_LATEST_VERSION";
+    public static final String KEY_APP_OLD_VERSION = "APP_OLD_VERSION";
+    public static final String KEY_IS_LOGIN = "IS_LOGIN";
+    public static final String LOGIN_TYPE = "LOGIN_TYPE";
+    public static final String KEY_APP_UPDATE_CHECKED = "APP_UPDATE_CHECKED";
+
+
+
+
+    /***************************CLIENT LOGIN********************************/
+
+    public static final String CLIENT_LOGIN_userID = "CLIENT_LOGIN_userID";
+    public static final String CLIENT_LOGIN_DealerID = "CLIENT_LOGIN_DealerID";
+    public static final String CLIENT_LOGIN_Imagepath = "CLIENT_LOGIN_Imagepath";
+    public static final String CLIENT_LOGIN_Masterstatus = "CLIENT_LOGIN_Masterstatus";
+    public static final String LOGIN_TYPE_CLIENT = "LOGIN_TYPE_CLIENT";
+    public static final String LOGIN_TYPE_NORMAL = "LOGIN_TYPE_NORMAL";
+    public static final String CLIENT_LOGIN_UserName = "CLIENT_LOGIN_UserName";
+
+    public static final String CLIENT_LOGIN_CompID = "CLIENT_LOGIN_CompID";
+
+
+
+
+    public static final String CLIENT_LOGIN_txt_Mail = "CLIENT_LOGIN_txt_Mail";
+    public static final String CLIENT_LOGIN_CompName = "CLIENT_LOGIN_CompName";
+    public static final String CLIENT_LOGIN_UserCategory = "CLIENT_LOGIN_UserCategory";
+    public static final String CLIENT_LOGIN_CaType = "CLIENT_LOGIN_CaType";
+    public static final String CLIENT_LOGIN_dtype = "CLIENT_LOGIN_dtype";
+    public static final String CLIENT_LOGIN_Login_Email = "CLIENT_LOGIN_Login_Email";
+    public static final String CLIENT_LOGIN_dealer_name = "CLIENT_LOGIN_dealer_name";
+    public static final String CLIENT_LOGIN_status = "CLIENT_LOGIN_status";
+
+
+    /***************************CLIENT LOGIN********************************/
+
+
+
+
 
 
     public static SharedPreferences getSharedPreferences(Context context) {
@@ -901,6 +947,243 @@ public class Shared_Preference {
         return val;
     }
 
+    public static void set_OVERLAP_TIMESHEET_ARRAY(Context context, String ARRAY) {
+        try {
+            SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+            editor.putString(KEY_OVERLAP_TIMESHEET_ARRAY,ARRAY);
+            editor.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static String get_OVERLAP_TIMESHEET_ARRAY(Context context) {
+        String val = "";
+        try {
+            val = getSharedPreferences(context).getString(KEY_OVERLAP_TIMESHEET_ARRAY, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return val;
+    }
+    public static void remove_OVERLAP_TIMESHEET_ARRAY(Context context) {
+        try {
+            SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+            editor.remove(KEY_OVERLAP_TIMESHEET_ARRAY).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void setLatestVersion(Context context, String ver) {
+        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+        editor.putString(KEY_APP_LATEST_VERSION, ver).apply();//nks
+    }
+    public static void setOldVersion(Context context) {
+        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+
+        editor.putString(KEY_APP_OLD_VERSION, Utility.getAppVersion(context)).apply();//nks
+    }
+
+    public static String getOldVersion(Context context) {
+        SharedPreferences sp=getSharedPreferences(context);
+        if (sp.contains(KEY_APP_OLD_VERSION)) {
+            return sp.getString(KEY_APP_OLD_VERSION, "0");
+        } else return "0";
+    }
+
+
+    public static String getLatestVersion(Context context) {
+        SharedPreferences sp=getSharedPreferences(context);
+        if (sp.contains(KEY_APP_LATEST_VERSION)) {
+            return sp.getString(KEY_APP_LATEST_VERSION, "0");
+        } else return "0";
+    }
+
+
+    public static boolean isLogin(Context context) {
+        boolean val =false;
+        try {
+            val = getSharedPreferences(context).getBoolean(KEY_IS_LOGIN, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return val;
+
+
+    }
+
+    public static void setLoginTrue(Context context, String Login_Type) {
+
+        try {
+            SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+            editor.putBoolean(KEY_IS_LOGIN,true);
+            editor.putString(LOGIN_TYPE,Login_Type);
+            editor.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+    }
+
+    public static void setLoginFalse(Context context) {
+        try {
+            SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+            editor.putBoolean(KEY_IS_LOGIN,false);
+            editor.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public static String getLoginType(Context context) {
+        String val = "";
+        try {
+            val = getSharedPreferences(context).getString(LOGIN_TYPE, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return val;
+
+
+    }
+
+
+
+
+    public static void setAppUpdateChecked(Context context) {
+        try {
+            SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+            editor.putBoolean(KEY_APP_UPDATE_CHECKED,true);
+            editor.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void setAppUpdateNotChecked(Context context) {
+        try {
+            SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+            editor.putBoolean(KEY_APP_UPDATE_CHECKED,false);
+            editor.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void SaveClientLoginData(Context context,
+                                           String userID,
+                                           String txt_Mail,
+                                           String CompID,
+                                           String CompName,
+                                           String UserName,
+                                           String UserCategory,
+                                           String CaType,
+                                           String DealerID,
+                                           String dtype,
+                                           String Login_Email,
+                                           String dealer_name,
+                                           String status,
+                                           String Imagepath,
+                                           String Masterstatus) {
+
+        SharedPreferences.Editor ed = getSharedPreferences(context).edit();
+        ed.putString(CLIENT_LOGIN_userID, userID);
+        ed.putString(CLIENT_LOGIN_txt_Mail, txt_Mail);
+        ed.putString(CLIENT_LOGIN_CompID, CompID);
+        ed.putString(CLIENT_LOGIN_CompName, CompName);
+        ed.putString(CLIENT_LOGIN_UserName, UserName);
+        ed.putString(CLIENT_LOGIN_UserCategory, UserCategory);
+        ed.putString(CLIENT_LOGIN_CaType, CaType);
+        ed.putString(CLIENT_LOGIN_DealerID, DealerID);
+        ed.putString(CLIENT_LOGIN_dtype, dtype);
+        ed.putString(CLIENT_LOGIN_Login_Email, Login_Email);
+        ed.putString(CLIENT_LOGIN_dealer_name, dealer_name);
+        ed.putString(CLIENT_LOGIN_status, status);
+        ed.putString(CLIENT_LOGIN_Imagepath, Imagepath);
+        ed.putString(CLIENT_LOGIN_Masterstatus, Masterstatus);
+
+        ed.apply();
+    }
+
+
+
+
+
+    public static String getCLIENT_LOGIN_userID(Context context) {
+        String val = "";
+        try {
+            val = getSharedPreferences(context).getString(CLIENT_LOGIN_userID, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return val;
+
+
+    }
+
+    public static String getCLIENT_LOGIN_DealerID(Context context) {
+        String val = "";
+        try {
+            val = getSharedPreferences(context).getString(CLIENT_LOGIN_DealerID, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return val;
+
+
+    }
+
+    public static String getCLIENT_LOGIN_Imagepath(Context context) {
+        String val = "";
+        try {
+            val = getSharedPreferences(context).getString(CLIENT_LOGIN_Imagepath, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return val;
+
+
+    }
+    public static String getCLIENT_LOGIN_Masterstatus(Context context) {
+        String val = "";
+        try {
+            val = getSharedPreferences(context).getString(CLIENT_LOGIN_Masterstatus, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return val;
+
+
+    }
+    public static String getCLIENT_LOGIN_UserName(Context context) {
+        String val = "";
+        try {
+            val = getSharedPreferences(context).getString(CLIENT_LOGIN_UserName, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return val;
+
+
+    }
+
+
+    public static String getCLIENT_LOGIN_CompID(Context context) {
+        String val = "";
+        try {
+            val = getSharedPreferences(context).getString(CLIENT_LOGIN_CompID, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return val;
+
+
+    }
 
 
 }

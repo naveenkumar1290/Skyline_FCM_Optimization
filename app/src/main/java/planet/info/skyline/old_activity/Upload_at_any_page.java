@@ -34,7 +34,7 @@ import java.util.List;
 
 import planet.info.skyline.R;
 import planet.info.skyline.network.Api;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
 
@@ -398,16 +398,9 @@ public class Upload_at_any_page extends Activity {
 
 					runOnUiThread(new Runnable() {
 						public void run() {
-							String msg = "File Upload Completed.\n\n See uploaded file here : \n\n"
-									+ " F:/wamp/wamp/www/uploads";
-							// messageText.setText(msg);
-							// Toast.makeText(Rubishcratedataupload.this,
-							// fname+"File Upload Complete. ",
-							// Toast.LENGTH_SHORT).show();
 
-							//ed.putString("upload", fname).commit();
 Shared_Preference.setUPLOAD(Upload_at_any_page.this,fname);
-							// ed.putString("upload", fname).commit();
+
 						}
 					});
 				}

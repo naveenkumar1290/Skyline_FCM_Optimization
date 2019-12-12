@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,8 +45,7 @@ import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.OverlapTimesheet;
 import planet.info.skyline.model.Timesheet;
-import planet.info.skyline.tech.billable_timesheet.SubmitTimesheet;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.util.Utility;
 
@@ -108,9 +106,6 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
         Btn_Submit = (Button) findViewById(R.id.Btn_Submit);
         Btn_Submit.setVisibility(View.GONE);
 
-        //sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
-       // ed = sp.edit();
-       // tech_id = sp.getString("clientid", "");
          tech_id = Shared_Preference.getLOGIN_USER_ID(this);
         try {
             TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -325,7 +320,7 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
             JSONObject jsonObject = new JSONObject(receivedString);
             //  {"ID":"0","Output":"0","Message":"Overlapping Time entries"}
             timesheetID = jsonObject.getString("ID");
-        //    ed.putString(Utility.TIME_SHEET_ID, timesheetID).commit();
+
             Shared_Preference.setTIME_SHEET_ID(this,timesheetID);
 
         } catch (Exception e) {
@@ -369,7 +364,7 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
             JSONObject jsonObject = new JSONObject(receivedString);
             //  {"ID":"0","Output":"0","Message":"Overlapping Time entries"}
             NonBillableTimeSheetID = jsonObject.getString("ID");
-          //  ed.putString(Utility.TIME_SHEET_ID, NonBillableTimeSheetID).commit();
+
             Shared_Preference.setTIME_SHEET_ID(this,NonBillableTimeSheetID);
         } catch (Exception e) {
             e.printStackTrace();
@@ -896,10 +891,8 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 
             if (output.equals("1")) {   //means sheet submitted successfully
-               // ed.putString(Utility.TIMEGAP_JOB_END_TIME, JOB_STOP_DateTime).commit();//for next job time gap
 
                 Shared_Preference.setTIMEGAP_JOB_END_TIME(TimeSheetList1Activity.this,JOB_STOP_DateTime);
-             //   ed.putString(Utility.TIMEGAP_PREV_JOB_START_TIME, JOB_START_DateTime).commit();//for next job time gap
                 Shared_Preference.setTIMEGAP_PREV_JOB_START_TIME(TimeSheetList1Activity.this, JOB_START_DateTime);
                 Utility.removeAllOverlapTimesheetData(TimeSheetList1Activity.this);
                 startActivity(new Intent(TimeSheetList1Activity.this, MainActivity.class));

@@ -1,11 +1,10 @@
-package planet.info.skyline.tech.usage_charges;
+package planet.info.skyline.client;
 
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -16,7 +15,6 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -27,23 +25,21 @@ import java.util.ArrayList;
 import planet.info.skyline.R;
 import planet.info.skyline.RequestControler.MyAsyncTask;
 import planet.info.skyline.RequestControler.ResponseInterface;
+import planet.info.skyline.adapter.JobsRecyclerAdapter;
 import planet.info.skyline.adapter.MyDividerItemDecoration;
-import planet.info.skyline.adapter.VendorsAdapter;
-import planet.info.skyline.adapter.VendorsAdapterListener;
 import planet.info.skyline.crash_report.ConnectionDetector;
-import planet.info.skyline.model.Vendor;
+import planet.info.skyline.model.Job_2;
 import planet.info.skyline.network.Api;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
-public class SearchJobActivity extends AppCompatActivity implements VendorsAdapterListener, ResponseInterface {
-
-    private RecyclerView recyclerView;
-    private VendorsAdapter mAdapter;
-    private SearchView searchView;
-    ArrayList<Vendor> List_Vendor = new ArrayList<>();
+public class SearchJobActivity extends AppCompatActivity implements ResponseInterface {
 
     Context context;
+    JobsRecyclerAdapter mAdapter;
+    ArrayList<Job_2> list_Jobs = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,40 +52,38 @@ public class SearchJobActivity extends AppCompatActivity implements VendorsAdapt
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(Utility.getTitle("Jobs"));
 
-
-        context= SearchJobActivity.this;
+        context = SearchJobActivity.this;
         recyclerView = findViewById(R.id.recycler_view);
-        List_Vendor = new ArrayList<>();
-        mAdapter = new VendorsAdapter(this, List_Vendor, this);
+        mAdapter = new JobsRecyclerAdapter(context, list_Jobs);
         // white background notification bar
-       // whiteNotificationBar(recyclerView);
-
+        // whiteNotificationBar(recyclerView);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new MyDividerItemDecoration(this, DividerItemDecoration.VERTICAL, 36));
         recyclerView.setAdapter(mAdapter);
 
-        FetchVendor();
+        FetchJobsByCompanyID();
+
+
     }
 
+    private void FetchJobsByCompanyID() {
 
+        String comp_ID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(SearchJobActivity.this);
 
-    private void FetchVendor() {
         JSONObject jsonObject = new JSONObject();
         try {
-            String dealerId = Shared_Preference.getDEALER_ID(this);
-            jsonObject.put("DealerID", dealerId);
-            jsonObject.put("Dealer_Type", "0");
+            jsonObject.put("ClientID", comp_ID);
         } catch (Exception e) {
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_VENDOR, jsonObject).execute();
+            new MyAsyncTask(this,true, this, Api.API_BindJob, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
-
 
     }
 
@@ -126,16 +120,11 @@ public class SearchJobActivity extends AppCompatActivity implements VendorsAdapt
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
             return true;
         }
         if (id == android.R.id.home) {
-            // API 5+ solution
             onBackPressed();
             return true;
         }
@@ -144,7 +133,6 @@ public class SearchJobActivity extends AppCompatActivity implements VendorsAdapt
 
     @Override
     public void onBackPressed() {
-        // close search view on back button pressed
         if (!searchView.isIconified()) {
             searchView.setIconified(true);
             return;
@@ -152,61 +140,60 @@ public class SearchJobActivity extends AppCompatActivity implements VendorsAdapt
         super.onBackPressed();
     }
 
-    private void whiteNotificationBar(View view) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            int flags = view.getSystemUiVisibility();
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            view.setSystemUiVisibility(flags);
-            getWindow().setStatusBarColor(Color.WHITE);
-        }
-    }
 
-    @Override
-    public void onVendorSelected(Vendor vendor) {
-      //  Toast.makeText(getApplicationContext(), "Selected: " + vendor.getVenderName() , Toast.LENGTH_LONG).show();
+    public void onJobSelected(Job_2 job) {
         Intent returnIntent = new Intent();
-        returnIntent.putExtra("VendorName", vendor.getVenderName());
-        returnIntent.putExtra("VendorID", vendor.getVenderID());
+        returnIntent.putExtra("Job_Desc", job.getJOB_Name_Desc());
+        returnIntent.putExtra("Job_id", job.getJOB_ID_PK());
+        returnIntent.putExtra("JobName", job.getJobName());
         setResult(Activity.RESULT_OK, returnIntent);
         finish();
 
 
     }
+
     @Override
     public void handleResponse(String responseString, String api) {
 
-        if (api.equalsIgnoreCase(Api.API_VENDOR)) {
-            List_Vendor.clear();
+        if (api.equalsIgnoreCase(Api.API_BindJob)) {
+            list_Jobs.clear();
             try {
+                //    Gson gson = new Gson();
+                //   GetCitiesResult citiesResult = gson.fromJson(responseString, GetCitiesResult.class);
                 JSONObject jsonObject = new JSONObject(responseString);
                 JSONArray jsonArray = jsonObject.getJSONArray("cds");
-
-                ArrayList<Vendor> items=new ArrayList<>();
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                    String VenderID = jsonObject1.getString("VenderID");
-                    String VenderName = jsonObject1.getString("VenderName");
-                    String IsCertified = jsonObject1.getString("IsCertified");
-                    items.add(new Vendor(VenderID, VenderName, IsCertified));
-                }
+                    String job_id = jsonObject1.getString("JOB_ID_PK");
+                    String jobName = jsonObject1.getString("JobName");
+                    String job_descripition = jsonObject1.getString("txt_Job");
+                    String status = jsonObject1.getString("Status");
+                    String show = jsonObject1.getString("ShowName");
+                    String jobtype = jsonObject1.getString("JOB_TYPE");
+                    list_Jobs.add(new Job_2(job_id, job_descripition, show, jobName, jobtype, status));
 
-                if (items != null && items.size() > 0) {
-                    List_Vendor.clear();
-                    List_Vendor.addAll(items);
-                    // refreshing recycler view
-                    mAdapter.notifyDataSetChanged();
-                } else {
-                    Toast.makeText(SearchJobActivity.this, "No vendor found!", Toast.LENGTH_LONG).show();
+                   /* Collections.sort(list_Jobs, new Comparator<Job_2>() {
+                        @Override
+                        public int compare( Job_2 o1, Job_2 o2) {
+                            return o1.getJobName().compareTo(o2.getJobName());
+                        }
+                    });*/
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            if (list_Jobs != null && list_Jobs.size() > 0) {
+                // refreshing recycler view
+                mAdapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(SearchJobActivity.this, "No vendor found!", Toast.LENGTH_LONG).show();
+            }
+
+
         }
 
     }
-
-
-
 
 
 }

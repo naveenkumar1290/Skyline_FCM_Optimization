@@ -49,13 +49,12 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.PathProjectFile;
 import planet.info.skyline.model.ProjectFileFolder;
 import planet.info.skyline.network.SOAP_API_Client;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.util.Utility;
 
 import static android.content.Context.MODE_PRIVATE;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
-import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
 
 public class ShowProjectFile_Fragment extends Fragment {
@@ -126,12 +125,8 @@ public class ShowProjectFile_Fragment extends Fragment {
 
     public void fetch_projectfiles_FOLDER() {
 
-        //  int index = 1;
-
-
-      //  String userRole = sp.getString(Utility.LOGIN_USER_ROLE, "");
         String userRole  = Shared_Preference.getUSER_ROLE(getActivity());
-       // String dealerId = sp.getString(Utility.DEALER_ID, "");
+
         String dealerId = Shared_Preference.getDEALER_ID(getActivity());
 
         final String NAMESPACE = KEY_NAMESPACE + "";
@@ -198,9 +193,8 @@ public class ShowProjectFile_Fragment extends Fragment {
     public void fetch_projectfiles_FILES() {
 
 
-      //  String dealerId = sp.getString(Utility.DEALER_ID, "");
         String dealerId = Shared_Preference.getDEALER_ID(getActivity());
-     //   String compID = sp.getString(Utility.COMPANY_ID_BILLABLE, "");
+
         String compID =   Shared_Preference.getCOMPANY_ID_BILLABLE(getActivity());
         final String NAMESPACE = KEY_NAMESPACE ;
         final String URL = SOAP_API_Client.BASE_URL;

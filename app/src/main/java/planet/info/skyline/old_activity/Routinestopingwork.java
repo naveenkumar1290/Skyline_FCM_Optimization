@@ -43,7 +43,7 @@ import planet.info.skyline.controller.AppController;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.tech.billable_timesheet.Clock_Submit_Type_Activity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_stop_tech_with_resion;
@@ -171,7 +171,7 @@ plslisttext.setText("Please list your reason for Pause work :");
 			}
 		});
 		if (imageloc.equals("") || imageloc.equalsIgnoreCase("")) {
-			//ed.putString("imglo", "").commit();
+
 			Shared_Preference.setCLIENT_IMAGE_LOGO_URL(this,"");
 
 			missing.setVisibility(View.GONE);
@@ -391,32 +391,14 @@ else
 					if (resuSt.equals("0") || resuSt.equalsIgnoreCase("0")
 							|| resuSt == "0") {
 						resultmy = 0;
-						// name=json_obj.getString("name");
-						// mob=json_obj.getString("mobile");
-						// id=json_obj.getString("id");
-						// ed.putString("tname", name).commit();
-						// ed.putString("mob", mob).commit();
-						// ed.putString("clientid", id).commit();
+
 					} else if (resuSt.equals("1")
 							|| resuSt.equalsIgnoreCase("1") || resuSt == "1") {
 						resultmy = 1;
-						// name=json_obj.getString("name");
-						// mob="";//json_obj.getString("mobile");
-						// id=json_obj.getString("id");
-						// // ed.putString("name", name).commit();
-						// // ed.putString("mob", name).commit();
-						// ed.putString("clientid", name).commit();
+
 					} else {
-						// resultmy=2;
-						// name=json_obj.getString("name");
-						// mob=json_obj.getString("mobile");
-						// id=json_obj.getString("id");
+
 					}
-					// String name=json_obj.getString("name");
-					// String mob=json_obj.getString("mobile");
-					// String id=json_obj.getString("id");
-					// {"cds":[{"id":28,"name":"tech tech","mobile":"","result":1}]}
-					//
 
 				}
 

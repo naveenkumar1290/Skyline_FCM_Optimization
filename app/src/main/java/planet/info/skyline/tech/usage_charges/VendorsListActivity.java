@@ -14,23 +14,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import planet.info.skyline.R;
 import planet.info.skyline.RequestControler.MyAsyncTask;
@@ -41,7 +33,7 @@ import planet.info.skyline.adapter.VendorsAdapterListener;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.Vendor;
 import planet.info.skyline.network.Api;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 public class VendorsListActivity extends AppCompatActivity implements VendorsAdapterListener, ResponseInterface {
@@ -93,7 +85,7 @@ public class VendorsListActivity extends AppCompatActivity implements VendorsAda
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_VENDOR, jsonObject).execute();
+            new MyAsyncTask(this,true,  this, Api.API_VENDOR, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }

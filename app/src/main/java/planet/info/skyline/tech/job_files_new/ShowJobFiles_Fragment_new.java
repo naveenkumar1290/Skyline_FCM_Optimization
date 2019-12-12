@@ -43,7 +43,7 @@ import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.tech.fullscreenview.FullscreenImageView;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.util.FileDownloader;
 import planet.info.skyline.util.Utility;
@@ -133,7 +133,7 @@ public class ShowJobFiles_Fragment_new extends Fragment {
         list_ProjectPhotos.clear();
         int index = 1;
         int count = 0;
-       // String User_Role=sp.getString(Utility.LOGIN_USER_ROLE,"");
+
         final String User_Role = Shared_Preference.getUSER_ROLE(getActivity());
         final String NAMESPACE = KEY_NAMESPACE + "";
         final String URL = SOAP_API_Client.BASE_URL;

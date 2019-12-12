@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -27,15 +26,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import planet.info.skyline.R;
-import planet.info.skyline.tech.billable_timesheet.ClientLeavingWithCrate;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 import planet.info.skyline.util.Utils;
 
 
 public class Scanworklocationstart extends BaseActivity {
-SharedPreferences sp;
-Editor ed;
+
 	 String arecode;
 	int count;
 	int punnu=0;
@@ -52,9 +49,7 @@ Editor ed;
 		ringProgressDialog	= new ProgressDialog(Scanworklocationstart.this);
 		ringProgressDialog.setMessage("Kindly Wait..");
 		ringProgressDialog.setCancelable(false);
-		sp = getApplicationContext().getSharedPreferences("skyline",
-				MODE_PRIVATE);
-		ed = sp.edit();
+
 
 		diloge_for_workArea();
 	}
@@ -116,9 +111,9 @@ Editor ed;
 				String contents = intent.getStringExtra("SCAN_RESULT");
 				String hom = contents;
 				String result = hom.substring(hom.indexOf("_loc=") + 5, hom.length());
-				//ed.putString("worklocation", result).commit();
+
 				Shared_Preference.setWORK_LOCATION(this,result);
-			//	String name_client=sp.getString("client_name","");
+
 				String name_client =  Shared_Preference.getCLIENT(this);
 				Utils.alert_with_intent_withoutintent(Scanworklocationstart.this,"Begin work in  "+result, "",name_client);
 			}
@@ -181,13 +176,11 @@ Editor ed;
 
 					if(punnu==12)
 					{
-						Log.d("BHANU", arecode);
-					//	ed.putString("worklocation", arecode).commit();
+
 						Shared_Preference.setWORK_LOCATION(Scanworklocationstart.this,arecode);
-						//String name_client = sp.getString("client_name", "");
 						String name_client =  Shared_Preference.getCLIENT(Scanworklocationstart.this);
 						Utils.alert_with_intent_withoutintent(Scanworklocationstart.this, "Begin work in  " + arecode, "", name_client);
-					//	String sdj = sp.getString("starttimenew", "");
+
 					}
 					else
 					{

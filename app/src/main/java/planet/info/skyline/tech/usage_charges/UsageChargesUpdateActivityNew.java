@@ -20,7 +20,7 @@ import planet.info.skyline.RequestControler.ResponseInterface;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 public class UsageChargesUpdateActivityNew extends AppCompatActivity implements ResponseInterface {
@@ -79,7 +79,7 @@ public class UsageChargesUpdateActivityNew extends AppCompatActivity implements 
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_SAVE_USAGE_REPORT, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_SAVE_USAGE_REPORT, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -158,13 +158,10 @@ public class UsageChargesUpdateActivityNew extends AppCompatActivity implements 
             public void onClick(View view) {
 
 
-
                 description = Description.getText().toString().trim();
                 quantity = Quantity.getText().toString().trim();
                 cost = Cost.getText().toString().trim();
                 total = Total.getText().toString().trim();
-
-
 
 
                 if (compID.equals("")) {
@@ -311,10 +308,9 @@ public class UsageChargesUpdateActivityNew extends AppCompatActivity implements 
             et_company.setText(CompanyName);
             et_job.setText(JobName);
 
-        }
-       else if (resultCode != RESULT_CANCELED && requestCode == Utility.CODE_SELECT_VENDOR) {
+        } else if (resultCode != RESULT_CANCELED && requestCode == Utility.CODE_SELECT_VENDOR) {
 
-           vendor_id = intent.getStringExtra("VendorID");
+            vendor_id = intent.getStringExtra("VendorID");
             final String VendorName = intent.getStringExtra("VendorName");
             et_Vendor.setText(VendorName);
 

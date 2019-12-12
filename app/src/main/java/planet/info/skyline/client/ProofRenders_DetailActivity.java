@@ -54,6 +54,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.fullscreenview.FullscreenImageView;
 import planet.info.skyline.tech.fullscreenview.FullscreenWebView;
 import planet.info.skyline.R;
@@ -74,7 +75,7 @@ import static planet.info.skyline.util.Utility.isValidEmail;
 
 public class ProofRenders_DetailActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
     String status = "", Comment = "";
-    SharedPreferences sp;
+
     String Client_id_Pk, comp_ID, jobID, FileId, dealerId;
     String commentFileShare = "", MailId = "";
     ImageView img_share, thumbnail, img_download;
@@ -106,11 +107,15 @@ public class ProofRenders_DetailActivity extends AppCompatActivity implements Da
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
       //  mHttpImageManager = ((AppController) ProofRenders_DetailActivity.this.getApplication()).getHttpImageManager();
 
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
+
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        Client_id_Pk = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        comp_ID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
-        dealerId = sp.getString(Utility.CLIENT_LOGIN_DealerID, "");
+        Client_id_Pk = Shared_Preference.getCLIENT_LOGIN_userID(ProofRenders_DetailActivity.this);
+
+        comp_ID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(ProofRenders_DetailActivity.this);
+
+        dealerId =
+                Shared_Preference.getCLIENT_LOGIN_DealerID(ProofRenders_DetailActivity.this);
 
 
         //  ProjectPhoto mPhoto = (ProjectPhoto) getIntent().getSerializableExtra("obj");

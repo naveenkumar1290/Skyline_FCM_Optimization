@@ -33,7 +33,7 @@ import planet.info.skyline.model.SWO;
 import planet.info.skyline.network.API_Interface;
 import planet.info.skyline.network.REST_API_Client_TaskPlan;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;

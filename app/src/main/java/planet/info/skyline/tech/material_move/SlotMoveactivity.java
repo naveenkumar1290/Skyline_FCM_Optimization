@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.text.Html;
@@ -43,8 +42,7 @@ import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.BaseActivity;
-import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;

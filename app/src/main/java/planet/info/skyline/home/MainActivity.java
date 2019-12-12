@@ -69,13 +69,12 @@ import planet.info.skyline.network.Api;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.old_activity.Packing_Activity;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
-import planet.info.skyline.tech.damage_report.DamageReport;
 import planet.info.skyline.tech.damage_report.DamageReportNew;
 import planet.info.skyline.tech.job_files_new.JobFilesTabActivity;
 import planet.info.skyline.tech.locate_crates.LocateCrates;
 import planet.info.skyline.tech.material_move.SlotMoveactivity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.update_timesheet.TimeSheetList1Activity;
 import planet.info.skyline.tech.upload_photo.Upload_image_and_cooment_New;
 import planet.info.skyline.tech.usage_charges.UsageChargesListActivity;
@@ -112,17 +111,36 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
     ArrayList<SWO_Details> list_SWO = new ArrayList<>();
     AlertDialog alertDialog_Paused;
     ArrayList<String> list_Employee_Role = new ArrayList<>();
+
     boolean CanEnter_MISByDailyTime = false;
     boolean Can_EditTime = false;
     boolean CanEnter_BillableTime = false;
-    boolean CanEnter_ChangeOrder = false;
+    boolean CanEnter_DamageReport = false;
+    boolean CanEnter_UsageCharge = false;
+    boolean CanUpload_ClientArt = false;
+    boolean CanUpload_ClientPhoto = false;
+
+    boolean CanView_MISByDailyTime = false;
+    boolean CanView_EditTime = false;
+    boolean CanView_BillableTime = false;
+    boolean CanView_ChangeOrder = false;
+    boolean CanView_UsageCharge = false;
+    boolean CanView_ClientArt = false;
+
+
     Context context;
     private long lastClickTime = 0;
     private String CLOCK_IN_BILLABLE_CODE = "";
     private String CLOCK_OUT_BILLABLE_CODE = "";
     private String IN_PROGRESS_SWO_AWO_STATUS = "";
     private int BillableLaborCodesLength = 0;
+
     private boolean DamageReportModuleClicked = false;
+    private boolean BillableJobModuleClicked = false;
+    private boolean AdminTimesheetModuleClicked = false;
+    private boolean UsageChargeModuleClicked = false;
+    private boolean UploadPhotoModuleClicked = false;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -145,7 +163,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
         if (Utility.isAppUpdated(context)) {
             String currentVersion = Utility.getAppVersion(context);
-            String oldVersion = Utility.getOldVersion(context);
+            String oldVersion = Shared_Preference.getOldVersion(context);
             String text = "App updated successfully from V " + oldVersion + " to V " + currentVersion + "";
             dialog_App_Updated(text, true);
         }
@@ -227,13 +245,15 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             // for clock in - clock out
 
             if (JobName.equalsIgnoreCase(Utility.CLOCK_IN) || JobName.equalsIgnoreCase(Utility.CLOCK_OUT)) {
-                //if ((userRole.equals(Utility.USER_ROLE_TECH)) ) {
-                if (new ConnectionDetector(context).isConnectingToInternet()) {
+
+                CallAPI_FetchClockInClockOutCodes();
+                //CallAPI_SubmitClockInClockOut();
+
+              /*  if (new ConnectionDetector(context).isConnectingToInternet()) {
                     new Async_Submit_Billable_Timesheet_New().execute();
                 } else {
                     Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                }
-                // }ec
+                }*/
             } else if (STARTING_BILLABLE_JOB_by_SCAN_QR_CODE) {
                 prepareDataForClock(Comp_ID, Swo_Id, JOB_ID);
             } else {
@@ -280,7 +300,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             context.startService(new Intent(context, ChatHeadService.class));
             return;
         }
-        // 他のアプリの上に表示できるかチェック
         if (Settings.canDrawOverlays(context)) {
             Intent intent = new Intent(context, ChatHeadService.class);
             context.startService(intent);
@@ -295,26 +314,19 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
     @SuppressLint("NewApi")
     private void showChatHead_Admin(Context context, boolean isShowOverlayPermission) {
-        // API22以下かチェック
-
         Shared_Preference.setTIMER_STARTED_FROM_ADMIN_CLOCK_MODULE(this, true);
-
-
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
             context.startService(new Intent(context, ChatHeadService.class));
             return;
         }
-        // 他のアプリの上に表示できるかチェック
         if (Settings.canDrawOverlays(context)) {
             Intent intent = new Intent(context, ChatHeadService.class);
             context.startService(intent);
             return;
         }
-
-        // オーバレイパーミッションの表示
         if (isShowOverlayPermission) {
             final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
-            startActivityForResult(intent,Utility.CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
+            startActivityForResult(intent, Utility.CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
         }
 
 
@@ -357,8 +369,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
 
     }
-
-
 
     public void INITIALIZE_VIEWS() {
 
@@ -404,16 +414,18 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                 }
                 lastClickTime = SystemClock.elapsedRealtime();
 //                if (Utility.isTimeAutomatic(context)) {
+                BillableJobModuleClicked = true;
                 boolean isTimerRunningFromAdminClockModule = Shared_Preference.getTIMER_STARTED_FROM_ADMIN_CLOCK_MODULE(context);
                 if (isTimerRunningFromAdminClockModule) {
                     Toast.makeText(context, "Clock already running for admin functions!", Toast.LENGTH_LONG).show();
                 } else {
                     Shared_Preference.setIS_STARTING_BILLABLE_JOB(context, true);
-                    if (new ConnectionDetector(context).isConnectingToInternet()) {
-                        new async_get_BillableCodes_PausedJobList_TimesheetAuth().execute();
+                    CallAPI_CheckPermission();
+                   /* if (new ConnectionDetector(context).isConnectingToInternet()) {
+                         new async_get_BillableCodes_PausedJobList().execute();
                     } else {
                         Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                    }
+                    }*/
 
                 }
 
@@ -429,17 +441,18 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             @Override
             public void onClick(View view) {
 
-
+                AdminTimesheetModuleClicked = true;
                 if (Utility.checkDrawOverlayPermission(MainActivity.this)) {
                     boolean isTimerRunningFromAdminClockModule = Shared_Preference.getTIMER_STARTED_FROM_ADMIN_CLOCK_MODULE(context);
                     if (!isTimerRunningFromAdminClockModule) {
                         Shared_Preference.setIS_STARTING_BILLABLE_JOB(context, false);
+                        CallAPI_CheckPermission();
+                       // CallAPI_FetchNonBillableCodes();
+                       /* if (new ConnectionDetector(context).isConnectingToInternet()) {
 
-                        if (new ConnectionDetector(context).isConnectingToInternet()) {
-                            new async_getNonBillableCodes().execute();
                         } else {
                             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                        }
+                        }*/
 
                     } else {
                         Toast.makeText(context, "Clock already running for admin functions!", Toast.LENGTH_LONG).show();
@@ -467,22 +480,20 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         ll_Upload.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
-                if (new ConnectionDetector(context).isConnectingToInternet()) {
-                    startActivity(new Intent(context, Upload_image_and_cooment_New.class));
-                    // startActivity(new Intent(context, Upload_image_and_cooment.class));
-                    finish();
+                UploadPhotoModuleClicked=true;
+                CallAPI_CheckPermission();
+                /*if (new ConnectionDetector(context).isConnectingToInternet()) {
+                      startActivity(new Intent(context, Upload_image_and_cooment_New.class));
+                     startActivity(new Intent(context, UploadPhotosActivity.class));
+                     finish();
                 } else {
                     Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
-                }
+                }*/
 
 
             }
         });
         ll_jobFiles.setVisibility(View.GONE);
-
-
         LinearLayout ll_jobFiles_new = (LinearLayout) findViewById(R.id.first6);
         ll_jobFiles_new.setOnClickListener(new OnClickListener() {
             @Override
@@ -514,15 +525,11 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             @Override
             public void onClick(View v) {
                 if (new ConnectionDetector(context).isConnectingToInternet()) {
-
                     Intent in = new Intent(context, ShowWhatsInside_MainActivity.class);
                     startActivity(in);
-
                 } else {
                     Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
-
                 }
-
             }
         });
 
@@ -576,7 +583,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                                 boolean result = Shared_Preference.clearAllPreferences(context);
                                 if (result) {
 
-                                    Utility.setLoginFalse(context);
+                                    Shared_Preference.setLoginFalse(context);
                                     finish();
                                     Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                                     startActivity(i);
@@ -636,11 +643,8 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             @Override
             public void onClick(View view) {
 
-                if (new ConnectionDetector(context).isConnectingToInternet()) {
-                    new Async_Check_UsageChargeAuth().execute();
-                } else {
-                    Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                }
+                UsageChargeModuleClicked = true;
+                CallAPI_CheckPermission();
 
 
             }
@@ -999,7 +1003,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         }
 
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_EditTimesheet_AWO_SWO, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_EditTimesheet_AWO_SWO, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -1049,7 +1053,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         }
 
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_EditTimesheet_AWO_SWO, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_EditTimesheet_AWO_SWO, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -1337,45 +1341,16 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         return BillableLaborCodesLength;
     }
 
-    public void getAuthentication() {
-        String receivedString = "";
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = urlofwebservice11_new;
-        final String METHOD_NAME = Api.API_getTimesheetAuth;
-        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
-
-        String userID = Shared_Preference.getLOGIN_USER_ID(this);
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        request.addProperty("UserId", userID);
-        request.addProperty("Role", userRole);
-
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                SoapEnvelope.VER11);
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
-            receivedString = SoapPrimitiveresult.toString();
-            SetAuthenticationVariables(receivedString);
-        } catch (Exception e) {
-            e.getMessage();
-        }
-
-    }
-
-    public void SetAuthenticationVariables(String ApiResponse){
+    public void SetAuthenticationVariables(String ApiResponse) {
         try {
             JSONObject jsonObject = new JSONObject(ApiResponse);
-            JSONArray jArray = jsonObject.getJSONArray("cds");
+            JSONArray jArray = jsonObject.getJSONArray("SubMenu");
+            JSONArray MainMenu_Array = jsonObject.getJSONArray("MainMenu");
             if (jArray == null || jArray.length() == 0) return;
             for (int i = 0; i < jArray.length(); i++) {
                 JSONObject jsonObject1 = jArray.getJSONObject(i);
                 String SubMenuId = jsonObject1.getString("SubMenuId");
                 String Authentication = jsonObject1.getString("Status");
-
 
                 if (SubMenuId.equals(Utility.MISByDailyTime)) {
                     if (Authentication.equals("1")) {
@@ -1398,53 +1373,78 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                     }
                 } else if (SubMenuId.equals(Utility.ChangeOrder)) {
                     if (Authentication.equals("1")) {
-                        CanEnter_ChangeOrder = true;
+                        CanEnter_DamageReport = true;
                     } else {
-                        CanEnter_ChangeOrder = false;
+                        CanEnter_DamageReport = false;
+                    }
+                } else if (SubMenuId.equals(Utility.UsageCharge)) {
+                    if (Authentication.equals("1")) {
+                        CanEnter_UsageCharge = true;
+                    } else {
+                        CanEnter_UsageCharge = false;
+                    }
+                } else if (SubMenuId.equals(Utility.Client_Art)) {
+                    if (Authentication.equals("1")) {
+                        CanUpload_ClientArt = true;
+                    } else {
+                        CanUpload_ClientArt = false;
+                    }
+                } else if (SubMenuId.equals(Utility.Client_Photo)) {
+                    if (Authentication.equals("1")) {
+                        CanUpload_ClientPhoto = true;
+                    } else {
+                        CanUpload_ClientPhoto = false;
                     }
                 }
+            }
+
+
+            for (int i = 0; i < MainMenu_Array.length(); i++) {
+
+                JSONObject jsonObject1 = MainMenu_Array.getJSONObject(i);
+                String MainId = jsonObject1.getString("MainId");
+                String IsMainCheck = jsonObject1.getString("IsMainCheck");
+                if (MainId.equals("7")) {//"Time Tracking",
+                    if (IsMainCheck.equals("1")) {
+                        CanView_BillableTime = true;
+                        CanView_MISByDailyTime = true;
+                        CanView_EditTime = true;
+                    } else {
+                        CanView_BillableTime = false;
+                        CanView_MISByDailyTime = false;
+                        CanView_EditTime = false;
+                    }
+                }
+                if (MainId.equals("11")) { //other-damage report
+                    if (IsMainCheck.equals("1")) {
+                        CanView_ChangeOrder = true;
+                    } else {
+                        CanView_ChangeOrder = false;
+                    }
+                }
+
+                if (MainId.equals("6")) { //Service-Usage Charge
+                    if (IsMainCheck.equals("1")) {
+                        CanView_UsageCharge = true;
+                    } else {
+                        CanView_UsageCharge = false;
+                    }
+                }
+
+                if (MainId.equals("5")) { //Art-Upload Photo
+                    if (IsMainCheck.equals("1")) {
+                        CanView_ClientArt = true;
+                    } else {
+                        CanView_ClientArt = false;
+                    }
+                }
+
 
             }
 
         } catch (Exception e) {
             e.getMessage();
         }
-    }
-
-    public int getNonBillableCodes_New() {
-        String receivedString = "";
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = urlofwebservice11_new;
-        final String METHOD_NAME = Api.API_BILLABLE_NONBILLABLE_CODE;
-        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
-
-
-        // Create SOAP request
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        String dealerId = Shared_Preference.getDEALER_ID(this);
-
-        request.addProperty("dealerID", dealerId);
-        request.addProperty("cat", userRole);
-        request.addProperty("type", "2");
-        //nks
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                SoapEnvelope.VER11);
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-        int len = 0;
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
-            receivedString = SoapPrimitiveresult.toString();
-            Shared_Preference.setNON_BILLABLE_CODES(context, receivedString);
-            JSONArray jArray = new JSONArray(receivedString);
-            len = jArray.length();
-        } catch (Exception e) {
-            e.getMessage();
-        }
-        return len;
-
     }
 
     public void dialog_NoJobCodes() {
@@ -2063,162 +2063,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
     }
 
-    public String Submit_Billable_TimeSheetNew() {  ///use this fo billable
-
-        String JOB_STOP_DateTime = Utility.getCurrentTimeString();//dd-MM-yyyy HH:mm:ss
-        String arr[] = JOB_STOP_DateTime.split(" ");
-        String str = arr[1];
-        String JOB_STOP_HrsMinuts = str.substring(0, str.lastIndexOf(":"));//HH:mm
-
-        String swoId = Shared_Preference.getSWO_ID(this);
-        String JobIdBillable = Shared_Preference.getJOB_ID_FOR_JOBFILES(this);
-        String clientid = Shared_Preference.getLOGIN_USER_ID(this);
-        String jobName = Shared_Preference.getJOB_NAME_BILLABLE(context);
-        String imei = "";
-        try {
-            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-            imei = telephonyManager.getDeviceId();
-        } catch (SecurityException e) {
-            e.getCause();
-        }
-
-        String Code = "";
-
-        if (jobName.equalsIgnoreCase(Utility.CLOCK_IN)) {
-            Code = CLOCK_IN_BILLABLE_CODE;
-        } else if (jobName.equalsIgnoreCase(Utility.CLOCK_OUT)) {
-            Code = CLOCK_OUT_BILLABLE_CODE;
-        }
-
-        String receivedString = "";
-        final String NAMESPACE = KEY_NAMESPACE;
-        final String URL = urlofwebservice11_new;
-        final String METHOD_NAME = Api.API_BILLABLE_TIMESHEET;
-        ;
-        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
-
-
-        SoapObject request_new = new SoapObject(NAMESPACE, METHOD_NAME);
-        request_new.addProperty("tech_id", clientid);
-        request_new.addProperty("swo_id", swoId);
-        request_new.addProperty("start_time", JOB_STOP_HrsMinuts);
-        request_new.addProperty("end_time", JOB_STOP_HrsMinuts);
-        request_new.addProperty("description", jobName);
-        request_new.addProperty("code", Code);
-        request_new.addProperty("dayInfo", "0");
-        request_new.addProperty("status", "2018");
-        request_new.addProperty("region", jobName);
-        request_new.addProperty("PhoneType", "Android");
-        request_new.addProperty("EMI", imei);
-        request_new.addProperty("SWOstatus", IN_PROGRESS_SWO_AWO_STATUS);
-        request_new.addProperty("jobID", JobIdBillable);
-        request_new.addProperty("PauseTimeSheetID", "0");
-
-
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                SoapEnvelope.VER11);
-
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request_new);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
-            receivedString = SoapPrimitiveresult.toString();
-            Log.e("receivedString", receivedString);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return receivedString;
-    }
-
-    public void getCodes() {
-
-
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = urlofwebservice11_new;
-        final String METHOD_NAME = Api.API_bindclock_swo_awo_status;
-        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
-
-        // Create SOAP request
-
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        String dealerId = Shared_Preference.getDEALER_ID(this);
-
-        request.addProperty("dealerID", dealerId);//nks
-        if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
-            request.addProperty("type", "2");//AWO
-        } else {
-            request.addProperty("type", "1");//SWO
-        }
-
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                SoapEnvelope.VER11);
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            Object results = (Object) envelope.getResponse();
-            String resultstring = results.toString();
-            //  {"cds":[{"ClockIn":1398,"ClockOut":1399,"SWOStatus":3}]}
-            JSONObject jsonObject1 = new JSONObject(resultstring);
-            JSONArray jsonArray = jsonObject1.getJSONArray("cds");
-            //  JSONArray jsonArray = new JSONArray(resultstring);
-            //[{"ClockIn":1398,"ClockOut":1399,"SWOStatus":3}]
-            JSONObject jsonObject = jsonArray.getJSONObject(0);
-            CLOCK_IN_BILLABLE_CODE = jsonObject.getString("ClockIn");
-            CLOCK_OUT_BILLABLE_CODE = jsonObject.getString("ClockOut");
-
-            if (Shared_Preference.get_EnterTimesheetByAWO(context)) { //AWO
-                IN_PROGRESS_SWO_AWO_STATUS = jsonObject.getString("AWOStatus");
-            } else {  //SWO
-                IN_PROGRESS_SWO_AWO_STATUS = jsonObject.getString("SWOStatus");
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
-
-
-    }
-
-    public String Auth_UsageCharge() {
-        String receivedString = "";
-        String status = "";
-        final String NAMESPACE = KEY_NAMESPACE;
-        final String URL = urlofwebservice11_new;
-        final String METHOD_NAME = Api.API_AUTH_USAGE_CHARGE;
-        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
-
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        String userID = Shared_Preference.getLOGIN_USER_ID(this);
-        request.addProperty("emp", userID);
-
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                SoapEnvelope.VER11);
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
-            receivedString = SoapPrimitiveresult.toString();
-            Log.e("receivedString", receivedString);
-            JSONObject jsonObject = new JSONObject(receivedString);
-            status = jsonObject.getString("status");
-
-        } catch (Exception e) {
-            e.getMessage();
-        }
-        return status;
-
-    }
-
     private void dialog_UpdateAvailable() {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
@@ -2244,7 +2088,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             public void onClick(View view) {
                 alertDialog.dismiss();
 
-                Utility.setAppUpdateChecked(context);
+                Shared_Preference.setAppUpdateChecked(context);
                 final String appPackageName = getPackageName(); // getPackageName() from Context or Activity object
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
@@ -2273,34 +2117,13 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
     }
 
-    @Override
-    public void handleResponse(String responseString, String api) {
-
-        if (api.equalsIgnoreCase(Api.API_getTimesheetAuth)) {
-            SetAuthenticationVariables(responseString);
-
-            if (DamageReportModuleClicked) {
-                DamageReportModuleClicked = false;
-                if (CanEnter_ChangeOrder) {
-                    Intent ii = new Intent(context, DamageReportNew.class);
-                    startActivity(ii);
-                } else {
-                    Toast.makeText(context, "You are not authorized to access Damage Report!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        } else if (api.equalsIgnoreCase(Api.API_EditTimesheet_AWO_SWO)) {
-            try {
-                JSONArray jsonArray = new JSONArray(responseString);
-                JSONObject jsonObject = jsonArray.getJSONObject(0);
-                //  {"ID":"0","Output":"0","Message":"Overlapping Time entries"}
-                Log.e("AdminTimeSheetId", responseString);
-                String output = jsonObject.getString("overlapp");
-                String msg = jsonObject.getString("msg");
-            } catch (Exception e) {
-                e.getCause();
-            }
-        }
-
+    private void setModuleClickedFalse() {
+        DamageReportModuleClicked = false;
+        AdminTimesheetModuleClicked = false;
+        UsageChargeModuleClicked = false;
+        UploadPhotoModuleClicked = false;
+        AdminTimesheetModuleClicked = false;
+        BillableJobModuleClicked = false;
 
     }
 
@@ -2313,7 +2136,23 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             e.printStackTrace();
         }
         if (new ConnectionDetector(this).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_getTimesheetAuth, jsonObject).execute();
+            new MyAsyncTask(this, false, this, Api.API_getTimesheetAuth, jsonObject).execute();
+        } else {
+            Toast.makeText(this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void CallAPI_FetchNonBillableCodes() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("dealerID", Shared_Preference.getDEALER_ID(this));
+            jsonObject.put("cat", userRole);
+            jsonObject.put("type", "2");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (new ConnectionDetector(this).isConnectingToInternet()) {
+            new MyAsyncTask(this, true, this, Api.API_BILLABLE_NONBILLABLE_CODE, jsonObject).execute();
         } else {
             Toast.makeText(this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -2378,6 +2217,199 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
     }
 
+    private void CallAPI_FetchClockInClockOutCodes() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            String dealerId = Shared_Preference.getDEALER_ID(this);
+            jsonObject.put("dealerID", dealerId);//nks
+            if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
+                jsonObject.put("type",  Utility.TYPE_AWO);//AWO
+            } else {
+                jsonObject.put("type", Utility.TYPE_SWO);//SWO
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (new ConnectionDetector(this).isConnectingToInternet()) {
+            new MyAsyncTask(this, false, this, Api.API_bindclock_swo_awo_status, jsonObject).execute();
+        } else {
+            Toast.makeText(this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void handleResponse(String responseString, String api) {
+
+        if (api.equalsIgnoreCase(Api.API_getTimesheetAuth)) {
+            SetAuthenticationVariables(responseString);
+
+            if (DamageReportModuleClicked) {
+                if (CanEnter_DamageReport && CanView_ChangeOrder) {
+                    Intent ii = new Intent(context, DamageReportNew.class);
+                    startActivity(ii);
+                } else {
+                    Toast.makeText(context, "You are not authorized to access Damage Report!", Toast.LENGTH_SHORT).show();
+                }
+            } else if (UsageChargeModuleClicked) {
+
+                if (CanEnter_UsageCharge && CanView_UsageCharge) {
+                    startActivity(new Intent(getApplicationContext(), UsageChargesListActivity.class));
+                } else {
+                    Toast.makeText(context, "You are not authorized to access Usage Charges!", Toast.LENGTH_SHORT).show();
+                }
+            } else if (UploadPhotoModuleClicked) {
+                if (CanView_ClientArt && CanView_UsageCharge && CanUpload_ClientPhoto && CanUpload_ClientArt) {
+                    startActivity(new Intent(context, Upload_image_and_cooment_New.class));
+                    // startActivity(new Intent(context, UploadPhotosActivity.class));
+                    finish();
+                } else {
+                    Toast.makeText(context, "You are not authorized to Upload Photos!", Toast.LENGTH_SHORT).show();
+                }
+
+            } else if (BillableJobModuleClicked) {
+                if (!CanEnter_BillableTime || !CanView_BillableTime) {
+                    Toast.makeText(context, "You do not have rights to Enter Time Sheet via App!", Toast.LENGTH_SHORT).show();
+                    return;
+                } else {
+                    new async_get_BillableCodes_PausedJobList().execute();
+                }
+            } else if (AdminTimesheetModuleClicked) {
+                CallAPI_FetchNonBillableCodes();
+            }
+
+
+            setModuleClickedFalse();//should be in last
+        } else if (api.equalsIgnoreCase(Api.API_EditTimesheet_AWO_SWO)) {
+            try {
+                JSONArray jsonArray = new JSONArray(responseString);
+                JSONObject jsonObject = jsonArray.getJSONObject(0);
+                //  {"ID":"0","Output":"0","Message":"Overlapping Time entries"}
+                Log.e("AdminTimeSheetId", responseString);
+                String output = jsonObject.getString("overlapp");
+                String msg = jsonObject.getString("msg");
+            } catch (Exception e) {
+                e.getCause();
+            }
+        } else if (api.equalsIgnoreCase(Api.API_BILLABLE_NONBILLABLE_CODE)) {
+            int NonBillableLaborCodesLength = 0;
+            try {
+                Shared_Preference.setNON_BILLABLE_CODES(context, responseString);
+                JSONArray jArray = new JSONArray(responseString);
+                NonBillableLaborCodesLength = jArray.length();
+            } catch (Exception e) {
+                e.getMessage();
+            }
+
+            if (!CanEnter_MISByDailyTime || !CanView_MISByDailyTime) {
+                Toast.makeText(context, "You are not authorized to access Time Clock for Admin Function!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (NonBillableLaborCodesLength == 0) {
+                dialog_NoJobCodes();
+            } else {
+                startClockForAdmin();
+            }
+
+        } else if (api.equalsIgnoreCase(Api.API_bindclock_swo_awo_status)) {
+            try {
+                JSONObject jsonObject1 = new JSONObject(responseString);
+                JSONArray jsonArray = jsonObject1.getJSONArray("cds");
+                JSONObject jsonObject = jsonArray.getJSONObject(0);
+                CLOCK_IN_BILLABLE_CODE = jsonObject.getString("ClockIn");
+                CLOCK_OUT_BILLABLE_CODE = jsonObject.getString("ClockOut");
+
+                if (Shared_Preference.get_EnterTimesheetByAWO(context)) { //AWO
+                    IN_PROGRESS_SWO_AWO_STATUS = jsonObject.getString("AWOStatus");
+                } else {  //SWO
+                    IN_PROGRESS_SWO_AWO_STATUS = jsonObject.getString("SWOStatus");
+                }
+            } catch (Exception e) {
+                e.getMessage();
+            }
+
+            CallAPI_SubmitClockInClockOut();
+        } else if (api.equalsIgnoreCase(Api.API_BILLABLE_TIMESHEET)) {
+
+            // {"ID":"0","Output":"0","Message":"Failed, Overlapping Time entries found!"}
+            String output = "", msg = "";
+            try {
+                JSONObject jsonObject = new JSONObject(responseString);
+                output = jsonObject.getString("Output");
+            } catch (Exception e) {
+                e.getCause();
+            }
+            String jobName = Shared_Preference.getJOB_NAME_BILLABLE(context);
+            if (output.equals("1")) {   //means sheet submitted successfully
+
+                if (jobName.equalsIgnoreCase(Utility.CLOCK_IN)) {
+                    dialog_App_Updated("You’ve clocked in!", true);
+                } else if (jobName.equalsIgnoreCase(Utility.CLOCK_OUT)) {
+                    dialog_App_Updated("You’ve clocked out!", true);
+                }
+
+            } else {
+                if (jobName.equalsIgnoreCase(Utility.CLOCK_IN)) {
+                    msg = "Clock in failed!";
+                } else if (jobName.equalsIgnoreCase(Utility.CLOCK_OUT)) {
+                    msg = "Clock out failed!";
+                }
+                dialog_App_Updated(msg, false);
+            }
+        }
+
+
+    }
+
+    private void CallAPI_SubmitClockInClockOut() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            String JOB_STOP_DateTime = Utility.getCurrentTimeString();//dd-MM-yyyy HH:mm:ss
+            String arr[] = JOB_STOP_DateTime.split(" ");
+            String str = arr[1];
+            String JOB_STOP_HrsMinuts = str.substring(0, str.lastIndexOf(":"));//HH:mm
+
+            String swoId = Shared_Preference.getSWO_ID(this);
+            String JobIdBillable = Shared_Preference.getJOB_ID_FOR_JOBFILES(this);
+            String clientid = Shared_Preference.getLOGIN_USER_ID(this);
+            String jobName = Shared_Preference.getJOB_NAME_BILLABLE(context);
+            String imei = "";
+            try {
+                TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                imei = telephonyManager.getDeviceId();
+            } catch (SecurityException e) {
+                e.getCause();
+            }
+            String Code = "";
+            if (jobName.equalsIgnoreCase(Utility.CLOCK_IN)) {
+                Code = CLOCK_IN_BILLABLE_CODE;
+            } else if (jobName.equalsIgnoreCase(Utility.CLOCK_OUT)) {
+                Code = CLOCK_OUT_BILLABLE_CODE;
+            }
+            jsonObject.put("tech_id", clientid);
+            jsonObject.put("swo_id", swoId);
+            jsonObject.put("start_time", JOB_STOP_HrsMinuts);
+            jsonObject.put("end_time", JOB_STOP_HrsMinuts);
+            jsonObject.put("description", jobName);
+            jsonObject.put("code", Code);
+            jsonObject.put("dayInfo", "0");
+            jsonObject.put("status", "2018");
+            jsonObject.put("region", jobName);
+            jsonObject.put("PhoneType", "Android");
+            jsonObject.put("EMI", imei);
+            jsonObject.put("SWOstatus", IN_PROGRESS_SWO_AWO_STATUS);
+            jsonObject.put("jobID", JobIdBillable);
+            jsonObject.put("PauseTimeSheetID", "0");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (new ConnectionDetector(this).isConnectingToInternet()) {
+            new MyAsyncTask(this, false, this, Api.API_BILLABLE_TIMESHEET, jsonObject).execute();
+        } else {
+            Toast.makeText(this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+        }
+    }
+
     private class checkVersionUpdate extends AsyncTask<String, Void, String> {
         ProgressDialog progressDialog;
 
@@ -2432,8 +2464,8 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         protected void onPostExecute(String nversionName) {
             // TODO Auto-generated method stub
             super.onPostExecute(nversionName);
-            Utility.setLatestVersion(context, nversionName);
-            Utility.setOldVersion(context);
+            Shared_Preference.setLatestVersion(context, nversionName);
+            Shared_Preference.setOldVersion(context);
             try {
                 if (progressDialog != null && progressDialog.isShowing())
                     progressDialog.dismiss();
@@ -2462,55 +2494,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
         }
 
-
-    }
-
-    private class async_getNonBillableCodes extends AsyncTask<Void, Void, Integer> {
-        ProgressDialog pDialog;
-
-        @Override
-        protected void onPreExecute() {
-            pDialog = new ProgressDialog(context);
-            pDialog.setMessage("Kindly wait");
-            pDialog.setCancelable(false);
-
-            try {
-                pDialog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-
-            super.onPreExecute();
-        }
-
-
-        @Override
-        protected void onPostExecute(Integer Total_NonBillableCodes) {
-            super.onPostExecute(Total_NonBillableCodes);
-            try {
-                pDialog.dismiss();
-
-                if (!CanEnter_MISByDailyTime) {
-                    Toast.makeText(context, "You are not authorized to access Time Clock for Admin Function!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (Total_NonBillableCodes == 0) {
-                    dialog_NoJobCodes();
-                } else {
-                    startClockForAdmin();
-                }
-
-            } catch (Exception e) {
-                e.getMessage();
-            }
-        }
-
-        @Override
-        protected Integer doInBackground(Void... params) {
-            getAuthentication();
-            int size = getNonBillableCodes_New();
-            return size;
-        }
 
     }
 
@@ -2557,115 +2540,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
     }
 
-    public class Async_Submit_Billable_Timesheet_New extends AsyncTask<Void, Void, String> {
-        ProgressDialog progressDoalog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressDoalog = new ProgressDialog(context);
-            progressDoalog.setMessage(getString(R.string.Loading_text));
-            progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDoalog.setCancelable(false);
-            try {
-                progressDoalog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (progressDoalog != null && progressDoalog.isShowing()) {
-                try {
-                    progressDoalog.dismiss();
-                } catch (Exception e) {
-                    e.getMessage();
-                }
-            }
-            // {"ID":"0","Output":"0","Message":"Failed, Overlapping Time entries found!"}
-            JSONObject jsonObject = null;
-            String output = "", msg = "";
-
-            try {
-                jsonObject = new JSONObject(result);
-                output = jsonObject.getString("Output");
-                //  msg = jsonObject.getString("Message");
-            } catch (Exception e) {
-                e.getCause();
-            }
-            String jobName = Shared_Preference.getJOB_NAME_BILLABLE(context);
-
-            if (output.equals("1")) {   //means sheet submitted successfully
-
-                if (jobName.equalsIgnoreCase(Utility.CLOCK_IN)) {
-                    dialog_App_Updated("You’ve clocked in!", true);
-                } else if (jobName.equalsIgnoreCase(Utility.CLOCK_OUT)) {
-                    dialog_App_Updated("You’ve clocked out!", true);
-                }
-
-            } else {
-
-                if (jobName.equalsIgnoreCase(Utility.CLOCK_IN)) {
-                    msg = "Clock in failed!";
-                } else if (jobName.equalsIgnoreCase(Utility.CLOCK_OUT)) {
-                    msg = "Clock out failed!";
-                }
-                dialog_App_Updated(msg, false);
-            }
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            getCodes();
-            return Submit_Billable_TimeSheetNew();
-
-        }
-
-    }
-
-    private class Async_Check_UsageChargeAuth extends AsyncTask<String, Void, String> {
-        final ProgressDialog ringProgressDialog = new ProgressDialog(context);
-
-        @Override
-        protected String doInBackground(String... strings) {
-            return Auth_UsageCharge();
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //  ringProgressDialog.setTitle("Kindly wait ...")
-            ringProgressDialog.setMessage(getString(R.string.Loading_text));
-            ringProgressDialog.setCancelable(false);
-
-            try {
-                ringProgressDialog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String status) {
-            super.onPostExecute(status);
-
-            try {
-                ringProgressDialog.dismiss();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-
-            if (status.equals("1")) {
-                startActivity(new Intent(getApplicationContext(), UsageChargesListActivity.class));
-            } else {
-                Toast.makeText(context, "You are not authorized to access Usage Charges!", Toast.LENGTH_SHORT).show();
-            }
-
-        }
-    }
-
-    private class async_get_BillableCodes_PausedJobList_TimesheetAuth extends AsyncTask<Void, Void, Void> {
+    private class async_get_BillableCodes_PausedJobList extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -2675,7 +2550,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
         @Override
         protected Void doInBackground(Void... params) {
-            getAuthentication();
+            // getAuthentication();
             getBillableCodes_new();
             GetPausedJob();
             // GetEmployeeRoles();
@@ -2685,7 +2560,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         @Override
         protected void onPostExecute(Void res) {
             hideprogressdialog();
-            if (!CanEnter_BillableTime) {
+            if (!CanEnter_BillableTime || !CanView_BillableTime) {
                 Toast.makeText(context, "You do not have rights to Enter Time Sheet via App!", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -2714,7 +2589,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
 
     }
-
 }
 
 

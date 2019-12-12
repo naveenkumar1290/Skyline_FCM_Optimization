@@ -1,4 +1,4 @@
-package planet.info.skyline.tech.damage_report;
+package planet.info.skyline.tech.upload_photo;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -44,6 +44,7 @@ import planet.info.skyline.RequestControler.MyAsyncTask_MultiApiCall;
 import planet.info.skyline.RequestControler.ResponseInterface_MultiApiCall;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.DamageDetail;
+import planet.info.skyline.model.ImageItem;
 import planet.info.skyline.model.ItemType;
 import planet.info.skyline.network.API_Interface;
 import planet.info.skyline.network.Api;
@@ -51,6 +52,8 @@ import planet.info.skyline.network.ProgressRequestBody;
 import planet.info.skyline.network.REST_API_Client;
 import planet.info.skyline.old_activity.AppConstants;
 import planet.info.skyline.shared_preference.Shared_Preference;
+import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
+import planet.info.skyline.tech.damage_report.Adapter_DamageReport;
 import planet.info.skyline.util.CameraUtils;
 import planet.info.skyline.util.Utility;
 import planet.info.skyline.util.Utils;
@@ -60,12 +63,13 @@ import retrofit2.Response;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
-public class DamageReportNew extends AppCompatActivity implements ProgressRequestBody.UploadCallbacks, ResponseInterface_MultiApiCall {
+public class UploadPhotosActivity extends AppCompatActivity implements ProgressRequestBody.UploadCallbacks, ResponseInterface_MultiApiCall
+{
 
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     private static String imageStoragePath;
-    Adapter_DamageReport userAdapter;
+    Adapter_UploadPhotos userAdapter;
     ArrayList<String> list_path = new ArrayList<>();
 
     ProgressDialog uploadProgressDialog;
@@ -75,37 +79,59 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
     private Context mContext;
     private RecyclerView recycler;
 
+    String selectedJobId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.damage_report_new);
-        mContext = DamageReportNew.this;
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.upload_photo_activity);
+        mContext = UploadPhotosActivity.this;
+
+        final boolean TIMER_STARTED_FROM_BILLABLE_MODULE = Shared_Preference.getTIMER_STARTED_FROM_BILLABLE_MODULE(this);
+        if (TIMER_STARTED_FROM_BILLABLE_MODULE) {
+            selectedJobId = Shared_Preference.getJOB_ID_FOR_JOBFILES(this);
+            opendilogforattachfileandimage();
+            String compID = Shared_Preference.getCOMPANY_ID_BILLABLE(this);
+            String company_Name = Shared_Preference.getCLIENT_NAME(this);
+            String job_Name = Shared_Preference.getJOB_NAME_BILLABLE(this);
+
+        } else {
+            Intent i = new Intent(this, SelectCompanyActivityNew.class);
+            i.putExtra(Utility.IS_JOB_MANDATORY, "1");
+            i.putExtra(Utility.Show_DIALOG_SHOW_INFO, true);
+            startActivityForResult(i, Utility.CODE_SELECT_COMPANY);
+
+        }
+
+
+
+
         init();
-        setToolbar();
+       // setToolbar();
     }
 
     private void init() {
-        ArrayList<DamageDetail> damageDetailList = new ArrayList<>();
-        damageDetailList.add(DamageDetail.getInitDamageDetail());
+        ArrayList<ImageItem> ImageItemList = new ArrayList<>();
+        //ImageItemList.add(ImageItem.getInitImageItem());
         recycler = findViewById(R.id.recycler);
         recycler.setLayoutManager(new LinearLayoutManager(mContext));
 
-        userAdapter = new Adapter_DamageReport(mContext, damageDetailList);
+        userAdapter = new Adapter_UploadPhotos(mContext, ImageItemList);
         recycler.setAdapter(userAdapter);
         Button btn_add = findViewById(R.id.btn_AddItem);
         Button btn_getData = findViewById(R.id.btn_FinishedWithReport);
         btn_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                userAdapter.addItemToList();
+                //userAdapter.addItemToList();
+                opendilogforattachfileandimage();
             }
         });
         btn_getData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<DamageDetail> list = userAdapter.returnData();
+                ArrayList<ImageItem> list = userAdapter.returnData();
                 if (list != null) {
                     PostDamageReport(list);
                 }
@@ -115,20 +141,20 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
 
     }
 
-    private void PostDamageReport(ArrayList<DamageDetail> listdamageDetail) {
+    private void PostDamageReport(ArrayList<ImageItem> listImageItem) {
         JSONArray jsonArray = new JSONArray();
-        for (DamageDetail damageDetail : listdamageDetail) {
-            try {
+        for (ImageItem ImageItem : listImageItem) {
+       /*     try {
                 JSONObject jsonObject_Input = new JSONObject();
                 jsonObject_Input.put("swo_id", Shared_Preference.getSWO_ID(this));
                 jsonObject_Input.put("emp_id", Shared_Preference.getLOGIN_USER_ID(this));
-                jsonObject_Input.put("desc", "Damage Report to " + ItemType.getItemTypeByPosition(damageDetail.getSpinnerSelectPos()) + ": " + damageDetail.getItemDesc()
-                        + ": " + damageDetail.getDamageDesc());
-                jsonObject_Input.put("fname", damageDetail.getUploadedPhotoUrl());
-                if (Shared_Preference.get_EnterTimesheetByAWO(DamageReportNew.this)) {
-                    jsonObject_Input.put("Type",  Utility.TYPE_AWO);
+                jsonObject_Input.put("desc", "Damage Report to " + ItemType.getItemTypeByPosition(ImageItem.getSpinnerSelectPos()) + ": " + ImageItem.getItemDesc()
+                        + ": " + ImageItem.getDamageDesc());
+                jsonObject_Input.put("fname", ImageItem.getUploadedPhotoUrl());
+                if (Shared_Preference.get_EnterTimesheetByAWO(UploadPhotosActivity.this)) {
+                    jsonObject_Input.put("Type", "2");
                 } else {
-                    jsonObject_Input.put("Type",  Utility.TYPE_SWO);
+                    jsonObject_Input.put("Type", "1");
                 }
                 JSONObject jsonObject1 = new JSONObject();
                 jsonObject1.put(Api.API_add_item_descwithFileByType, jsonObject_Input);
@@ -136,14 +162,14 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
 
             } catch (Exception e) {
                 e.printStackTrace();
-            }
+            }*/
 
         }
 
-        if (new ConnectionDetector(DamageReportNew.this).isConnectingToInternet()) {
+        if (new ConnectionDetector(UploadPhotosActivity.this).isConnectingToInternet()) {
             new MyAsyncTask_MultiApiCall(this, this, jsonArray).execute();
         } else {
-            Toast.makeText(DamageReportNew.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+            Toast.makeText(UploadPhotosActivity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -184,19 +210,25 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
                     ArrayList<Image> images = data.getParcelableArrayListExtra(com.darsh.multipleimageselect.helpers.Constants.INTENT_EXTRA_IMAGES);
                     for (int i = 0; i < images.size(); i++) {
                         list_path.add(images.get(i).path);
+                        userAdapter.addItemToList(images.get(i).path);
                     }
-                    multipartImageUpload();
+
+                   // multipartImageUpload();
+
+
                 } else {
                     File file1 = null;
                     Uri mImageCaptureUri = FileProvider.getUriForFile(mContext, mContext.getApplicationContext().getPackageName() + ".provider", file1);
                     try {
                         list_path.add(Utils.getPath(mImageCaptureUri,
-                                DamageReportNew.this));
-                        multipartImageUpload();
+                                UploadPhotosActivity.this));
+                       // multipartImageUpload();
+                        userAdapter.addItemToList(mImageCaptureUri.toString());
 
                     } catch (Exception e) {
                         list_path.add(mImageCaptureUri.getPath());
-                        multipartImageUpload();
+                       // multipartImageUpload();
+                        userAdapter.addItemToList(mImageCaptureUri.getPath());
                     }
                 }
 
@@ -213,15 +245,33 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
                     e.getCause();
                 }
                 list_path.add(imageStoragePath);
-                multipartImageUpload();
+              //  multipartImageUpload();
+                userAdapter.addItemToList(imageStoragePath);
             }
+
+            else if (requestCode == Utility.CODE_SELECT_COMPANY) {
+
+                //   if (resultCode == Activity.RESULT_OK) {
+                try {
+                    String compID = data.getStringExtra("CompID");
+                    String jobID = data.getStringExtra("JobID");
+                    String company_Name = data.getStringExtra("CompName");
+                    String job_Name = data.getStringExtra("JobName");
+                    selectedJobId = jobID;
+                    opendilogforattachfileandimage();
+                } catch (Exception e) {
+                    e.getMessage();
+                    Toast.makeText(getApplicationContext(), "Exception caught!", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
         }
 
     }
 
     private void multipartImageUpload() {
-        final ArrayList<String> list_UploadImageName = new ArrayList<>();
-
+       final ArrayList<String> list_UploadImageName = new ArrayList<>();
         if (Count_Image_Uploaded < list_path.size())
             Count_Image_Uploaded++;
         uploadProgressDialog = new ProgressDialog(mContext);
@@ -269,14 +319,16 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
                                 if (responseStr.contains(",")) {
                                     String s[] = responseStr.split(",");
                                     List<String> stringList = new ArrayList<String>(Arrays.asList(s));
-                                    list_UploadImageName.clear();
-                                    list_UploadImageName.addAll(stringList);
+
+                                   list_UploadImageName.clear();
+                                   list_UploadImageName.addAll(stringList);
+
                                 } else {
                                     list_UploadImageName.add(responseStr);
                                 }
                                 //only one image will be use in api
                                 if (list_UploadImageName.size() > 0) {
-                                    userAdapter.setUploadedImageURL(list_UploadImageName.get(0));
+                                    //userAdapter.setUploadedImageURL(list_UploadImageName.get(0));
                                 } else {
                                     Toast.makeText(mContext, "No url found!", Toast.LENGTH_SHORT).show();
                                 }
@@ -381,10 +433,10 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(mContext, AlbumSelectActivity.class);
-                intent.putExtra(com.darsh.multipleimageselect.helpers.Constants.INTENT_EXTRA_LIMIT, 1);
-                if (mContext instanceof DamageReportNew) {
-                    ((DamageReportNew) mContext).startActivityForResult(intent, AppConstants.GALLERY_CAPTURE_IMAGE_REQUEST_CODE);
-                }
+
+                intent.putExtra(com.darsh.multipleimageselect.helpers.Constants.INTENT_EXTRA_LIMIT, 50);
+                startActivityForResult(intent, AppConstants.GALLERY_CAPTURE_IMAGE_REQUEST_CODE);
+
                 dialog.dismiss();
             }
         });
@@ -404,8 +456,8 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
         }
         Uri fileUri = CameraUtils.getOutputMediaFileUri(mContext, file);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-        if (mContext instanceof DamageReportNew) {
-            ((DamageReportNew) mContext).startActivityForResult(intent, AppConstants.CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
+        if (mContext instanceof UploadPhotosActivity) {
+            ((UploadPhotosActivity) mContext).startActivityForResult(intent, AppConstants.CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
         }
 
     }
@@ -478,7 +530,7 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
     @Override
     public void handleResponse(JSONObject responseJsonObject) {
         Iterator iterator = responseJsonObject.keys();
-        String result = "";
+        String result="";
         while (iterator.hasNext()) {
             try {
                 String Api = (String) iterator.next();
@@ -489,14 +541,14 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
                     String[] result_arr = str.split("=");
                     result = result_arr[1];
                 }
-            } catch (Exception e) {
+            }catch (Exception e){
                 e.getMessage();
             }
 
             if (result.equals("1")) {
-                Toast.makeText(DamageReportNew.this, "Report submitted successfully !", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UploadPhotosActivity.this, "Report submitted successfully !", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(DamageReportNew.this, "Report submitting failed!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UploadPhotosActivity.this, "Report submitting failed!", Toast.LENGTH_SHORT).show();
             }
             finish();
         }

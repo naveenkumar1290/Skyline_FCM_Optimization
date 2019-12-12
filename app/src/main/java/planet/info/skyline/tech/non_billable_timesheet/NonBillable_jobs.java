@@ -36,7 +36,7 @@ import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.model.LaborCode;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.old_activity.BaseActivity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.update_timesheet.TimeSheetList1Activity;
 import planet.info.skyline.util.Utility;
 
@@ -105,13 +105,11 @@ public class NonBillable_jobs extends BaseActivity implements ResponseInterface 
             jsonObject.put("dealerID", dealerId);
             jsonObject.put("cat", role);
             jsonObject.put("type", "2");
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         if (new ConnectionDetector(NonBillable_jobs.this).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_BILLABLE_NONBILLABLE_CODE, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_BILLABLE_NONBILLABLE_CODE, jsonObject).execute();
         } else {
             Toast.makeText(NonBillable_jobs.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -127,7 +125,7 @@ public class NonBillable_jobs extends BaseActivity implements ResponseInterface 
             jsonObject.put("cat", role);
             jsonObject.put("type", "2");
             jsonObject.put("Lcode", Selected_LaborCode_ID);
-            new MyAsyncTask(this, this, Api.API_VerifyLaborCode, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_VerifyLaborCode, jsonObject).execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -138,7 +136,7 @@ public class NonBillable_jobs extends BaseActivity implements ResponseInterface 
     private void SubmitNonBillableTimeSheet() {
 
         if (new ConnectionDetector(NonBillable_jobs.this).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_NON_BILLABLE_TIMESHEET, Utility.SoapObject_To_JsonObject(request)).execute();
+            new MyAsyncTask(this, true, this, Api.API_NON_BILLABLE_TIMESHEET, Utility.SoapObject_To_JsonObject(request)).execute();
         } else {
             Toast.makeText(NonBillable_jobs.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -314,9 +312,6 @@ public class NonBillable_jobs extends BaseActivity implements ResponseInterface 
         JOB_START_DateTime = Shared_Preference.getCLOCK_START_TIME(this);//dd-MM-yyyy HH:mm:ss
         JOB_STOP_DateTime = Utility.getCurrentTimeString();//dd-MM-yyyy HH:mm:ss
 
-       /* ed.putString(Utility.TIMEGAP_JOB_END_TIME, JOB_STOP_DateTime).commit();//for next job time gap
-        ed.putString(Utility.TIMEGAP_PREV_JOB_START_TIME, JOB_START_DateTime).commit();//for next job time gap
-       */
         boolean bool_IsSameDay = Utility.IsSameDay(JOB_START_DateTime, JOB_STOP_DateTime);
         dayInfo = "0";
         if (bool_IsSameDay) dayInfo = "0";
@@ -345,13 +340,7 @@ public class NonBillable_jobs extends BaseActivity implements ResponseInterface 
         //  request.addProperty("dayInfo", dayInfo);
 
         if (new ConnectionDetector(NonBillable_jobs.this).isConnectingToInternet()) {
-            /*
-            ed.putString(Utility.TIMEGAP_JOB_END_TIME, JOB_STOP_DateTime).commit();//for next job time gap
-            ed.putString(Utility.TIMEGAP_PREV_JOB_START_TIME, JOB_START_DateTime).commit();//for next job time gap
-           */
-
             Utility.StopRunningClock(NonBillable_jobs.this);
-            //  new Async_Submit_NonBillable_Timesheet().execute();
             SubmitNonBillableTimeSheet();
 
         } else {

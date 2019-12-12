@@ -40,7 +40,7 @@ import planet.info.skyline.model.Company;
 import planet.info.skyline.model.Job_2;
 import planet.info.skyline.model.SWO_Details;
 import planet.info.skyline.network.Api;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.swo.SwoListActivity;
 import planet.info.skyline.util.Utility;
 
@@ -120,7 +120,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
         if (STARTING_BILLABLE_JOB) {
             if (new ConnectionDetector(context).isConnectingToInternet()) {
                 //    new Async_fetch_SWO_AWO_List().execute(job.getTxt_job(), job.getJob_id_pk());
-
                 if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
                     FetchAWOsByJobID(job.getJob_id_pk());
                 } else {
@@ -294,7 +293,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_bindClientByDealer, jsonObject).execute();
+            new MyAsyncTask(this,true, this, Api.API_bindClientByDealer, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -309,7 +308,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_BindJob, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_BindJob, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -325,7 +324,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_GetallJobByDealerID, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_GetallJobByDealerID, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -340,7 +339,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_GetAwoDetailByJob, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_GetAwoDetailByJob, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -357,7 +356,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_GetSwoByJObDealer, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_GetSwoByJObDealer, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -369,15 +368,15 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
         try {
             jsonObject.put("AWO_SWO", awo_swo_id);
             if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
-                jsonObject.put("type", "2");
+                jsonObject.put("type", Utility.TYPE_AWO);
             } else {
-                jsonObject.put("type", "1");
+                jsonObject.put("type", Utility.TYPE_SWO);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_GetJobDetailsBy_SWO_AWO, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_GetJobDetailsBy_SWO_AWO, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -394,7 +393,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this, this, Api.API_GetAllDetailbyJobtext_New, jsonObject).execute();
+            new MyAsyncTask(this,true,  this, Api.API_GetAllDetailbyJobtext_New, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -407,7 +406,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
         dialog_companyName.setContentView(R.layout.test_new);
         dialog_companyName.getWindow().setBackgroundDrawable(
                 new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
         dialog_companyName.setCancelable(true);
         dialog_companyName.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         try {
@@ -1061,7 +1059,9 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                 txtvw_JOB_NAME_SearchByCompany.setAdapter(jobDescAdapter);
                 txtvw_JOB_NAME_SearchByCompany.setDropDownHeight(550);
             }
-        } else if (api.equalsIgnoreCase(Api.API_GetallJobByDealerID)) {
+        }
+        else if (api.equalsIgnoreCase(Api.API_GetallJobByDealerID))
+        {
             list_AllJobs.clear();
             try {
                 JSONObject jsonObject1 = new JSONObject(responseString);

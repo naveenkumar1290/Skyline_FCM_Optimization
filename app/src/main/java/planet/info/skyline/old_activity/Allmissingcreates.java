@@ -39,7 +39,7 @@ import planet.info.skyline.controller.AppController;
 import planet.info.skyline.model.Allmissing;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.tech.billable_timesheet.Clock_Submit_Type_Activity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
 
@@ -111,20 +111,16 @@ public class Allmissingcreates extends BaseActivity {
 		stopp = (TextView) findViewById(R.id.createnotfound);
 
 		//
-	//	String imageloc = sp.getString("imglo", "");
+
 		String imageloc =	Shared_Preference.getCLIENT_IMAGE_LOGO_URL(this);
 		if (imageloc.equals("") || imageloc.equalsIgnoreCase("")) {
-			//ed.putString("imglo", "").commit();
+
 			Shared_Preference.setCLIENT_IMAGE_LOGO_URL(this,"");
 			missing.setVisibility(View.GONE);
 		} else {
 			imageLoadery.displayImage(imageloc, missing, options);
 		}
-		// long hh= sp.getLong("times", 0);
-		// startTime = SystemClock.uptimeMillis();
-		// startTime=startTime-hh;
-		// customHandler.postDelayed(updateTimerThread, 1000);
-		//String nam = sp.getString("name", "");
+
 		String nam  = Shared_Preference.getCLIENT_NAME(this);
 		clientnam.setText(nam);
 		String sggs = "";
@@ -182,10 +178,8 @@ public class Allmissingcreates extends BaseActivity {
 					// Intent ii=new Intent(activity,Foundscaneract.class);
 					Intent ii = new Intent(Allmissingcreates.this,
 							Updatecreatelocation.class);
-					// ii.putExtra("oldlocation", locationcreate);
-					// ii.putExtra("oldlocation",locationcreate);
+
 					String sba = locationcreate;
-					// ed.putString("oldlocation", sba).commit();
 					ii.putExtra("oldlocation", sba);
 					ii.putExtra("case", "1");
 					ii.putExtra("idi", "real");

@@ -40,6 +40,7 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 //import planet.info.skyline.httpimage.HttpImageManager;
 import planet.info.skyline.model.Help;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_GetHelpDetails;
@@ -49,7 +50,7 @@ import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 public class HelpActivity extends AppCompatActivity {
     Context context;
     TextView tv_msg;
-    SharedPreferences sp;
+
     String Client_id_Pk, CLIENT_LOGIN_CompID;
     ArrayList<Help> listHelp = new ArrayList<>();
     private RecyclerView recyclerView;
@@ -71,10 +72,12 @@ public class HelpActivity extends AppCompatActivity {
 
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
 
-        Client_id_Pk = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        CLIENT_LOGIN_CompID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
+        Client_id_Pk = Shared_Preference.getCLIENT_LOGIN_userID(HelpActivity.this);
+
+        CLIENT_LOGIN_CompID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(HelpActivity.this);
+
 
         /***************/
         pullToRefresh = findViewById(R.id.pullToRefresh);

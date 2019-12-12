@@ -2,7 +2,7 @@ package planet.info.skyline.network;
 
 public class SOAP_API_Client {
     // Make any one true
-    private static boolean staging = true, beta = false, live = false;
+    private static boolean staging = false, beta = true, live = false;
     //Staging
     private static final String HEADER_Staging = "http://";
     private static final String URL_EP1_Staging = HEADER_Staging + "staging.ep1.businesstowork.com";

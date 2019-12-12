@@ -22,7 +22,7 @@ import java.util.List;
 import planet.info.skyline.R;
 import planet.info.skyline.adapter.TabsPagerAdapter_ShowJobFiles;
 import planet.info.skyline.tech.job_files_new.SharePhotosToClientActivity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 
@@ -50,7 +50,7 @@ public class Show_Jobs_Activity_New extends AppCompatActivity implements TabLayo
         tabs.add("Project Photos(s)");//3
         tabs.add("Project File(s)");//4
         sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
-       // jobtxt_id = sp.getString(Utility.KEY_JOB_ID_FOR_JOBFILES, "");
+
         jobtxt_id = Shared_Preference.getJOB_ID_FOR_JOBFILES(Show_Jobs_Activity_New.this);
         if (jobtxt_id != null && (!jobtxt_id.equalsIgnoreCase(""))) {
             setTabs_ViewPager();

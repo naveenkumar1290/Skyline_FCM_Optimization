@@ -41,7 +41,7 @@ import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.model.SWO_Status;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.old_activity.BaseActivity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.update_timesheet.TimeSheetList1Activity;
 import planet.info.skyline.util.Utility;
 
@@ -402,7 +402,7 @@ public class SubmitTimesheet extends BaseActivity {
         TextView title = showd.findViewById(R.id.textView1rr);
         if (Shared_Preference.get_EnterTimesheetByAWO(SubmitTimesheet.this)) {
             title.setText("Update AWO Status");
-        }else {
+        } else {
             title.setText("Update SWO Status");
         }
        /* if (userRole.equals(Utility.USER_ROLE_ARTIST)) {  // artist
@@ -517,9 +517,9 @@ public class SubmitTimesheet extends BaseActivity {
 
         request.addProperty("swoID_Awoid", swoID);
         if (Shared_Preference.get_EnterTimesheetByAWO(SubmitTimesheet.this)) {
-            request.addProperty("Type", "2");
+            request.addProperty("Type", Utility.TYPE_AWO);
         } else {
-            request.addProperty("Type", "1");
+            request.addProperty("Type", Utility.TYPE_SWO);
         }
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
                 SoapEnvelope.VER11);
@@ -594,11 +594,6 @@ public class SubmitTimesheet extends BaseActivity {
         final String URL = urlofwebservice11_new;
         final String SOAP_ACTION = KEY_NAMESPACE + Utility.Method_BillableTimeSheet;
 
-        if (Shared_Preference.get_EnterTimesheetByAWO(SubmitTimesheet.this)) {
-            request_new.addProperty("Type", "2");
-        } else {
-            request_new.addProperty("Type", "1");
-        }
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.dotNet = true;
@@ -660,7 +655,6 @@ public class SubmitTimesheet extends BaseActivity {
 
         final String METHOD_NAME3 = Utility.Method_BillableTimeSheet;
         request_new = new SoapObject(NAMESPACE, METHOD_NAME3);
-
         request_new.addProperty("tech_id", clientid);
         request_new.addProperty("swo_id", Swo_Id);
         request_new.addProperty("start_time", JOB_START_HrsMinuts);
@@ -675,6 +669,11 @@ public class SubmitTimesheet extends BaseActivity {
         request_new.addProperty("SWOstatus", Swo_Status);
         request_new.addProperty("jobID", JobIdBillable);
         request_new.addProperty("PauseTimeSheetID", PAUSED_TIMESHEET_ID);
+        if (Shared_Preference.get_EnterTimesheetByAWO(SubmitTimesheet.this)) {
+            request_new.addProperty("Type", Utility.TYPE_AWO);
+        } else {
+            request_new.addProperty("Type", Utility.TYPE_SWO);
+        }
 
 /**************************************************************************************/
 
@@ -687,7 +686,6 @@ public class SubmitTimesheet extends BaseActivity {
             Shared_Preference.setCLIENT(this, "");
             Shared_Preference.setCLIENT_NAME(this, "");
             new Async_Submit_Billable_Timesheet_New().execute();
-
 
         } else {
             Toast.makeText(SubmitTimesheet.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();

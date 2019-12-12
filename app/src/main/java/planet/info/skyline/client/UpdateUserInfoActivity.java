@@ -45,9 +45,7 @@ import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 public class UpdateUserInfoActivity extends AppCompatActivity {
 
     Context context;
-    TextView tv_msg;
 
-    SharedPreferences sp;
     String UserID = "";
 
     TextInputEditText et_Fax, et_PinCode;
@@ -74,7 +72,6 @@ public class UpdateUserInfoActivity extends AppCompatActivity {
         context = UpdateUserInfoActivity.this;
         setTitle(Utility.getTitle("Update User Info"));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
 
         try {
             UserID = getIntent().getExtras().getString("UserID");

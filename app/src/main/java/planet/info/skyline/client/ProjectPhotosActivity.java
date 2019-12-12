@@ -1,43 +1,28 @@
 package planet.info.skyline.client;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,12 +33,10 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ksoap2.SoapEnvelope;
-import org.ksoap2.serialization.KvmSerializable;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapPrimitive;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
@@ -61,21 +44,16 @@ import org.ksoap2.transport.HttpTransportSE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import planet.info.skyline.R;
-import planet.info.skyline.adapter.CompanyNameAdapter;
 import planet.info.skyline.crash_report.ConnectionDetector;
 //import planet.info.skyline.httpimage.HttpImageManager;
-import planet.info.skyline.model.Job;
-import planet.info.skyline.model.Myspinner_timezone;
 import planet.info.skyline.model.ProjectPhoto;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
-import static planet.info.skyline.network.Api.API_BindJob;
 import static planet.info.skyline.network.Api.API_ShowProjectphotosByJobeID;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
@@ -85,18 +63,11 @@ public class ProjectPhotosActivity extends AppCompatActivity {
     Context context;
     TextView tv_msg;
     ArrayList<ProjectPhoto> list_ProjectPhotos = new ArrayList<>();
-    SharedPreferences sp;
-    String Client_id_Pk, comp_ID, jobID, job_Name, dealerId, Agency;
-    List<String> job_Name_list_Desc_forIndex;
-    List<String> job_Name_list_Desc = new ArrayList<String>();
-    List<String> job_id_list = new ArrayList<String>();
-    List<String> job_Name_list = new ArrayList<String>();
-   // SwipeRefreshLayout mSwipeRefreshLayout;
-    private Menu menu;
 
+    String Client_id_Pk, comp_ID, jobID, job_Name, dealerId, Agency;
+    private Menu menu;
     private RecyclerView recyclerView;
     private MoviesAdapter mAdapter;
-    AlertDialog alertDialog1;
     SwipeRefreshLayout pullToRefresh;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,15 +84,18 @@ public class ProjectPhotosActivity extends AppCompatActivity {
         setTitle(Utility.getTitle("Project Photo(s)"));
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
 
         /**************/
-        Client_id_Pk = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        comp_ID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
+        Client_id_Pk = Shared_Preference.getCLIENT_LOGIN_userID(ProjectPhotosActivity.this);
+
+        comp_ID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(ProjectPhotosActivity.this);
+
         jobID = "-1"; //by default
         Agency = "0";// by default
         job_Name = getApplicationContext().getResources().getString(R.string.Select_Job);
-        dealerId = sp.getString(Utility.CLIENT_LOGIN_DealerID, "");
+        dealerId =
+                Shared_Preference.getCLIENT_LOGIN_DealerID(ProjectPhotosActivity.this);
         /***************/
 
 
@@ -167,110 +141,6 @@ public class ProjectPhotosActivity extends AppCompatActivity {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
         }
     }
-
-    public void Getcompany_job_id()   ///by aman kaushik
-    {
-        ArrayList<Job> list_job = new ArrayList<>();
-        job_id_list.clear();
-        job_Name_list_Desc.clear();//nks
-        job_Name_list.clear();
-
-        /**/
-        job_Name_list_Desc.add(getResources().getString(R.string.Select_Job) );
-        job_id_list.add("-1");
-        job_Name_list.add(getResources().getString(R.string.Select_Job));
-        /**/
-
-
-        final String NAMESPACE = KEY_NAMESPACE + "";
-        final String URL = SOAP_API_Client.BASE_URL;
-        final String SOAP_ACTION = KEY_NAMESPACE + API_BindJob;
-        final String METHOD_NAME = API_BindJob;
-        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        request.addProperty("ClientID", comp_ID);
-
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(request);
-        HttpTransportSE httpTransport = new HttpTransportSE(URL);
-        try {
-            httpTransport.call(SOAP_ACTION, envelope);
-            KvmSerializable ks = (KvmSerializable) envelope.bodyIn;
-            for (int j = 0; j < ks.getPropertyCount(); j++) {
-                ks.getProperty(j);
-            }
-            String recved = ks.toString();
-            if (recved.contains("No Data Available.")) {
-
-            } else {
-
-                String json = recved.substring(recved.indexOf("=") + 1, recved.lastIndexOf(";"));
-
-                JSONObject jsonObject = new JSONObject(json);
-                JSONArray jsonArray = jsonObject.getJSONArray("cds");
-
-
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                    String comapny_id = jsonObject1.getString("JOB_ID_PK");
-                    String company_name = jsonObject1.getString("JobName");
-                    String job_descripition = jsonObject1.getString("txt_Job");
-
-
-                    String status = jsonObject1.getString("Status");
-                    String show = jsonObject1.getString("ShowName");
-                    String jobtype = jsonObject1.getString("JOB_TYPE");
-
-
-                    String desc = job_descripition.trim();
-                    char space = ' ';
-                    int index = 0;
-                    if (desc.length() > 30) {
-                        for (int j = 30; j < desc.length(); j++) {
-                            if (desc.charAt(j) == space) {
-                                // String s=desc.substring(j);
-                                index = j;
-                                break;
-                            }
-                        }
-                    }
-                    String total_desc = "";
-                    if (index != 0) {
-                        desc = desc.substring(0, index) + System.getProperty("line.separator") + (desc.substring(index)).trim();
-                    }
-                    total_desc = company_name + System.getProperty("line.separator") + desc.trim();
-                    /*******for sorting*/
-                    list_job.add(new Job(comapny_id, company_name, total_desc));
-
-                    /*******************/
-
-                    //                    job_id_list.add(comapny_id);
-//                    job_Name_list.add(company_name);
-//                    job_Name_list_Desc.add(total_desc);
-
-                }
-                Collections.sort(list_job, new Comparator<Job>() {
-                    @Override
-                    public int compare(Job o1, Job o2) {
-                        return o1.getJobName().compareTo(o2.getJobName());
-                    }
-                });
-
-                for (int i = 0; i < list_job.size(); i++) {
-                    Job job = list_job.get(i);
-                    job_id_list.add(job.getJobID());
-                    job_Name_list.add(job.getJobName());
-                    job_Name_list_Desc.add(job.getJobDesc());
-                }
-
-                job_Name_list_Desc_forIndex = new ArrayList<>(job_Name_list_Desc);
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 
     public void getProjectPhotos() {
         list_ProjectPhotos.clear();
@@ -394,165 +264,12 @@ public class ProjectPhotosActivity extends AppCompatActivity {
         }
 
     }
-
     private void updateMenuTitles() {
         MenuItem bedMenuItem = menu.findItem(R.id.spinner);
 
         bedMenuItem.setTitle(job_Name);
 
     }
-
-    public void dialog_select_job()    /////by aman kaushik
-    {
-
-        final Dialog dialog_companyName = new Dialog(ProjectPhotosActivity.this);
-        dialog_companyName.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog_companyName.setContentView(R.layout.select_job);
-        dialog_companyName.getWindow().setBackgroundDrawable(
-                new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        dialog_companyName.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
-
-        dialog_companyName.setCancelable(true);
-        ImageView closebtn = (ImageView) dialog_companyName.findViewById(R.id.close);
-
-        final AutoCompleteTextView autocomplete_job_name = (AutoCompleteTextView) dialog_companyName.findViewById(R.id.job);
-        Button btn_GO = (Button) dialog_companyName.findViewById(R.id.go_button);
-        dialog_companyName.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        btn_GO.setVisibility(View.GONE);
-
-        final LinearLayout ll_arrow = (LinearLayout) dialog_companyName.findViewById(R.id.ll_arrow);
-        final LinearLayout ll_clear = (LinearLayout) dialog_companyName.findViewById(R.id.ll_clear);
-        ll_arrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                autocomplete_job_name.showDropDown();
-            }
-        });
-        ll_clear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                autocomplete_job_name.setText("");
-            }
-        });
-
-
-
-        CompanyNameAdapter jobDescAdapter = new CompanyNameAdapter(ProjectPhotosActivity.this, android.R.layout.simple_list_item_1, job_Name_list_Desc);
-        autocomplete_job_name.setAdapter(jobDescAdapter);
-        autocomplete_job_name.setDropDownHeight(550);
-        autocomplete_job_name.setThreshold(1);
-
-      //  autocomplete_job_name.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.down_arrow, 0);
-
-        //ontouch for job name---->
-        autocomplete_job_name.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                autocomplete_job_name.showDropDown();
-
-                return false;
-            }
-        });
-
-
-        autocomplete_job_name.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-
-                String job_txt = autocomplete_job_name.getText().toString();
-
-                if(! job_txt.equals(getResources().getString(R.string.Select_Job))){
-                    job_txt = job_txt.substring(0, job_txt.indexOf("\n"));
-                }
-
-                int index = job_Name_list.indexOf(job_txt);
-                jobID = job_id_list.get(index);
-                job_Name = job_Name_list.get(index);
-                autocomplete_job_name.setText(job_Name);
-                Log.e("jobId", jobID);
-                Log.e("job_Name", job_Name);
-                try {
-                    dialog_companyName.dismiss();
-                } catch (Exception e) {
-                    e.getMessage();
-                }
-                callApiProjectPhotos();
-
-            }
-        });
-
-        autocomplete_job_name.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                try {
-                    if (autocomplete_job_name.getText().length() == 0) {
-                        // autocomplete_job_name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                       // autocomplete_job_name.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.down_arrow, 0);
-                        ll_arrow.setVisibility(View.VISIBLE);
-                        ll_clear.setVisibility(View.GONE);
-
-                        //refresh adapter
-                        job_Name_list_Desc = new ArrayList<>(job_Name_list_Desc_forIndex);
-                        CompanyNameAdapter jobDescAdapter = new CompanyNameAdapter(ProjectPhotosActivity.this, android.R.layout.simple_list_item_1, job_Name_list_Desc);
-                        autocomplete_job_name.setAdapter(jobDescAdapter);
-                        autocomplete_job_name.setDropDownHeight(550);
-
-                    } else {
-                      //  autocomplete_job_name.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.clear, 0);
-
-                        ll_arrow.setVisibility(View.GONE);
-                        ll_clear.setVisibility(View.VISIBLE);
-
-
-                    }
-                } catch (Exception e) {
-                    e.getMessage();
-                }
-            }
-
-
-        });
-        closebtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog_companyName.dismiss();
-            }
-        });
-
-        btn_GO.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (!job_Name_list.contains(autocomplete_job_name.getText().toString().trim())) {
-                    Toast.makeText(ProjectPhotosActivity.this, "Kindly enter a valid job name!", Toast.LENGTH_SHORT).show();
-                } else {
-                    try {
-                        dialog_companyName.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-                    callApiProjectPhotos();
-                }
-
-            }
-        });
-
-
-        dialog_companyName.show();
-
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -562,18 +279,22 @@ public class ProjectPhotosActivity extends AppCompatActivity {
                 return true;
             case R.id.spinner:
 
-                if (new ConnectionDetector(ProjectPhotosActivity.this).isConnectingToInternet()) {
+               /* if (new ConnectionDetector(ProjectPhotosActivity.this).isConnectingToInternet()) {
                     new get_company_job_id().execute();
                 } else {
                     Toast.makeText(ProjectPhotosActivity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                }
+                }*/
+                GotoSearchJobActivity();
 
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
+    private void GotoSearchJobActivity() {
+        Intent i = new Intent(this, SearchJobActivity.class);
+        startActivityForResult(i, Utility.CODE_SELECT_JOB);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -635,296 +356,6 @@ public class ProjectPhotosActivity extends AppCompatActivity {
             mAdapter = new MoviesAdapter(ProjectPhotosActivity.this,list_ProjectPhotos);
             recyclerView.setAdapter(mAdapter);
 
-        }
-    }
-
-    public class order_adapter extends BaseAdapter {
-        Context context;
-        private List<ProjectPhoto> beanArrayList;
-
-        public order_adapter(Context context, List<ProjectPhoto> beanArrayList) {
-            this.context = context;
-            this.beanArrayList = beanArrayList;
-        }
-
-        @Override
-        public int getCount() {
-            return beanArrayList.size();
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return i;
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(final int i, View convertview, ViewGroup viewGroup) {
-
-            final Holder holder;
-            final String FileName = beanArrayList.get(i).getFILENAME();
-            final String Descr = beanArrayList.get(i).getDescr();
-            final String job = beanArrayList.get(i).getJob();
-            final String createdate = beanArrayList.get(i).getCreatedate();
-            final String Action_status = beanArrayList.get(i).getActionStatus();
-            final String ImgName = beanArrayList.get(i).getImgName();
-
-            if (convertview == null) {
-                holder = new Holder();
-
-                convertview = LayoutInflater.from(context).inflate(R.layout.row_client_project_photos, null);
-                holder.index_no = (Button) convertview.findViewById(R.id.serial_no);
-
-                holder.thumbnail = (ImageView) convertview.findViewById(R.id.thumbnail);
-                holder.tv_file_name = (TextView) convertview.findViewById(R.id.tv_file_name);
-                holder.tv_job_name = (TextView) convertview.findViewById(R.id.tv_job_name);
-                holder.tv_dated = (TextView) convertview.findViewById(R.id.tv_dated);
-                holder.tv_status = (TextView) convertview.findViewById(R.id.tv_status);
-
-
-                convertview.setTag(holder);
-            } else {
-                holder = (Holder) convertview.getTag();
-            }
-
-            // holder.thumbnail.setTag(i);
-            holder.index_no.setText(String.valueOf(i + 1));
-
-            String url = URL_EP2 + "/upload/" + FileName;
-
-            //  holder.thumbnail.setTag(i); // this line
-
-            String fileExt = FileName.substring(FileName.lastIndexOf("."));
-            boolean isImage = Arrays.asList(Utility.imgExt).contains(fileExt);
-            boolean isDoc = Arrays.asList(Utility.docExt).contains(fileExt);
-            boolean isMedia = Arrays.asList(Utility.mediaExt).contains(fileExt);
-
-            if (isImage) {
-
-
-//
-                Picasso.with(context).load(url).into(holder.thumbnail);
-
-
-            } else if (isDoc) {
-                holder.thumbnail.setImageResource(R.drawable.doc);
-            } else if (isMedia) {
-                holder.thumbnail.setImageResource(R.drawable.media);
-            }
-
-
-            if (ImgName == null || ImgName.trim().equals("")) {
-                holder.tv_file_name.setText("Not available");
-            } else {
-                holder.tv_file_name.setText(ImgName);
-            }
-            if (job == null || job.trim().equals("")) {
-                holder.tv_job_name.setText("Not available");
-            } else {
-                holder.tv_job_name.setText(job);
-            }
-
-            if (createdate == null || createdate.trim().equals("")) {
-                holder.tv_dated.setText("Not available");
-            } else {
-                holder.tv_dated.setText(createdate);
-            }
-            if (Action_status == null || Action_status.trim().equals("")) {
-                holder.tv_status.setText("Not available");
-            } else {
-                holder.tv_status.setText(Action_status);
-            }
-
-            final ProjectPhoto obj = beanArrayList.get(i);
-            convertview.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, ProjectPhotoDetailActivity.class);
-                    intent.putExtra("obj", obj);
-
-                    startActivity(intent);
-                }
-            });
-
-            return convertview;
-        }
-
-
-        class Holder {
-            TextView tv_file_name, tv_job_name, tv_dated, tv_status;
-            ImageView thumbnail;
-            Button index_no;
-
-
-        }
-
-
-    }
-
-
-    private class get_company_job_id extends AsyncTask<String, Void, Void> {
-
-        final ProgressDialog ringProgressDialog = new ProgressDialog(ProjectPhotosActivity.this);
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            Getcompany_job_id();
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //  ringProgressDialog.setTitle("Kindly wait ...")
-            ringProgressDialog.setMessage(getString(R.string.Loading_text));
-            ringProgressDialog.setCancelable(false);
-            ringProgressDialog.show();
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            try {
-                ringProgressDialog.dismiss();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-          //  dialog_select_job();
-            showJobSearchDialogNew("Job(s)", ProjectPhotosActivity.this);
-        }
-    }
-    public void showJobSearchDialogNew(String dialog_title, final Context context) {
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-        LayoutInflater inflater = ProjectPhotosActivity.this.getLayoutInflater();
-        final View dialogView = inflater.inflate(R.layout.custom_dialog, null);
-        dialogBuilder.setView(dialogView);
-
-        final EditText autoText_TimeZone = (EditText) dialogView.findViewById(R.id.autoText_TimeZone);
-        final ListView listvw = (ListView) dialogView.findViewById(R.id.listview);
-
-        final ArrayList<Myspinner_timezone> list_temp = new ArrayList<>();
-        final ArrayList<Myspinner_timezone> list = new ArrayList<>();
-
-        for (int i = 0; i < job_Name_list_Desc.size(); i++) {
-            Myspinner_timezone myspinner_timezone = new Myspinner_timezone(job_Name_list_Desc.get(i), "", "");
-            list_temp.add(myspinner_timezone);
-        }
-
-        list.addAll(list_temp);
-
-        ArrayAdapter<Myspinner_timezone> adapter = new ArrayAdapter<Myspinner_timezone>(context,
-                android.R.layout.simple_list_item_1, android.R.id.text1, list_temp);
-        listvw.setAdapter(adapter);
-
-
-        listvw.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-
-
-                Myspinner_timezone spinner_ = (Myspinner_timezone) listvw.getItemAtPosition(position);
-                String job_txt = spinner_.getSpinnerText();
-
-                if (!job_txt.equals(getResources().getString(R.string.Select_Job))) {
-                    job_txt = job_txt.substring(0, job_txt.indexOf("\n"));
-                }
-
-                int index = job_Name_list.indexOf(job_txt);
-                jobID = job_id_list.get(index);
-                job_Name = job_Name_list.get(index);
-                autoText_TimeZone.setText(job_Name);
-                Log.e("jobId", jobID);
-                Log.e("job_Name", job_Name);
-
-                try {
-                    alertDialog1.dismiss();
-                } catch (Exception e) {
-                    e.getMessage();
-                }
-                callApiProjectPhotos();
-
-
-            }
-        });
-
-
-        autoText_TimeZone.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-
-                /*to clear autocomplete*/
-                final int DRAWABLE_LEFT = 0;
-                final int DRAWABLE_TOP = 1;
-                final int DRAWABLE_RIGHT = 2;
-                final int DRAWABLE_BOTTOM = 3;
-                try {
-                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                        if (motionEvent.getRawX() >= (autoText_TimeZone.getRight() - autoText_TimeZone.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                            // your action here
-                            autoText_TimeZone.setText("");
-                            return true;
-                        }
-                    }
-                } catch (Exception e) {
-                }
-
-
-                return false;
-            }
-        });
-
-        autoText_TimeZone.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                String text = autoText_TimeZone.getText().toString().trim().toLowerCase();
-                if (autoText_TimeZone.getText().length() == 0) {
-                    autoText_TimeZone.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-
-                    ArrayAdapter<Myspinner_timezone> adapter = new ArrayAdapter<Myspinner_timezone>(context,
-                            android.R.layout.simple_list_item_1, android.R.id.text1, list);
-                    listvw.setAdapter(adapter);
-
-
-                } else {
-                    autoText_TimeZone.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.clear, 0);
-                    list_temp.clear();
-
-                    for (int i = 0; i < list.size(); i++) {
-                        String listText = list.get(i).getSpinnerText().toLowerCase();
-                        if (listText.contains(text.toLowerCase())) {
-                            list_temp.add(list.get(i));
-                        }
-                    }
-
-                    ArrayAdapter<Myspinner_timezone> adapter = new ArrayAdapter<Myspinner_timezone>(context,
-                            android.R.layout.simple_list_item_1, android.R.id.text1, list_temp);
-                    listvw.setAdapter(adapter);
-
-                }
-            }
-        });
-
-
-        ///// new work
-
-
-        dialogBuilder.setTitle(dialog_title);
-        alertDialog1 = dialogBuilder.create();
-        if(!alertDialog1.isShowing()) {
-            alertDialog1.show();
         }
     }
 
@@ -1142,5 +573,21 @@ public class ProjectPhotosActivity extends AppCompatActivity {
             return moviesList.size();
         }
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == Utility.CODE_SELECT_JOB) {
+                String Job_Desc = data.getStringExtra("Job_Desc");
+                jobID = data.getStringExtra("Job_id");
+                job_Name = data.getStringExtra("JobName");
+                callApiProjectPhotos();
+
+
+            }
+        }
+    }
+
+
 }
 

@@ -63,7 +63,7 @@ import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.ProjectPhoto;
 import planet.info.skyline.model.ProjectPhotoComment;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.util.FileDownloader;
 import planet.info.skyline.util.Utility;
@@ -72,7 +72,6 @@ import static planet.info.skyline.network.Api.API_GetProjectFileComment;
 import static planet.info.skyline.network.Api.API_SaveProjectFileComment;
 import static planet.info.skyline.network.Api.API_UpdateProjectPhotoStatusByClient;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
-import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 import static planet.info.skyline.util.Utility.isValidEmail;
 
 //import planet.info.skyline.httpimage.HttpImageManager;
@@ -120,12 +119,12 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
        Client_id_Pk = "0";
 
 
-      //  comp_ID = sp.getString(Utility.COMPANY_ID_BILLABLE, "");
+
         comp_ID =   Shared_Preference.getCOMPANY_ID_BILLABLE(this);
 
-      //  dealerId = sp.getString(Utility.DEALER_ID, "");
+
         dealerId = Shared_Preference.getDEALER_ID(this);
-        //  ProjectPhoto mPhoto = (ProjectPhoto) getIntent().getSerializableExtra("obj");
+
         FileId = getIntent().getStringExtra("FileId");
         FileName = getIntent().getStringExtra("FileName");
         jobID = getIntent().getStringExtra("jobID");
@@ -522,7 +521,7 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
 
     public void ShareFileToGuest(String mail_id) {
 
-      // String userID = sp.getString("clientid", "");
+
         String userID= Shared_Preference.getLOGIN_USER_ID(ProjectFileDetailActivityNonClient.this);
 
         final String NAMESPACE = KEY_NAMESPACE + "";

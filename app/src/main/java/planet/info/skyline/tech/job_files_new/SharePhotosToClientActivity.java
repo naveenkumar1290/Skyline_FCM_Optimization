@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -48,7 +47,7 @@ import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.ClientUser;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_GetClientUserList;
@@ -105,13 +104,6 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         }
 
 
-       /* sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
-        ed = sp.edit();*/
-
-        //   Toast.makeText(getApplicationContext(), sp.getString(Utility.KEY_JOB_ID_FOR_JOBFILES,""), Toast.LENGTH_SHORT).show();
-        // Toast.makeText(getApplicationContext(), list_Selected_Project_Photos.toString(),Toast.LENGTH_SHORT).show();
-
-      //  CompanyId = sp.getString(Utility.COMPANY_ID_BILLABLE, "");
         CompanyId =   Shared_Preference.getCOMPANY_ID_BILLABLE(this);
         if (CompanyId.equals("")) {
             Toast.makeText(context, "Company id not found!", Toast.LENGTH_SHORT).show();
@@ -701,10 +693,10 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
 
 
-            //String LID = sp.getString("clientid", "");
+
             String LID= Shared_Preference.getLOGIN_USER_ID(SharePhotosToClientActivity.this);
             String CID = CompanyId;
-            //String JID = sp.getString(Utility.KEY_JOB_ID_FOR_JOBFILES, "");
+
             String JID = Shared_Preference.getJOB_ID_FOR_JOBFILES(SharePhotosToClientActivity.this);
             String FID = "";
 

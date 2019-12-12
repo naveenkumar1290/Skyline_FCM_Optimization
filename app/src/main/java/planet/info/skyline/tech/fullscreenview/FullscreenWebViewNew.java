@@ -36,7 +36,7 @@ import java.io.IOException;
 import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.tech.runtime_permission.PermissionActivity;
-import planet.info.skyline.tech.upload_photo.Upload_image_and_cooment_New;
+
 import planet.info.skyline.util.FileDownloader;
 import planet.info.skyline.util.Utility;
 

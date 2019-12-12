@@ -69,9 +69,8 @@ import planet.info.skyline.network.REST_API_Client;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.AppConstants;
 import planet.info.skyline.old_activity.BaseActivity;
-import planet.info.skyline.old_activity.Selectmissing;
 import planet.info.skyline.tech.runtime_permission.PermissionActivity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.CameraUtils;
 import planet.info.skyline.util.Utility;
 import retrofit2.Call;
@@ -657,7 +656,6 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
 
 
                     showprogressdialog();//
-                    // String tnam = sp.getString("tname", "arvind");
                     String tnam = Shared_Preference.getLOGIN_USERNAME(ClientLeavingWithCrate.this);
                     if (isBin) {
                         saveonnewloc = URL_EP1 + Api.API_CRATE_INFO_UPDATE + "cratesid=" + scancreateid + "&type=bin&aid=" + BinId + "&tech_id=" + tnam + "&print=yes";
@@ -714,13 +712,9 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
                 alertDialog.dismiss();
                 if (new ConnectionDetector(ClientLeavingWithCrate.this).isConnectingToInternet()) {
 
-                    ///////there is some wrong by Aman kaushik
-                    //	stopService(new Intent(ClientLeavingWithCrate.this, Timerclass.class));
-                    // String dd = sp.getString("jobid", "");
+
                     String dd = Shared_Preference.getSWO_ID(ClientLeavingWithCrate.this);
-                    //   String clientidme = sp.getString("clientid", "");
                     String clientidme = Shared_Preference.getLOGIN_USER_ID(ClientLeavingWithCrate.this);
-                    //   String tech = sp.getString("tname", "empty");
                     String tech = Shared_Preference.getLOGIN_USERNAME(ClientLeavingWithCrate.this);
                     Long jj = System.currentTimeMillis();
                     String sd = jj.toString();
@@ -739,10 +733,6 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
                     String dh = webhit;
                     String de = dh;
                     getjsonobject11();
-                    //   ed.putLong("deviceofftime", 0).commit();
-
-                    //   Boolean bb = sp.getBoolean("billable", false);
-
                     Intent i = new Intent(getApplicationContext(),
                             SubmitTimesheet.class);
                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -1196,14 +1186,10 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
 
                 if (remove_crete.startsWith(","))
                     remove_crete = remove_crete.substring(1, remove_crete.length());
-                //    String clientida = sp.getString("tname", "");
+
                 String clientida = Shared_Preference.getLOGIN_USERNAME(ClientLeavingWithCrate.this);
                 linkforconect = URL_EP1 + Api.API_CRATE_INFO_UPDATE + "cratesid=" + remove_crete + "&type=" + locationorbin + "&aid=" + location + "&tech_id=" + clientida + "&print=yes";
-                //linkforconect="http://exhibitpower.com/crate_info_updates.php?cratesid="+idd+"&type="+LocationType+"&aid="+LocationId+"&tech_id="+clientid+"&print=yes";
-                /*showd.dismiss();
-                finish();*/
                 linkforconect = linkforconect.replace(" ", "%20");
-                //Toast.makeText(getApplicationContext(), linkforconect, 10000).show();
                 slotmovcess();
 
 
@@ -2631,11 +2617,9 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
                 totalSize = totalSize + Size;
                 list_imageSize.add(String.valueOf(Size / 1000));
             }
-            //  String jid = sp.getString(Utility.KEY_JOB_ID_FOR_JOBFILES, "");
             String jid = Shared_Preference.getJOB_ID_FOR_JOBFILES(this);
-
             String url = URL_EP2 + "/UploadFileHandler.ashx?jid=" + jid;
-            /**/
+
 
             API_Interface APIInterface = REST_API_Client.getClient().create(API_Interface.class);
 

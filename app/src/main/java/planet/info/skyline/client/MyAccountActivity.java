@@ -20,6 +20,7 @@ import org.ksoap2.transport.HttpTransportSE;
 import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_GetClientUserInfo;
@@ -28,7 +29,7 @@ import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
 public class MyAccountActivity extends AppCompatActivity {
     ProgressDialog progressDoalog;
-    SharedPreferences sp;
+
 
 
     String CompName;
@@ -128,8 +129,9 @@ public class MyAccountActivity extends AppCompatActivity {
 
     public void fun_client_account_details() {
 
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
-        String Client_id = sp.getString(Utility.CLIENT_LOGIN_userID, "");
+
+        String Client_id = Shared_Preference.getCLIENT_LOGIN_userID(MyAccountActivity.this);
+
         final String NAMESPACE = SOAP_API_Client. KEY_NAMESPACE;
         final String URL =SOAP_API_Client.BASE_URL;
         final String SOAP_ACTION = KEY_NAMESPACE + API_GetClientUserInfo;

@@ -34,6 +34,7 @@ import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.ClientUserAll;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_GetClientUserListAll;
@@ -45,7 +46,6 @@ public class UserListActivity extends AppCompatActivity {
     Context context;
     TextView tv_msg;
     ArrayList<ClientUserAll> list_ClientUser = new ArrayList<>();
-    SharedPreferences sp;
     SwipeRefreshLayout pullToRefresh;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +55,9 @@ public class UserListActivity extends AppCompatActivity {
         tv_msg = findViewById(R.id.tv_msg);
         context = UserListActivity.this;
 
-
         setTitle(Utility.getTitle("Manage Users"));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
+
        /* if (new ConnectionDetector(context).isConnectingToInternet()) {
             new Async_ClientUserList().execute();
         } else {
@@ -110,9 +109,12 @@ public class UserListActivity extends AppCompatActivity {
         ArrayList<ClientUserAll> MasterUser = new ArrayList<>();
         ArrayList<ClientUserAll> NormalUser = new ArrayList<>();
 
-        String UserID = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        String _CompID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
-        String MasterStatus = sp.getString(Utility.CLIENT_LOGIN_Masterstatus, "");
+        String UserID =Shared_Preference.getCLIENT_LOGIN_userID(UserListActivity.this);
+
+        String _CompID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(UserListActivity.this);
+
+        String MasterStatus = Shared_Preference.getCLIENT_LOGIN_Masterstatus(UserListActivity.this);
 
         final String NAMESPACE = KEY_NAMESPACE + "";
         final String URL = SOAP_API_Client.BASE_URL;

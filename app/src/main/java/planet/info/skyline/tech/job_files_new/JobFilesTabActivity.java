@@ -20,7 +20,7 @@ import java.util.List;
 import planet.info.skyline.R;
 import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 

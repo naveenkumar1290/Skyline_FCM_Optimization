@@ -57,6 +57,10 @@
         <activity
             android:name=".tech.usage_charges.VendorsListActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".client.SearchJobActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".tech.task_plan.CompleteTaskActivity" />
         <activity android:name=".tech.task_plan.AttachmentListActivity" />
         <activity android:name=".tech.task_plan.TechnicianListActivity" />
@@ -85,8 +89,7 @@
 
         <uses-library
             android:name="org.apache.http.legacy"
-            android:required="false" /> <!-- android:theme="@style/MyAppCompatDialogTheme" -->
-        <!-- android:theme="@style/Theme.AppCompat.Dialog" -->
+            android:required="false" />
         <activity
             android:name=".tech.choose_job_company.SelectCompanyActivityNew"
             android:windowSoftInputMode="stateAlwaysHidden" /> <!-- android:theme="@style/MyAppCompatDialogTheme" -->
@@ -193,6 +196,10 @@
             android:label="@string/title_activity_rubishcratedataupload"
             android:screenOrientation="portrait"
             android:theme="@style/ThemeNoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".tech.upload_photo.UploadPhotosActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".tech.billable_timesheet.ClientLeavingWithCrate"

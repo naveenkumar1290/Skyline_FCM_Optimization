@@ -38,7 +38,7 @@ import planet.info.skyline.floating_view.ChatHeadService;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.tech.non_billable_timesheet.NonBillable_jobs;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_GetSkylineJob;
@@ -52,9 +52,9 @@ public class NonBillable_List_Activity extends BaseActivity {
     ProgressDialog pDialog;
     ListView l1;
     String nextact, webhit, clientidme;
-    SharedPreferences sp;
+
     int count;
-    SharedPreferences.Editor ed;
+
     List<HashMap<String, String>> data = new ArrayList<HashMap<String, String>>();
     HashMap<String, String> map;
 
@@ -68,9 +68,6 @@ public class NonBillable_List_Activity extends BaseActivity {
         pDialog.setMessage("Kindly wait");
         pDialog.setCancelable(false);
 
-        sp = getApplicationContext().getSharedPreferences("skyline",
-                getApplicationContext().MODE_PRIVATE);
-        ed = sp.edit();
 
         //  clientidme = sp.getString("clientid", "");
         clientidme = Shared_Preference.getLOGIN_USER_ID(this);
@@ -191,34 +188,6 @@ public class NonBillable_List_Activity extends BaseActivity {
             SubAdapter adapter = new SubAdapter(NonBillable_List_Activity.this, data);
             l1.setAdapter(adapter);
 
-           /*     String jobid = JOB_ID_forNonBillable;
-                String clientid = COMP_ID_forNonBillable;
-
-                nextact = "http://exhibitpower.com/crate_web_service.php?id="
-                        + clientid;
-                webhit = "http://exhibitpower2.com/Register/auto_generate_event2.aspx?done_by="
-                        + clientidme + "&swo_id=" + jobid + "&status=start";
-                ed.putString("link", nextact);
-                ed.putString("jobid", jobid);
-                ed.commit();
-
-                //  eventgenerate();
-
-                System.out.println("---------------------------------------------------- its is non billiable"); //by Aman Kaushik
-                Date dt = new Date();
-                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm ");
-                String time1 = sdf.format(dt);
-                System.out.println("time"+time1);
-                ed.putString("starttimenew",time1).commit();
-
-
-                Intent ii = new Intent(NonBillable_List_Activity.this, NonBillable_jobs.class);
-                Intent uuu = new Intent(NonBillable_List_Activity.this, Timerclass.class);
-                startService(uuu);
-                ii.putExtra("dataa", nextact);
-                ii.putExtra("clientid", clientid);
-                startActivity(ii);
-                finish();*/
 
         }
     }
@@ -280,30 +249,17 @@ public class NonBillable_List_Activity extends BaseActivity {
                             + clientid;
                     webhit = URL_EP2 + "/Register/auto_generate_event2.aspx?done_by="
                             + clientidme + "&swo_id=" + jobid + "&status=start";
-                    //   ed.putString("link", nextact);
                     Shared_Preference.setLINK(NonBillable_List_Activity.this, nextact);
-
-                    //   ed.putString("jobid", jobid);
                     Shared_Preference.setSWO_ID(NonBillable_List_Activity.this, jobid);
-                    ed.commit();
-
-                    //  eventgenerate();
 
                     System.out.println("---------------------------------------------------- its is non billiable"); //by Aman Kaushik
                     Date dt = new Date();
                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm ");
                     String time1 = sdf.format(dt);
                     System.out.println("time" + time1);
-                    //  ed.putString("starttimenew", time1).commit();
-                  //  Shared_Preference.setCLOCK_START_TIME(NonBillable_List_Activity.this, time1);
-
-                    //ed.putBoolean(Utility.TIMER_STARTED_FROM_ADMIN_CLOCK_MODULE, true).commit();//nks
-                    Shared_Preference.setTIMER_STARTED_FROM_ADMIN_CLOCK_MODULE(NonBillable_List_Activity.this,true);
-                    ed.putString(Utility.CLIENT_ID_FOR_NON_BILLABLE, clientid).commit();//nks
+                         Shared_Preference.setTIMER_STARTED_FROM_ADMIN_CLOCK_MODULE(NonBillable_List_Activity.this,true);
 
                     Intent ii = new Intent(NonBillable_List_Activity.this, NonBillable_jobs.class);
-                   /* Intent uuu = new Intent(NonBillable_List_Activity.this, Timerclass.class);
-                    startService(uuu);*/
 
                     showChatHead(NonBillable_List_Activity.this, true);
                     ii.putExtra("dataa", nextact);

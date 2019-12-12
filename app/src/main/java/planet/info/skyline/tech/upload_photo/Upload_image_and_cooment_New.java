@@ -39,11 +39,6 @@ import com.bumptech.glide.Glide;
 import com.darsh.multipleimageselect.activities.AlbumSelectActivity;
 import com.darsh.multipleimageselect.models.Image;
 import com.github.paolorotolo.expandableheightlistview.ExpandableHeightListView;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.MultiplePermissionsReport;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import org.json.JSONObject;
 import org.ksoap2.SoapEnvelope;
@@ -70,10 +65,10 @@ import planet.info.skyline.network.ProgressRequestBody;
 import planet.info.skyline.network.REST_API_Client;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.AppConstants;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
 import planet.info.skyline.tech.job_files_new.SharePhotosToClientActivity;
 import planet.info.skyline.tech.runtime_permission.PermissionActivity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
 import planet.info.skyline.util.CameraUtils;
 import planet.info.skyline.util.Utility;
 import retrofit2.Call;
@@ -95,7 +90,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     File file1;
 
 
-    String urlofwebservice2 =   SOAP_API_Client.BASE_URL;
+    String urlofwebservice2 = SOAP_API_Client.BASE_URL;
 
     AlertDialog alertDialog;
     String selectedJobId;//nks
@@ -115,15 +110,18 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     ProgressDialog uploadProgressDialog;
     int Count_Image_Uploaded = 0;
 
+    Context mContext;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mContext = Upload_image_and_cooment_New.this;
         setContentView(R.layout.activity_upload_image_and_cooment);
-        pDialog = new ProgressDialog(Upload_image_and_cooment_New.this);
+        pDialog = new ProgressDialog(mContext);
         pDialog.setMessage(getString(R.string.Loading_text));
         pDialog.setCancelable(false);
+
 
         userRole = Shared_Preference.getUSER_ROLE(this);
         final boolean TIMER_STARTED_FROM_BILLABLE_MODULE = Shared_Preference.getTIMER_STARTED_FROM_BILLABLE_MODULE(this);
@@ -148,10 +146,8 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     }
 
 
-
-
     public void opendilogforattachfileandimage_custom() {
-        final Dialog dialog = new Dialog(Upload_image_and_cooment_New.this);
+        final Dialog dialog = new Dialog(mContext);
         // dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.openattachmentdilog_new);
         dialog.getWindow().setBackgroundDrawable(
@@ -186,11 +182,11 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
             public void onClick(View v) {
                 dialog.dismiss();
 
-                if (PermissionActivity.CheckingPermissionIsEnabledOrNot( Upload_image_and_cooment_New.this)) {
+                if (PermissionActivity.CheckingPermissionIsEnabledOrNot(mContext)) {
                     captureImage();
                 } else {
-                    Intent i= new Intent(getApplicationContext(),PermissionActivity.class);
-                    startActivityForResult(i,Utility.REQUEST_CODE_PERMISSIONS);
+                    Intent i = new Intent(getApplicationContext(), PermissionActivity.class);
+                    startActivityForResult(i, Utility.REQUEST_CODE_PERMISSIONS);
                 }
 
 
@@ -201,7 +197,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                Intent intent = new Intent(Upload_image_and_cooment_New.this, AlbumSelectActivity.class);
+                Intent intent = new Intent(mContext, AlbumSelectActivity.class);
                 intent.putExtra(com.darsh.multipleimageselect.helpers.Constants.INTENT_EXTRA_LIMIT, 50);
                 startActivityForResult(intent, AppConstants.GALLERY_CAPTURE_IMAGE_REQUEST_CODE);
 
@@ -261,7 +257,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     }
 
     public void dialog_sharePhotos() {
-        final Dialog showd = new Dialog(Upload_image_and_cooment_New.this);
+        final Dialog showd = new Dialog(mContext);
         showd.requestWindowFeature(Window.FEATURE_NO_TITLE);
         showd.setContentView(R.layout.dialog_yes_no);
         showd.getWindow().setBackgroundDrawable(
@@ -309,7 +305,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
                 showd.dismiss();
 
 
-                Intent intent = new Intent(Upload_image_and_cooment_New.this, SharePhotosToClientActivity.class);
+                Intent intent = new Intent(mContext, SharePhotosToClientActivity.class);
                 Bundle args = new Bundle();
                 args.putSerializable("ARRAYLIST", (Serializable) list_UploadedImageID);
                 intent.putExtra("BUNDLE", args);
@@ -419,7 +415,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     }
 
     public void finishs() {
-        Intent iiu = new Intent(Upload_image_and_cooment_New.this, MainActivity.class);
+        Intent iiu = new Intent(mContext, MainActivity.class);
         iiu.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
                 | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(iiu);
@@ -429,8 +425,8 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     public void exitMethod() {
 
 
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(Upload_image_and_cooment_New.this);
-        LayoutInflater inflater = LayoutInflater.from(Upload_image_and_cooment_New.this);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext);
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         final View dialogView = inflater.inflate(R.layout.dialog_yes_no, null);
         dialogView.setBackgroundDrawable(
                 new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -452,7 +448,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
             @Override
             public void onClick(View view) {
                 alertDialog.dismiss();
-                Intent in = new Intent(Upload_image_and_cooment_New.this, MainActivity.class);
+                Intent in = new Intent(mContext, MainActivity.class);
                 startActivity(in);
                 finishs();
             }
@@ -479,7 +475,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
 
     private void dialog_Multiple_image_Desciption() {
 
-        final Dialog dialog_image = new Dialog(Upload_image_and_cooment_New.this);
+        final Dialog dialog_image = new Dialog(mContext);
         dialog_image.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog_image.setContentView(R.layout.dialog_photo_comment_list_1);
         try {
@@ -501,7 +497,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
         Button Btn_Submit = (Button) dialog_image.findViewById(R.id.Btn_Submit);
         Button Btn_AddMorePhotos = (Button) dialog_image.findViewById(R.id.Btn_AddMorePhotos);
         Button Btn_Back = (Button) dialog_image.findViewById(R.id.Btn_Back);
-        String clid = Shared_Preference.getLOGIN_USER_ID(Upload_image_and_cooment_New.this);
+        String clid = Shared_Preference.getLOGIN_USER_ID(mContext);
         String name = Shared_Preference.getLOGIN_USERNAME(this);
 
 //nks
@@ -528,7 +524,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
 
         ///////////////////////////////////////////////
 
-        adpter = new LvAdapter(Upload_image_and_cooment_New.this);
+        adpter = new LvAdapter(mContext);
         listvw_images.setAdapter(adpter);
         listvw_images.setExpanded(true);
         dialog_image.show();
@@ -547,10 +543,10 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
                     ////////////////////////////////
                     Utility.hideKeyboard(Upload_image_and_cooment_New.this);
                     /////////////////////
-                    if (new ConnectionDetector(Upload_image_and_cooment_New.this).isConnectingToInternet()) {
+                    if (new ConnectionDetector(mContext).isConnectingToInternet()) {
                         multipartImageUpload();
                     } else {
-                        Toast.makeText(Upload_image_and_cooment_New.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -574,8 +570,8 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
             public void onClick(View v) {
 
 
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(Upload_image_and_cooment_New.this);
-                LayoutInflater inflater = LayoutInflater.from(Upload_image_and_cooment_New.this);
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext);
+                LayoutInflater inflater = LayoutInflater.from(mContext);
                 final View dialogView = inflater.inflate(R.layout.dialog_yes_no, null);
                 dialogView.setBackgroundDrawable(
                         new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -597,7 +593,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
                     @Override
                     public void onClick(View view) {
                         alertDialog.dismiss();
-                        Intent in = new Intent(Upload_image_and_cooment_New.this, MainActivity.class);
+                        Intent in = new Intent(mContext, MainActivity.class);
                         startActivity(in);
                         finishs();
                     }
@@ -633,7 +629,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
 
             int ItemNo = i + 1;
             if (textDesc.equalsIgnoreCase("")) {
-                Toast.makeText(Upload_image_and_cooment_New.this,
+                Toast.makeText(mContext,
                         "Please enter description of photo " + ItemNo, Toast.LENGTH_LONG).show();
                 val = 0;
                 break;
@@ -662,7 +658,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
 
                     dialog_Multiple_image_Desciption();
                 } else {
-                    Uri mImageCaptureUri = FileProvider.getUriForFile(Upload_image_and_cooment_New.this, Upload_image_and_cooment_New.this.getApplicationContext().getPackageName() + ".provider", file1);
+                    Uri mImageCaptureUri = FileProvider.getUriForFile(mContext, mContext.getApplicationContext().getPackageName() + ".provider", file1);
                     try {
                         path = getPath(mImageCaptureUri,
                                 Upload_image_and_cooment_New.this); // from Gallery
@@ -676,9 +672,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
                     }
 
                 }
-            }
-
-           else if (requestCode == AppConstants.CAMERA_CAPTURE_IMAGE_REQUEST_CODE) {
+            } else if (requestCode == AppConstants.CAMERA_CAPTURE_IMAGE_REQUEST_CODE) {
                 path = imageStoragePath;
                 int orientation = Utility.getExifOrientation(path);
                 try {
@@ -695,8 +689,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
                 dialog_Multiple_image_Desciption();
 
 
-            }
-            else   if ( requestCode == Utility.CODE_SELECT_COMPANY) {
+            } else if (requestCode == Utility.CODE_SELECT_COMPANY) {
 
                 //   if (resultCode == Activity.RESULT_OK) {
                 try {
@@ -704,25 +697,21 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
                     String jobID = data.getStringExtra("JobID");
                     String company_Name = data.getStringExtra("CompName");
                     String job_Name = data.getStringExtra("JobName");
-
                     selectedJobId = jobID;
-
                     opendilogforattachfileandimage_custom();
-
                 } catch (Exception e) {
                     e.getMessage();
                     Toast.makeText(getApplicationContext(), "Exception caught!", Toast.LENGTH_SHORT).show();
                 }
 
-            }
-            else   if ( requestCode == Utility.REQUEST_CODE_PERMISSIONS) {
+            } else if (requestCode == Utility.REQUEST_CODE_PERMISSIONS) {
                 opendilogforattachfileandimage_custom();
 
             }
         }
-       if(resultCode == RESULT_CANCELED){
-           finishs();
-       }
+        if (resultCode == RESULT_CANCELED) {
+            finishs();
+        }
 
 
     }
@@ -747,7 +736,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     private void multipartImageUpload() {
         if (Count_Image_Uploaded < list_ImageDescData.size())
             Count_Image_Uploaded++;
-        uploadProgressDialog = new ProgressDialog(Upload_image_and_cooment_New.this);
+        uploadProgressDialog = new ProgressDialog(mContext);
         // uploadProgressDialog.setMessage("Uploading , Please wait..");
         uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_ImageDescData.size() + ", Please wait..");
         uploadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -860,8 +849,8 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     }
 
     private void dialog_photo_upload_failed() {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(Upload_image_and_cooment_New.this);
-        LayoutInflater inflater = LayoutInflater.from(Upload_image_and_cooment_New.this);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext);
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         final View dialogView = inflater.inflate(R.layout.dialog_yes_no, null);
         dialogView.setBackgroundDrawable(
                 new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -1002,8 +991,8 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
                 public void onClick(View v) {
 
 
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(Upload_image_and_cooment_New.this);
-                    LayoutInflater inflater = LayoutInflater.from(Upload_image_and_cooment_New.this);
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext);
+                    LayoutInflater inflater = LayoutInflater.from(mContext);
                     final View dialogView = inflater.inflate(R.layout.dialog_yes_no, null);
                     dialogView.setBackgroundDrawable(
                             new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -1029,7 +1018,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
                             list_ImageDescData.remove(index);
                             notifyDataSetChanged();
                             if (list_ImageDescData.size() < 1) {
-                                Intent in = new Intent(Upload_image_and_cooment_New.this, MainActivity.class);
+                                Intent in = new Intent(mContext, MainActivity.class);
                                 startActivity(in);
                                 finishs();
                             }

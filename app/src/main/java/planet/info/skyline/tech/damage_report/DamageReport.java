@@ -63,8 +63,7 @@ import planet.info.skyline.network.REST_API_Client;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.AppConstants;
 import planet.info.skyline.old_activity.BaseActivity;
-import planet.info.skyline.tech.billable_timesheet.SubmitTimesheet;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.CameraUtils;
 import planet.info.skyline.util.Myspinner;
 import planet.info.skyline.util.Utility;
@@ -521,9 +520,9 @@ public class DamageReport extends BaseActivity implements ProgressRequestBody.Up
         request.addProperty("desc", Desc);
         request.addProperty("fname", imageName);
         if (Shared_Preference.get_EnterTimesheetByAWO(DamageReport.this)) {
-            request.addProperty("Type", "2");
+            request.addProperty("Type", Utility.TYPE_AWO);
         } else {
-            request.addProperty("Type", "1");
+            request.addProperty("Type", Utility.TYPE_SWO);
         }
 
 

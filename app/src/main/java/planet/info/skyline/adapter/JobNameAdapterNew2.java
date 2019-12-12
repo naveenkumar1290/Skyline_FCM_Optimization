@@ -26,7 +26,6 @@ public class JobNameAdapterNew2 extends ArrayAdapter {
 
     private List<Job_2> dataList;
     private Context mContext;
-    private int itemLayout;
 
     private ListFilter listFilter = new ListFilter();
     private List<Job_2> dataListAllItems;
@@ -37,7 +36,7 @@ public class JobNameAdapterNew2 extends ArrayAdapter {
         super(context, resource, storeDataLst);
         dataList = storeDataLst;
         mContext = context;
-        itemLayout = resource;
+
     //    this.listener = listener;
     }
 

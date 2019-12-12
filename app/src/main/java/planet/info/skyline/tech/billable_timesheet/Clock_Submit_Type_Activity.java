@@ -23,19 +23,11 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-
 import planet.info.skyline.R;
-import planet.info.skyline.RequestControler.MyAsyncTask;
-import planet.info.skyline.RequestControler.ResponseInterface;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.home.MainActivity;
-import planet.info.skyline.network.Api;
 import planet.info.skyline.old_activity.BaseActivity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 public class Clock_Submit_Type_Activity extends BaseActivity {

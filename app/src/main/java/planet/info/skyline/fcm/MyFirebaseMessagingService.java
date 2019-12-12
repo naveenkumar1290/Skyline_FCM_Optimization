@@ -22,12 +22,11 @@ import org.ksoap2.transport.HttpTransportSE;
 import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.R;
 import planet.info.skyline.network.SOAP_API_Client;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
-import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
@@ -46,13 +45,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onNewToken(String s) {
         super.onNewToken(s);
         Log.e("NEW_TOKEN", s);
-      /*  SharedPreferences sp = this.getSharedPreferences("skyline", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sp.edit();
-        ed.putString(Utility.FCM_TOKEN, s).apply();*/
+
 
         Shared_Preference.setFCM_TOKEN(this,s);
-
-       // String empId = sp.getString("clientid", "");
 
         String empId =    Shared_Preference.getLOGIN_USER_ID(this);
 
@@ -89,12 +84,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     public void UpdateTokenOnServer() {
-       // SharedPreferences sp = this.getSharedPreferences("skyline", MODE_PRIVATE);
         String empId =    Shared_Preference.getLOGIN_USER_ID(this);
-     //   String fcm_token = sp.getString(Utility.FCM_TOKEN, "");
-
         String fcm_token =   Shared_Preference.getFCM_TOKEN(this);
-
         final String NAMESPACE = KEY_NAMESPACE;
         final String URL = urlofwebservice;
         final String SOAP_ACTION = KEY_NAMESPACE + "";

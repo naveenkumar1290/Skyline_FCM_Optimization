@@ -3,6 +3,7 @@ package planet.info.skyline.RequestControler;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.widget.Button;
 
 import org.json.JSONObject;
 import org.ksoap2.SoapEnvelope;
@@ -26,26 +27,30 @@ public class MyAsyncTask extends AsyncTask<Void, Void, String> {
     private String API_NAME;
     private JSONObject INPUT;
     private ProgressDialog pDialog;
-
+    private Boolean showProgress;
     // String Response="";
-    public MyAsyncTask(Context context, ResponseInterface responseInterface, String API_NAME, JSONObject INPUT) {
+    public MyAsyncTask(Context context,Boolean showProgress, ResponseInterface responseInterface, String API_NAME, JSONObject INPUT) {
         this.context = context;
         this.responseInterface = responseInterface;
         this.API_NAME = API_NAME;
         this.INPUT = INPUT;
+        this.showProgress = showProgress;
     }
 
     protected void onPreExecute() {
-        try {
-            pDialog = new ProgressDialog(context);
-            pDialog.setMessage(context.getString(R.string.Loading_text));
-            pDialog.setCancelable(false);
-            if (!pDialog.isShowing()) {
-                pDialog.show();
+        if(showProgress) {
+            try {
+                pDialog = new ProgressDialog(context);
+                pDialog.setMessage(context.getString(R.string.Loading_text));
+                pDialog.setCancelable(false);
+                if (!pDialog.isShowing()) {
+                    pDialog.show();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
     }
 
     protected String doInBackground(Void... strings) {
@@ -59,13 +64,15 @@ public class MyAsyncTask extends AsyncTask<Void, Void, String> {
     }*/
 
     protected void onPostExecute(String response) {
-        try {
-            if (pDialog.isShowing()) {
-                pDialog.dismiss();
-            }
-        } catch (Exception e) {
-            e.getMessage();
-        }
+       if(showProgress) {
+           try {
+               if (pDialog.isShowing()) {
+                   pDialog.dismiss();
+               }
+           } catch (Exception e) {
+               e.getMessage();
+           }
+       }
         responseInterface.handleResponse(response, API_NAME);
     }
 

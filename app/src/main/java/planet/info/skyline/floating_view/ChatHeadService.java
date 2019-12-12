@@ -23,7 +23,7 @@ import planet.info.skyline.tech.billable_timesheet.Clock_Submit_Type_Activity;
 import planet.info.skyline.tech.non_billable_timesheet.NonBillable_jobs;
 import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 

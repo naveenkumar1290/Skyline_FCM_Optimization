@@ -1,7 +1,5 @@
 package planet.info.skyline.tech.task_plan;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -9,17 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import planet.info.skyline.R;
-import planet.info.skyline.tech.job_files_new.SectionsPagerAdapter;
-import planet.info.skyline.tech.job_files_new.SharePhotosToClientActivity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 

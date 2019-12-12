@@ -24,7 +24,7 @@ import org.json.JSONObject;
 import planet.info.skyline.R;
 import planet.info.skyline.controller.AppController;
 import planet.info.skyline.tech.billable_timesheet.SubmitTimesheet;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
 
@@ -77,18 +77,7 @@ String webhit="";
 				webhit =  URL_EP2+"/Register/auto_generate_event2.aspx?done_by="
 						+ clientidme + "&swo_id=" + dd + "&status=stop";
 				getjsonobject1();
-				// deviceofftime
-			//	ed.putLong("deviceofftime", 0).commit();
-				// Boolean bb = sp.getBoolean("billable", false);
-				// if (bb) {
-				// // callifworkwithnonbillable();
-				// // dialogforshowingbillornonbill();
-				// callifworkwithnonbillable();
-				// } else {
-				// finish();
-				// }
-				// finish();
-				/////alertforsurework();
+
 				startActivity(new Intent(DamagwRubishnewpack.this, SubmitTimesheet.class));
 				finish();
 			 }catch(Exception e){

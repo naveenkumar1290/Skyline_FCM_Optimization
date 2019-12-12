@@ -350,13 +350,7 @@ public class Show_Jobs_Activity extends BaseActivity {
                 holder = new Holder();
 
                 convertview = LayoutInflater.from(context).inflate(R.layout.jobfile_list_item, null);
-              /*  boolean show_job_new = sp.getBoolean(Utility.SHOW_JOB_FILE_NEW, false);
 
-                if (show_job_new) {
-                    convertview = LayoutInflater.from(context).inflate(R.layout.row_job_files, null);
-                } else {
-                    convertview = LayoutInflater.from(context).inflate(R.layout.jobfile_list_item, null);
-                }*/
 
                 holder.index_no = (Button) convertview.findViewById(R.id.serial_no);
                 holder.Source = (TextView) convertview.findViewById(R.id.source);
@@ -616,14 +610,6 @@ public class Show_Jobs_Activity extends BaseActivity {
             if (convertview == null) {
                 holder = new Holder();
                 convertview = LayoutInflater.from(context).inflate(R.layout.jobfile_list_item, null);
-
-                /*boolean show_job_new = sp.getBoolean(Utility.SHOW_JOB_FILE_NEW, false);
-
-                if (show_job_new) {
-                    convertview = LayoutInflater.from(context).inflate(R.layout.row_job_files, null);
-                } else {
-                    convertview = LayoutInflater.from(context).inflate(R.layout.jobfile_list_item, null);
-                }*/
 
                 holder.index_no = (Button) convertview.findViewById(R.id.serial_no);
                 holder.Source = (TextView) convertview.findViewById(R.id.source);

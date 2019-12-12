@@ -6,11 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -37,7 +34,7 @@ import planet.info.skyline.controller.AppController;
 import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.tech.billable_timesheet.Clock_Submit_Type_Activity;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
@@ -562,19 +559,6 @@ public class Updatecreatelocation extends BaseActivity {
                     String newloc = jobj.getString("cur_loacation");
                     descsbout = jobj.getString("description");
                     catetype = jobj.getString("type_name");
-//			newlocr=newloc;
-		/*	et1.setText(locationn);
-			newlocr=locationn;//
-			et2.setText(cati);
-			ed.putString("catidnew", cati).commit();
-			et3.setText(newloc);
-			*/
-//			et1.setText(locationn);
-//			newlocr=locationn;//
-//			String unique_craye_numb=jobj.getString("uni_crates");
-//			et2.setText(unique_craye_numb);
-//			ed.putString("catidnew", cati).commit();
-//			et3.setText(mylocation);
 
                     if (casee.equalsIgnoreCase("1") || casee.equals("1") || casee == "1") {
                         et1.setText(mylocation);
@@ -582,7 +566,7 @@ public class Updatecreatelocation extends BaseActivity {
                         String unique_craye_numb = jobj.getString("uni_crates");
                         unique_crateid = unique_craye_numb;
                         et2.setText(unique_craye_numb);
-                      //  ed.putString("catidnew", cati).commit();
+
                         Shared_Preference.setCrate_ID(Updatecreatelocation.this,cati);
                         et3.setText(newloc);
                         et4.setText(catetype);
@@ -593,7 +577,7 @@ public class Updatecreatelocation extends BaseActivity {
                         String unique_craye_numb = jobj.getString("uni_crates");
                         unique_crateid = unique_craye_numb;
                         et2.setText(unique_craye_numb);
-                       // ed.putString("catidnew", cati).commit();
+
                         Shared_Preference.setCrate_ID(Updatecreatelocation.this,cati);
                         et3.setText(mylocation);
                         et4.setText(catetype);

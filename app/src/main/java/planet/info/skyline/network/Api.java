@@ -112,7 +112,9 @@ public class Api {
     public static final String API_FETCH_PROJECTFILE = "GetrojectFile";
 
     public static final String API_VerifyLaborCode = "bind_code1CheckCode"; //Staging- live
-    public static final String API_getTimesheetAuth = "GetTimeSheetTechPerm"; //Staging- live
+
+  //  public static final String API_getTimesheetAuth = "GetTimeSheetTechPerm"; //live
+    public static final String API_getTimesheetAuth = "GetTimeSheetTechPerm2"; //Staging
 
     public static final String API_GetJobFileByTextJob11withrole = "GetJobFileByTextJob11withrole"; //old modified for swo files
    // public static final String API_GetJobFileByTextJob11withrole = "GetAllFilewithrole";  //new satging

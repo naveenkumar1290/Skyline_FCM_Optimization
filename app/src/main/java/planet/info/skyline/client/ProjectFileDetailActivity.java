@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.List;
 
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.fullscreenview.FullscreenImageView;
 import planet.info.skyline.tech.fullscreenview.FullscreenWebView;
 import planet.info.skyline.R;
@@ -78,7 +79,7 @@ import static planet.info.skyline.util.Utility.isValidEmail;
 
 public class ProjectFileDetailActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
     String status = "", Comment = "", SnoozDate = "";
-    SharedPreferences sp;
+
     String Client_id_Pk, comp_ID, jobID, FileId, dealerId, googleId;
     // String commentFileShare = "";
     String MailId = "";
@@ -114,11 +115,14 @@ public class ProjectFileDetailActivity extends AppCompatActivity implements Date
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
       //  mHttpImageManager = ((AppController) ProjectFileDetailActivityNonClient.this.getApplication()).getHttpImageManager();
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
 
-        Client_id_Pk = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        comp_ID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
-        dealerId = sp.getString(Utility.CLIENT_LOGIN_DealerID, "");
+        Client_id_Pk = Shared_Preference.getCLIENT_LOGIN_userID(ProjectFileDetailActivity.this);
+
+        comp_ID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(ProjectFileDetailActivity.this);
+
+        dealerId =
+                Shared_Preference.getCLIENT_LOGIN_DealerID(ProjectFileDetailActivity.this);
 
         //  ProjectPhoto mPhoto = (ProjectPhoto) getIntent().getSerializableExtra("obj");
         FileId = getIntent().getStringExtra("FileId");

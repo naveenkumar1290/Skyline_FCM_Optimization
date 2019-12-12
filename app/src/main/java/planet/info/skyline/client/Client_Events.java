@@ -38,6 +38,7 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.EventModel;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
@@ -53,7 +54,7 @@ public class Client_Events extends AppCompatActivity {
     Timer timer;
     TextView tv_msg;
     ArrayList<EventModel> list_Event = new ArrayList<>();
-    SharedPreferences sp;
+
     String Client_id_Pk, comp_ID;
     private int currentPage = 0;
     private ViewPager mViewPager;
@@ -70,7 +71,7 @@ public class Client_Events extends AppCompatActivity {
         tv_msg = findViewById(R.id.tv_msg);
         //  setTitle("Events");
         myContext = Client_Events.this;
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
+
         setTitle(Utility.getTitle("Events"));
         try {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -79,8 +80,14 @@ public class Client_Events extends AppCompatActivity {
         //  sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
 
         /**************/
-        Client_id_Pk = sp.getString(Utility.CLIENT_LOGIN_userID, "");
-        comp_ID = sp.getString(Utility.CLIENT_LOGIN_CompID, "");
+
+
+        Client_id_Pk = Shared_Preference.getCLIENT_LOGIN_userID(Client_Events.this);
+
+
+        comp_ID =
+                Shared_Preference.getCLIENT_LOGIN_CompID(Client_Events.this);
+
     /*     jobID = "-1"; //by default
         Agency = "0";// by default
         job_Name = getApplicationContext().getResources().getString(R.string.Select_Job);

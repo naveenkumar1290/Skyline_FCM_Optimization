@@ -37,7 +37,7 @@ import planet.info.skyline.model.MySwo;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
-import planet.info.skyline.tech.shared_preference.Shared_Preference;
+import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
@@ -217,9 +217,9 @@ public class SwoListActivity extends AppCompatActivity {
         request.addProperty("user", userID);
         request.addProperty("DealerID", dealerId);
         if (Shared_Preference.get_EnterTimesheetByAWO(SwoListActivity.this)) {
-            request.addProperty("Type", "2");
+            request.addProperty("Type", Utility.TYPE_AWO);
         } else {
-            request.addProperty("Type", "1");
+            request.addProperty("Type", Utility.TYPE_SWO);
         }
 
 
@@ -295,9 +295,9 @@ public class SwoListActivity extends AppCompatActivity {
 
         request.addProperty("DealerID", dealerId);
         if (Shared_Preference.get_EnterTimesheetByAWO(SwoListActivity.this)) {
-            request.addProperty("Type", "2");
+            request.addProperty("Type", Utility.TYPE_AWO);
         } else {
-            request.addProperty("Type", "1");
+            request.addProperty("Type", Utility.TYPE_SWO);
         }
 
 
@@ -599,9 +599,9 @@ public class SwoListActivity extends AppCompatActivity {
             SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
             request.addProperty("AWO_SWO", awo_swo_id);
             if (Shared_Preference.get_EnterTimesheetByAWO(SwoListActivity.this)) {
-                request.addProperty("type", "2");
+                request.addProperty("type", Utility.TYPE_AWO);
             } else {
-                request.addProperty("type", "1");
+                request.addProperty("type", Utility.TYPE_SWO);
             }
 
 
