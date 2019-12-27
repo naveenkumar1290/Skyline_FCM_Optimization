@@ -69,6 +69,7 @@ import planet.info.skyline.network.Api;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.old_activity.Packing_Activity;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
 import planet.info.skyline.tech.damage_report.DamageReportNew;
@@ -76,7 +77,7 @@ import planet.info.skyline.tech.job_files_new.JobFilesTabActivity;
 import planet.info.skyline.tech.locate_crates.LocateCrates;
 import planet.info.skyline.tech.material_move.SlotMoveactivity;
 import planet.info.skyline.tech.update_timesheet.TimeSheetList1Activity;
-import planet.info.skyline.tech.upload_photo.Upload_image_and_cooment_New;
+import planet.info.skyline.tech.upload_photo.UploadPhotosActivity;
 import planet.info.skyline.tech.usage_charges.UsageChargesListActivity;
 import planet.info.skyline.tech.whats_inside.ShowWhatsInside_MainActivity;
 import planet.info.skyline.util.Utility;
@@ -85,6 +86,7 @@ import static planet.info.skyline.network.Api.API_GetEmployee_Roles;
 import static planet.info.skyline.network.Api.API_GetVersion;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class MainActivity extends BaseActivity implements ResponseInterface {
@@ -129,18 +131,17 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
 
     Context context;
+    ProgressHUD mProgressHUD;
     private long lastClickTime = 0;
     private String CLOCK_IN_BILLABLE_CODE = "";
     private String CLOCK_OUT_BILLABLE_CODE = "";
     private String IN_PROGRESS_SWO_AWO_STATUS = "";
     private int BillableLaborCodesLength = 0;
-
     private boolean DamageReportModuleClicked = false;
     private boolean BillableJobModuleClicked = false;
     private boolean AdminTimesheetModuleClicked = false;
     private boolean UsageChargeModuleClicked = false;
     private boolean UploadPhotoModuleClicked = false;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -245,15 +246,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             // for clock in - clock out
 
             if (JobName.equalsIgnoreCase(Utility.CLOCK_IN) || JobName.equalsIgnoreCase(Utility.CLOCK_OUT)) {
-
                 CallAPI_FetchClockInClockOutCodes();
-                //CallAPI_SubmitClockInClockOut();
-
-              /*  if (new ConnectionDetector(context).isConnectingToInternet()) {
-                    new Async_Submit_Billable_Timesheet_New().execute();
-                } else {
-                    Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                }*/
             } else if (STARTING_BILLABLE_JOB_by_SCAN_QR_CODE) {
                 prepareDataForClock(Comp_ID, Swo_Id, JOB_ID);
             } else {
@@ -274,23 +267,21 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
     public void showprogressdialog() {
         try {
-            if (!(pDialog.isShowing())) {
-                pDialog.show();
-            }
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
         } catch (Exception e) {
             e.getMessage();
         }
+
     }
 
     public void hideprogressdialog() {
         try {
-            if ((pDialog.isShowing())) {
-                pDialog.dismiss();
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
             }
         } catch (Exception e) {
             e.getMessage();
         }
-
     }
 
     @SuppressLint("NewApi")
@@ -421,11 +412,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                 } else {
                     Shared_Preference.setIS_STARTING_BILLABLE_JOB(context, true);
                     CallAPI_CheckPermission();
-                   /* if (new ConnectionDetector(context).isConnectingToInternet()) {
-                         new async_get_BillableCodes_PausedJobList().execute();
-                    } else {
-                        Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                    }*/
 
                 }
 
@@ -447,21 +433,11 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                     if (!isTimerRunningFromAdminClockModule) {
                         Shared_Preference.setIS_STARTING_BILLABLE_JOB(context, false);
                         CallAPI_CheckPermission();
-                       // CallAPI_FetchNonBillableCodes();
-                       /* if (new ConnectionDetector(context).isConnectingToInternet()) {
-
-                        } else {
-                            Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                        }*/
-
                     } else {
                         Toast.makeText(context, "Clock already running for admin functions!", Toast.LENGTH_LONG).show();
                     }
                 }
-               /* } else// for not auth usr
-                {
-                    Toast.makeText(context, "You are not authorized to access Time Clock for Admin Function!", Toast.LENGTH_SHORT).show();
-                }*/
+
             }
         });
 
@@ -480,17 +456,8 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         ll_Upload.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                UploadPhotoModuleClicked=true;
+                UploadPhotoModuleClicked = true;
                 CallAPI_CheckPermission();
-                /*if (new ConnectionDetector(context).isConnectingToInternet()) {
-                      startActivity(new Intent(context, Upload_image_and_cooment_New.class));
-                     startActivity(new Intent(context, UploadPhotosActivity.class));
-                     finish();
-                } else {
-                    Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
-                }*/
-
-
             }
         });
         ll_jobFiles.setVisibility(View.GONE);
@@ -498,24 +465,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         ll_jobFiles_new.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                /**************/
-              /*  my_logic_of = 24;
-                if (new ConnectionDetector(context).isConnectingToInternet()) {
-                    final boolean TIMER_STARTED_FROM_BILLABLE_MODULE = Shared_Preference.getTIMER_STARTED_FROM_BILLABLE_MODULE(context);
-                    if (TIMER_STARTED_FROM_BILLABLE_MODULE) {
-                        start_JobFilesActivity();
-                    } else {
-                        new get_company_name().execute();
-                    }
-                } else {
-                    Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                }*/
-                /**************/
-
                 start_JobFilesActivity();
-
-                /**************/
-
             }
         });
 
@@ -550,12 +500,10 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         ll_logout.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (isMyServiceRunning(ChatHeadService.class)) {
                     Toast.makeText(context, "Clock is running, Please submit it first!", Toast.LENGTH_SHORT).show();
                 } else {
                     try {
-
                         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
                         LayoutInflater inflater = LayoutInflater.from(context);
                         final View dialogView = inflater.inflate(R.layout.dialog_yes_no, null);
@@ -579,7 +527,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                             @Override
                             public void onClick(View view) {
                                 alertDialog.dismiss();
-                                // sp = getApplicationContext().getSharedPreferences("skyline", Context.MODE_PRIVATE);
                                 boolean result = Shared_Preference.clearAllPreferences(context);
                                 if (result) {
 
@@ -613,7 +560,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                         e.getCause();
                     }
                 }
-
             }
         });
 
@@ -629,7 +575,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                 }
             }
         });
-
 
         ll_DamageReport.setOnClickListener(new OnClickListener() {
             @Override
@@ -1076,7 +1021,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
             @Override
             public void onErrorResponse(VolleyError arg0) {
-                hideprogressdialog();
 
             }
         });
@@ -1267,11 +1211,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                     e.getMessage();
                 }
                 //  GoTo_Select_CompJob_Activity();
-                if (userRole.equals(Utility.USER_ROLE_ARTIST) || userRole.equals(Utility.USER_ROLE_APC)) {
-                    Shared_Preference.set_EnterTimesheetByAWO(context, true);
-                }
-
-
                 dialog_show_TimesheetEnterOption();
 
             }
@@ -1280,12 +1219,23 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
     }
 
     private void dialog_show_TimesheetEnterOption() {
+        if (list_Employee_Role.contains(Utility.USER_ROLE_ARTIST) || list_Employee_Role.contains(Utility.USER_ROLE_APC)) {
+            Shared_Preference.set_EnterTimesheetByAWO(context, true); // awo
+        }
+        if (list_Employee_Role.contains(Utility.USER_ROLE_TECH) || list_Employee_Role.contains(Utility.USER_ROLE_SPC)) {
+            Shared_Preference.set_EnterTimesheetByAWO(context, false); //swo
+        }
 
-        if (userRole.equals(Utility.USER_ROLE_PM) || userRole.equals(Utility.USER_ROLE_DC)) { // PM can enter time sheet by AWO/SWO both
-            dialog_Choose_SWO_AWO();
+        if (list_Employee_Role.contains(Utility.USER_ROLE_DC) || list_Employee_Role.contains(Utility.USER_ROLE_PM)
+                || list_Employee_Role.contains(Utility.USER_ROLE_SUPER_ADMIN)) {
+            dialog_Choose_SWO_AWO();//both
+        } else if ((list_Employee_Role.contains(Utility.USER_ROLE_ARTIST) || list_Employee_Role.contains(Utility.USER_ROLE_APC))
+                && (list_Employee_Role.contains(Utility.USER_ROLE_TECH) || list_Employee_Role.contains(Utility.USER_ROLE_SPC))) {
+            dialog_Choose_SWO_AWO();  //both
         } else {
             GoTo_Select_CompJob_Activity();
         }
+
     }
 
     public void PrepareDataForPausedJob(String Comp_ID, String Comp_Name, String swo_id, String job_id, String jobName_forPaused, String strPausedTimesheetID) {
@@ -2136,7 +2086,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             e.printStackTrace();
         }
         if (new ConnectionDetector(this).isConnectingToInternet()) {
-            new MyAsyncTask(this, false, this, Api.API_getTimesheetAuth, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_getTimesheetAuth, jsonObject).execute();
         } else {
             Toast.makeText(this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -2223,7 +2173,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             String dealerId = Shared_Preference.getDEALER_ID(this);
             jsonObject.put("dealerID", dealerId);//nks
             if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
-                jsonObject.put("type",  Utility.TYPE_AWO);//AWO
+                jsonObject.put("type", Utility.TYPE_AWO);//AWO
             } else {
                 jsonObject.put("type", Utility.TYPE_SWO);//SWO
             }
@@ -2248,22 +2198,22 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                     Intent ii = new Intent(context, DamageReportNew.class);
                     startActivity(ii);
                 } else {
-                    Toast.makeText(context, "You are not authorized to access Damage Report!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "You do not have rights to access Damage Report!", Toast.LENGTH_SHORT).show();
                 }
             } else if (UsageChargeModuleClicked) {
 
                 if (CanEnter_UsageCharge && CanView_UsageCharge) {
                     startActivity(new Intent(getApplicationContext(), UsageChargesListActivity.class));
                 } else {
-                    Toast.makeText(context, "You are not authorized to access Usage Charges!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "You do not have rights to access Usage Charges!", Toast.LENGTH_SHORT).show();
                 }
             } else if (UploadPhotoModuleClicked) {
-                if (CanView_ClientArt && CanView_UsageCharge && CanUpload_ClientPhoto && CanUpload_ClientArt) {
-                    startActivity(new Intent(context, Upload_image_and_cooment_New.class));
-                    // startActivity(new Intent(context, UploadPhotosActivity.class));
+                if ((CanView_ClientArt && CanUpload_ClientArt) || (CanView_UsageCharge && CanUpload_ClientPhoto)) {
+                    // startActivity(new Intent(context, Upload_image_and_cooment_New.class));
+                    startActivity(new Intent(context, UploadPhotosActivity.class));
                     finish();
                 } else {
-                    Toast.makeText(context, "You are not authorized to Upload Photos!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "You do not have rights to Upload Photos!", Toast.LENGTH_SHORT).show();
                 }
 
             } else if (BillableJobModuleClicked) {
@@ -2283,8 +2233,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             try {
                 JSONArray jsonArray = new JSONArray(responseString);
                 JSONObject jsonObject = jsonArray.getJSONObject(0);
-                //  {"ID":"0","Output":"0","Message":"Overlapping Time entries"}
-                Log.e("AdminTimeSheetId", responseString);
                 String output = jsonObject.getString("overlapp");
                 String msg = jsonObject.getString("msg");
             } catch (Exception e) {
@@ -2301,7 +2249,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             }
 
             if (!CanEnter_MISByDailyTime || !CanView_MISByDailyTime) {
-                Toast.makeText(context, "You are not authorized to access Time Clock for Admin Function!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "You do not have rights to enter Admin Time Sheet!", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (NonBillableLaborCodesLength == 0) {
@@ -2329,8 +2277,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
             CallAPI_SubmitClockInClockOut();
         } else if (api.equalsIgnoreCase(Api.API_BILLABLE_TIMESHEET)) {
-
-            // {"ID":"0","Output":"0","Message":"Failed, Overlapping Time entries found!"}
             String output = "", msg = "";
             try {
                 JSONObject jsonObject = new JSONObject(responseString);
@@ -2411,23 +2357,10 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
     }
 
     private class checkVersionUpdate extends AsyncTask<String, Void, String> {
-        ProgressDialog progressDialog;
-
         @Override
         protected void onPreExecute() {
-            // TODO Auto-generated method stub
+            showprogressdialog();
             super.onPreExecute();
-            try {
-                progressDialog = new ProgressDialog(context);
-                progressDialog.setMessage(getString(R.string.Loading_text));
-                progressDialog.setCancelable(false);
-                progressDialog.setCanceledOnTouchOutside(false);
-
-                progressDialog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-
         }
 
         @Override
@@ -2462,16 +2395,10 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
         @Override
         protected void onPostExecute(String nversionName) {
-            // TODO Auto-generated method stub
+            hideprogressdialog();
             super.onPostExecute(nversionName);
             Shared_Preference.setLatestVersion(context, nversionName);
             Shared_Preference.setOldVersion(context);
-            try {
-                if (progressDialog != null && progressDialog.isShowing())
-                    progressDialog.dismiss();
-            } catch (Exception e) {
-                e.getMessage();
-            }
 
             try {
                 PackageManager manager = context.getPackageManager();
@@ -2482,7 +2409,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                 }
                 Double retuenvl = Double.parseDouble(nversionName);
                 if (Double.parseDouble(versionName) < retuenvl) {
-                    // if (true) {
                     dialog_UpdateAvailable();
                 }
 
@@ -2498,40 +2424,22 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
     }
 
     private class async_RunIncompleteTask extends AsyncTask<Void, Void, Void> {
-        ProgressDialog pDialog;
-
         @Override
         protected void onPreExecute() {
-            pDialog = new ProgressDialog(context);
-            pDialog.setMessage("Submitting offline data...");
-            pDialog.setCancelable(false);
-
-            try {
-                pDialog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-
+            showprogressdialog();
             super.onPreExecute();
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             SavedTask();
-
             return null;
         }
 
         @Override
         protected void onPostExecute(Void integer) {
-            try {
-                pDialog.dismiss();
-
-            } catch (Exception e) {
-                e.getMessage();
-            }
+            hideprogressdialog();
             Toast.makeText(context, "Time sheet(s) submitted successfully!", Toast.LENGTH_SHORT).show();
-
             if (Utility.isOverlapTimesheetExist(context)) {
                 dialog_OverlapDataFound();
             }
@@ -2541,19 +2449,18 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
     }
 
     private class async_get_BillableCodes_PausedJobList extends AsyncTask<Void, Void, Void> {
-
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
             showprogressdialog();
+            super.onPreExecute();
+
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            // getAuthentication();
             getBillableCodes_new();
             GetPausedJob();
-            // GetEmployeeRoles();
+            GetEmployeeRoles();
             return null;
         }
 
@@ -2571,14 +2478,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             if (pausedJobList != null && !pausedJobList.isEmpty()) {
                 dialog_show_Paused_Job_List();
             } else {
-                /*if (userRole.equals(Utility.USER_ROLE_ARTIST) || userRole.equals(Utility.USER_ROLE_APC)) {
-                    Shared_Preference.set_EnterTimesheetByAWO(context, true);
-                }*/
-
-                if (userRole.equals(Utility.USER_ROLE_ARTIST) || userRole.equals(Utility.USER_ROLE_APC)) {
-                    Shared_Preference.set_EnterTimesheetByAWO(context, true);
-                }
-
                 dialog_show_TimesheetEnterOption();
 
 
@@ -2589,6 +2488,8 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
 
     }
+
+
 }
 
 

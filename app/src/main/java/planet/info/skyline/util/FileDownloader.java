@@ -52,7 +52,7 @@ public class FileDownloader {
 
     {
         try {
-            System.out.println("dat1 " + fileUrl + " file url " + file);
+            //System.out.println("dat1 " + fileUrl + " file url " + file);
             URL url = new URL(fileUrl);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");

@@ -21,6 +21,7 @@ import planet.info.skyline.R;
 import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
 import planet.info.skyline.shared_preference.Shared_Preference;
+import planet.info.skyline.tech.share_photos.SharePhotosToClientActivity;
 import planet.info.skyline.util.Utility;
 
 
@@ -216,10 +217,15 @@ public class JobFilesTabActivity extends AppCompatActivity {
             if (requestCode == Utility.CODE_SELECT_COMPANY) {
                 try {
                     String Job_Id = data.getStringExtra("JobID");
+                    String compID = data.getStringExtra("CompID");
+                    Shared_Preference.setCOMPANY_ID_BILLABLE(this,compID);
+                    Shared_Preference.setJOB_ID_FOR_JOBFILES(this,Job_Id);
+
+
                     setAdapter(Job_Id);
                 } catch (Exception e) {
                     e.getMessage();
-                    Toast.makeText(getApplicationContext(), "Exception caught!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Some error occurred!", Toast.LENGTH_SHORT).show();
                 }
             }
 

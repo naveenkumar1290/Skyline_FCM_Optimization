@@ -41,11 +41,13 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.CreateDetails;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.old_activity.BaseActivity;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class LocateCrates extends BaseActivity {
@@ -56,21 +58,23 @@ public class LocateCrates extends BaseActivity {
     ImageView img_search;
     EditText et_search;
     private String urlskyline;
-    private ProgressDialog pDialog;
+//    private ProgressDialog pDialog;
     private List<CreateDetails> createlist = new ArrayList<CreateDetails>();
-
+    Context context;
+    ProgressHUD mProgressHUD;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homeact_new);
-        try {
+        context=LocateCrates.this;
+     /*   try {
             pDialog = new ProgressDialog(this);
             pDialog.setMessage(getString(R.string.Loading_text));
             pDialog.setCancelable(false);
         } catch (Exception e) {
             e.getMessage();
-        }
+        }*/
         listView = (RecyclerView) findViewById(R.id.listView1);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         listView.setLayoutManager(mLayoutManager);
@@ -163,7 +167,7 @@ public class LocateCrates extends BaseActivity {
         AppController.getInstance().addToRequestQueue(bb);
     }
 
-    public void showprogressdialog() {
+/*    public void showprogressdialog() {
         try {
             pDialog.show();
         } catch (Exception e) {
@@ -174,6 +178,38 @@ public class LocateCrates extends BaseActivity {
     public void hideprogressdialog() {
         try {
             pDialog.dismiss();
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }*/
+    public void showprogressdialog() {
+       /* try {
+            if (!(pDialog.isShowing())) {
+                pDialog.show();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }*/
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+
+    }
+
+    public void hideprogressdialog() {
+        /*try {
+            if ((pDialog.isShowing())) {
+                pDialog.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }*/
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
         } catch (Exception e) {
             e.getMessage();
         }

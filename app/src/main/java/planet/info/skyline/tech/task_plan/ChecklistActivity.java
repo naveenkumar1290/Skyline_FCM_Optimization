@@ -45,17 +45,9 @@ import planet.info.skyline.util.Utility;
 public class ChecklistActivity extends AppCompatActivity {
 
 
-    // We don't use namespaces
-    //https://developer.android.com/training/basics/network-ops/xml
-    private static final String ns = null;
-    //    View rootView;
-    String jobtxt_id, tab;
     TextView tv_msg;
     List<Checklist> list_Checklists = new ArrayList<>();
     Button btn_Add, btn_Cancel;
-    AlertDialog alertDialog;
-    //SwipeRefreshLayout pullToRefresh;
-    SharedPreferences sp;
     String updatable = "";
     Integer request_code = 0;
     String job_id;
@@ -63,11 +55,6 @@ public class ChecklistActivity extends AppCompatActivity {
     String id;
     private RecyclerView Checklist_recyclerView;
 
-    private static String getValue(String tag, Element element) {
-        NodeList nodeList = element.getElementsByTagName(tag).item(0).getChildNodes();
-        Node node = nodeList.item(0);
-        return node.getNodeValue();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,7 +118,6 @@ public class ChecklistActivity extends AppCompatActivity {
                 }
                 if (bundle.containsKey("RequestCode")) {
                     request_code = bundle.getInt("RequestCode");
-
                 }
 
                 job_id = bundle.getString("job_id");

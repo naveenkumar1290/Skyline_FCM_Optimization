@@ -49,24 +49,27 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.PathProjectFile;
 import planet.info.skyline.model.ProjectFileFolder;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.util.Utility;
 
 import static android.content.Context.MODE_PRIVATE;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class ShowProjectFile_Fragment extends Fragment {
     View rootView;
     String jobtxt_id, tab;
     TextView tv_msg;
-    AlertDialog alertDialog;
+   // AlertDialog alertDialog;
     SwipeRefreshLayout pullToRefresh;
     ArrayList<ProjectFileFolder> List_ProjectFileFolder = new ArrayList<>();
     String masterId = "0";
-    SharedPreferences sp;
-
+   // SharedPreferences sp;
+    Context context;
+    ProgressHUD mProgressHUD;
     ArrayList<PathProjectFile> List_Path = new ArrayList<>();
     private RecyclerView path_recyclerView, jobFiles_recyclerView;
 
@@ -75,11 +78,11 @@ public class ShowProjectFile_Fragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_project_files, container, false);
-
+        context=getActivity();
         jobFiles_recyclerView = (RecyclerView) rootView.findViewById(R.id.jobFiles_recyclerView);
 
         tv_msg = (TextView) rootView.findViewById(R.id.tv_msg);
-        sp = getActivity().getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
+       // sp = getActivity().getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
 
         path_recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         path_recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
@@ -194,8 +197,8 @@ public class ShowProjectFile_Fragment extends Fragment {
 
 
         String dealerId = Shared_Preference.getDEALER_ID(getActivity());
-
         String compID =   Shared_Preference.getCOMPANY_ID_BILLABLE(getActivity());
+
         final String NAMESPACE = KEY_NAMESPACE ;
         final String URL = SOAP_API_Client.BASE_URL;
         final String METHOD_NAME = Api.API_FETCH_PROJECTFILE;
@@ -323,7 +326,7 @@ public class ShowProjectFile_Fragment extends Fragment {
     }
 
      class get_jobFiles_Acyntask extends AsyncTask<Void, Void, Void> {
-        ProgressDialog progressDoalog;
+     //   ProgressDialog progressDoalog;
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -340,22 +343,24 @@ public class ShowProjectFile_Fragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            progressDoalog = new ProgressDialog(getActivity());
+          /*  progressDoalog = new ProgressDialog(getActivity());
             progressDoalog.setMessage("Please wait....");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
-            progressDoalog.show();
+            progressDoalog.show();*/
+          showprogressdialog();
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            try {
+          /*  try {
                 progressDoalog.dismiss();
             } catch (Exception e) {
                 e.getMessage();
-            }
+            }*/
+          hideprogressdialog();
 
             if (List_ProjectFileFolder.size() < 1) {
                 tv_msg.setVisibility(View.VISIBLE);
@@ -689,6 +694,23 @@ public class ShowProjectFile_Fragment extends Fragment {
             }
         }
     }
+    public void showprogressdialog() {
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
 
+    }
+
+    public void hideprogressdialog() {
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
 
 }

@@ -25,9 +25,11 @@ import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.R;
 import planet.info.skyline.controller.AppController;
 import planet.info.skyline.crash_report.ConnectionDetector;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class ShowWhatsInside_MainActivity extends BaseActivity {
@@ -37,7 +39,7 @@ public class ShowWhatsInside_MainActivity extends BaseActivity {
     LinearLayout ll_view;
     TextView tv_Caret_id, tv_msg_validation;
     String crateId;
-
+ProgressHUD mProgressHUD;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,10 +125,12 @@ public class ShowWhatsInside_MainActivity extends BaseActivity {
     }
 
     public void getCrateName(String CrateId) {
-        final ProgressDialog ringProgressDialog = new ProgressDialog(ShowWhatsInside_MainActivity.this);
+      /*  final ProgressDialog ringProgressDialog = new ProgressDialog(ShowWhatsInside_MainActivity.this);
         ringProgressDialog.setMessage("Kindly wait...");
         ringProgressDialog.setCancelable(false);
         ringProgressDialog.show();
+*/
+        mProgressHUD = ProgressHUD.show(ShowWhatsInside_MainActivity.this, LOADING_TEXT, false);
 
         String urlCrateId = URL_EP1 +Api.API_GET_CRATE_NAME_BY_CARTE_ID + CrateId;
         JsonObjectRequest bb = new JsonObjectRequest(Request.Method.GET, urlCrateId,
@@ -150,16 +154,22 @@ public class ShowWhatsInside_MainActivity extends BaseActivity {
                     tv_msg_validation.setText("Scan Crate QR Code");
                     ll_view.setVisibility(View.VISIBLE);
 
-                    if (ringProgressDialog.isShowing()) {
+                   /* if (ringProgressDialog.isShowing()) {
                         ringProgressDialog.dismiss();
-                    }
+                    }*/
+
 
                 } catch (Exception e) {
                     e.getMessage();
                     tv_Caret_id.setText("Crate Number: Not Available");
-                    if (ringProgressDialog.isShowing()) {
+
+                  if(mProgressHUD.isShowing()){
+                      mProgressHUD.dismiss();
+                  }
+
+                  /*  if (ringProgressDialog.isShowing()) {
                         ringProgressDialog.dismiss();
-                    }
+                    }*/
                 }
 
             }
@@ -168,10 +178,10 @@ public class ShowWhatsInside_MainActivity extends BaseActivity {
             @Override
             public void onErrorResponse(VolleyError arg0) {
                 // TODO Auto-generated method stub
-                if (ringProgressDialog.isShowing()) {
+               /* if (ringProgressDialog.isShowing()) {
                     ringProgressDialog.dismiss();
                 }
-
+*/
             }
         });
 

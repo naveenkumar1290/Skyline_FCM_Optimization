@@ -41,12 +41,14 @@ import planet.info.skyline.R;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.UsageCharge;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 public class UsageChargesListActivity extends AppCompatActivity {
     TextView tv_msg;
@@ -399,13 +401,15 @@ public class UsageChargesListActivity extends AppCompatActivity {
     }
 
     private  class async_list_usage_report extends AsyncTask<Void, Void, String> {
-
-        final ProgressDialog ringProgressDialog = new ProgressDialog(UsageChargesListActivity.this);
+        ProgressHUD mProgressHUD;
+     //   final ProgressDialog ringProgressDialog = new ProgressDialog(UsageChargesListActivity.this);
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            try {
+
+            mProgressHUD = ProgressHUD.show(UsageChargesListActivity.this, LOADING_TEXT, false);
+           /* try {
                 ringProgressDialog.setMessage(getString(R.string.Loading_text));
                 ringProgressDialog.setCancelable(false);
                 ringProgressDialog.setCanceledOnTouchOutside(false);
@@ -419,7 +423,7 @@ public class UsageChargesListActivity extends AppCompatActivity {
 
             } catch (Exception e) {
                 e.getMessage();
-            }
+            }*/
         }
 
         @Override
@@ -433,10 +437,13 @@ public class UsageChargesListActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 //{"status":"1","Message":"Inserted Successfully.","ReturnID":"0"}
-            try {
+           /* try {
                 ringProgressDialog.dismiss();
             } catch (Exception e) {
                 e.getMessage();
+            }*/
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
             }
             updateMenuTitles();
             if (usageChargesList.isEmpty()) {

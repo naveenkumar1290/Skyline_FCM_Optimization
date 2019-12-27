@@ -41,6 +41,7 @@ import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.model.SWO_Status;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.old_activity.BaseActivity;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.update_timesheet.TimeSheetList1Activity;
 import planet.info.skyline.util.Utility;
@@ -48,6 +49,7 @@ import planet.info.skyline.util.Utility;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class SubmitTimesheet extends BaseActivity {
@@ -84,12 +86,14 @@ public class SubmitTimesheet extends BaseActivity {
     String userRole = "";
     String JobIdBillable = "";
 
-
+    Context context;
+    ProgressHUD mProgressHUD;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_scanforworkstation);
+        context=SubmitTimesheet.this;
         userRole = Shared_Preference.getUSER_ROLE(this);
         Swo_Id = Shared_Preference.getSWO_ID(SubmitTimesheet.this);
         JobIdBillable = Shared_Preference.getJOB_ID_FOR_JOBFILES(this);
@@ -925,13 +929,13 @@ public class SubmitTimesheet extends BaseActivity {
     }
 
     public class async_Get_Billable_Code extends AsyncTask<Void, Void, Void> {
-        ProgressDialog progressDoalog;
+      //  ProgressDialog progressDoalog;
 
         @Override
         protected void onPreExecute() {
 
             super.onPreExecute();
-            progressDoalog = new ProgressDialog(SubmitTimesheet.this);
+         /*   progressDoalog = new ProgressDialog(SubmitTimesheet.this);
             progressDoalog.setMessage(getString(R.string.Loading_text));
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
@@ -939,19 +943,21 @@ public class SubmitTimesheet extends BaseActivity {
                 progressDoalog.show();
             } catch (Exception e) {
                 e.getMessage();
-            }
+            }*/
+         showprogressdialog();
         }
 
         @Override
         protected void onPostExecute(Void result) {
             // TODO Auto-generated method stub
-            if (progressDoalog != null && progressDoalog.isShowing()) {
+           /* if (progressDoalog != null && progressDoalog.isShowing()) {
                 try {
                     progressDoalog.dismiss();
                 } catch (Exception e) {
                     e.getMessage();
                 }
-            }
+            }*/
+           hideprogressdialog();
             if (arrid != null && arrid.length > 0) {
                 Dialog_Choose_Labor_Code();
             } else {
@@ -976,12 +982,12 @@ public class SubmitTimesheet extends BaseActivity {
     }
 
     public class Async_Submit_Billable_Timesheet_New extends AsyncTask<Void, Void, String> {
-        ProgressDialog progressDoalog;
+   //     ProgressDialog progressDoalog;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progressDoalog = new ProgressDialog(SubmitTimesheet.this);
+          /*  progressDoalog = new ProgressDialog(SubmitTimesheet.this);
             progressDoalog.setMessage(getString(R.string.Loading_text));
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
@@ -989,18 +995,20 @@ public class SubmitTimesheet extends BaseActivity {
                 progressDoalog.show();
             } catch (Exception e) {
                 e.getMessage();
-            }
+            }*/
+          showprogressdialog();
         }
 
         @Override
         protected void onPostExecute(String result) {
-            if (progressDoalog != null && progressDoalog.isShowing()) {
+           /* if (progressDoalog != null && progressDoalog.isShowing()) {
                 try {
                     progressDoalog.dismiss();
                 } catch (Exception e) {
                     e.getMessage();
                 }
-            }
+            }*/
+           hideprogressdialog();
 
             JSONObject jsonObject = null;
             String output = "";
@@ -1041,5 +1049,22 @@ public class SubmitTimesheet extends BaseActivity {
         }
 
     }
+    public void showprogressdialog() {
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
 
+    }
+
+    public void hideprogressdialog() {
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
 }

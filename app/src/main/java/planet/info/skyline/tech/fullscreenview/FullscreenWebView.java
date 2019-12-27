@@ -4,6 +4,7 @@ package planet.info.skyline.tech.fullscreenview;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.os.Bundle;
@@ -19,6 +20,9 @@ import android.widget.Toast;
 
 import planet.info.skyline.R;
 import planet.info.skyline.old_activity.BaseActivity;
+import planet.info.skyline.progress.ProgressHUD;
+
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 /**
@@ -115,23 +119,25 @@ public class FullscreenWebView extends BaseActivity implements View.OnTouchListe
             return false;
         }
     };
-
+    Context context;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_fullscreen_image_view);
         mVisible = true;
+        context=FullscreenWebView.this;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         //  mContentView = (NetworkImageView)findViewById(R.id.fullscreen_content);
         mContentView = (ImageView) findViewById(R.id.fullscreen_content);
         final String url = getIntent().getStringExtra("url");
+        final ProgressHUD mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, true);
 
-        final ProgressDialog progressDoalog = new ProgressDialog(FullscreenWebView.this);
+      /*  final ProgressDialog progressDoalog = new ProgressDialog(FullscreenWebView.this);
         progressDoalog.setMessage(getString(R.string.Loading_text));
         progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDoalog.setCancelable(true);
-        progressDoalog.show();
+        progressDoalog.show();*/
 
 
         WebView webView=(WebView)findViewById(R.id.webView);
@@ -157,13 +163,19 @@ public class FullscreenWebView extends BaseActivity implements View.OnTouchListe
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                   progressDoalog.dismiss();
+                   //progressDoalog.dismiss();
+                if(mProgressHUD.isShowing()){
+                    mProgressHUD.dismiss();
+                }
                 Toast.makeText(getApplicationContext(), " Press 'BACK' to cancel!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                  progressDoalog.dismiss();
+               //   progressDoalog.dismiss();
+                if(mProgressHUD.isShowing()){
+                    mProgressHUD.dismiss();
+                }
                 Toast.makeText(getApplicationContext(), "This file is not available. Press Back to cancel.", Toast.LENGTH_SHORT).show();
 
             }
@@ -250,7 +262,7 @@ public class FullscreenWebView extends BaseActivity implements View.OnTouchListe
         }*/
 
 
-        mContentView.setOnTouchListener(FullscreenWebView.this);
+        mContentView.setOnTouchListener(this);
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
             @Override

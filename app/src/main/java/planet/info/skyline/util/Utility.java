@@ -60,6 +60,7 @@ import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -78,7 +79,9 @@ import planet.info.skyline.model.LaborCode;
 import planet.info.skyline.model.OverlapTimesheet;
 import planet.info.skyline.model.SavedTask;
 import planet.info.skyline.network.Api;
+import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.tech.billable_timesheet.Clock_Submit_Type_Activity;
+import planet.info.skyline.tech.fullscreenview.FullscreenWebViewNew;
 import planet.info.skyline.tech.non_billable_timesheet.NonBillable_jobs;
 import planet.info.skyline.shared_preference.Shared_Preference;
 
@@ -143,17 +146,30 @@ public class Utility {
 
     //public static final String KEY_APP_LAUNCHED_FIRST_TIME = "APP_LAUNCHED_FIRST_TIME";
 
-
-
+    public static final String KEY_SELECTED_SWO_STATUS = "SELECTED_SWO_STATUS";
     public static final String NON_BILLABLE = "Non-Billable";
     public static final String BILLABLE = "1";
     public static final String CHANGE_TIME_CODE = "2";
-    public static final String KEY_SELECTED_SWO_STATUS = "SELECTED_SWO_STATUS";
+
+    /**************************************Roles**********************************************/
+
+
+
+
+    //Admin   (Have both rights awo/swo)
+    public static final String USER_ROLE_DC = "1";
+    public static final String USER_ROLE_PM = "2";
+    public static final String USER_ROLE_SUPER_ADMIN = "3";
+
+    //Technicians (swo)
+    public static final String USER_ROLE_TECH = "9";
+    public static final String USER_ROLE_SPC = "12";
+
+    // Artists
     public static final String USER_ROLE_ARTIST = "6";
     public static final String USER_ROLE_APC = "5";
-    public static final String USER_ROLE_TECH = "9";
-    public static final String USER_ROLE_PM = "2";
-    public static final String USER_ROLE_DC = "1";
+
+    /**************************************Roles**********************************************/
 
 
     public static final int SWO_LIST_REQUEST_CODE = 24459;
@@ -234,7 +250,7 @@ public class Utility {
     public static String pdfExt[] = {".pdf", ".PDF"};
     public static String txtExt[] = {".txt", ".TXT"};
     public static String excelExt[] = {".xlsx", ".XLSX", ".xls", ".XLS"};
-
+    public static final String LOADING_TEXT = "Kindly Wait...";
     /**/
 
     public static ArrayList<HashMap<String, String>> JSONEncoding(JSONArray result, ArrayList<String> listval) {
@@ -1931,6 +1947,27 @@ public class Utility {
             e.getMessage();
         }
         return version;
+    }
+
+    public static void view_downloadFile(String fileName,Context context){
+        String fileExt="";
+        if (fileName.contains(".")) {
+            fileExt = fileName.substring(fileName.lastIndexOf("."));
+        }
+        boolean  isImage = Arrays.asList(Utility.imgExt).contains(fileExt);
+
+        if(isImage){
+            Intent i = new Intent(context, FullscreenWebViewNew.class);
+            i.putExtra("url", SOAP_API_Client.URL_EP2 + "/upload/" + fileName);
+            i.putExtra("FileName", fileName);
+            context. startActivity(i);
+        }else {
+            Intent i = new Intent(context, FullscreenWebViewNew.class);
+            i.putExtra("url", "https://docs.google.com/gview?embedded=true&url="
+                    + SOAP_API_Client.URL_EP2 + "/upload/" + fileName);
+            i.putExtra("FileName", fileName);
+            context. startActivity(i);
+        }
     }
 
 }

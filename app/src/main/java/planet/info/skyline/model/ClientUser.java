@@ -1,6 +1,8 @@
 package planet.info.skyline.model;
 
-public class ClientUser {
+import java.io.Serializable;
+
+public class ClientUser implements Serializable {
     String ename;
     String txt_Mail;
     String Id_Pk;

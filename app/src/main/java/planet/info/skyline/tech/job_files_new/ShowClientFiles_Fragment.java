@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.tech.fullscreenview.FullscreenImageView;
 import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
@@ -50,6 +51,7 @@ import static android.content.Context.MODE_PRIVATE;
 import static planet.info.skyline.network.Api.API_Bind_Job_client11;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class ShowClientFiles_Fragment extends Fragment {
@@ -65,9 +67,11 @@ public class ShowClientFiles_Fragment extends Fragment {
     AlertDialog alertDialog;
     SwipeRefreshLayout pullToRefresh;
 
-    SharedPreferences sp;
+  //  SharedPreferences sp;
 
 
+    Context context;
+    ProgressHUD mProgressHUD;
     private RecyclerView jobFiles_recyclerView;
     // ListView jobs_list_View;
 
@@ -77,13 +81,13 @@ public class ShowClientFiles_Fragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_client_files, container, false);
-
+        context=getActivity();
         jobFiles_recyclerView = (RecyclerView) rootView.findViewById(R.id.jobFiles_recyclerView);
         jobFiles_recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         jobFiles_recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         tv_msg = (TextView) rootView.findViewById(R.id.tv_msg);
-        sp = getActivity().getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
+      //  sp = getActivity().getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
 
 
         pullToRefresh = rootView.findViewById(R.id.pullToRefresh);
@@ -185,132 +189,10 @@ public class ShowClientFiles_Fragment extends Fragment {
 
     }
 
-    public void download_file(String file_name1) {
-        if ((file_name1.contains(".jpg")) || (file_name1.contains(".JPG"))
-                || (file_name1.contains(".jpeg")) || (file_name1.contains(".JPEG"))
-                || (file_name1.contains(".png")) || (file_name1.contains(".PNG"))
-                || (file_name1.contains(".bmp")) || (file_name1.contains(".BMP"))
-                || (file_name1.contains(".gif")) || (file_name1.contains(".GIF"))
-                || (file_name1.contains(".webp")) || (file_name1.contains(".WEBP"))
-        ) {
-            if (new ConnectionDetector(getActivity()).isConnectingToInternet()) {
-                new Download_images().execute(URL_EP2 + "/upload/" + file_name1, file_name1);
-            } else {
-                Toast.makeText(getActivity(), Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            // Toast.makeText(Show_Jobs_Activity.this, "No pdf file Avalable", Toast.LENGTH_SHORT).show();
-            if (new ConnectionDetector(getActivity()).isConnectingToInternet()) {
-                new Download_images().execute(URL_EP2 + "/upload/" + file_name1, file_name1);
-            } else {
-                Toast.makeText(getActivity(), Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    public void view_file(String file_name1) {
-        if ((file_name1.contains(".jpg")) || (file_name1.contains(".JPG"))
-                || (file_name1.contains(".jpeg")) || (file_name1.contains(".JPEG"))
-                || (file_name1.contains(".png")) || (file_name1.contains(".PNG"))
-                || (file_name1.contains(".bmp")) || (file_name1.contains(".BMP"))
-                || (file_name1.contains(".gif")) || (file_name1.contains(".GIF"))
-                || (file_name1.contains(".webp")) || (file_name1.contains(".WEBP"))
-        ) {
-            Intent i = new Intent(getActivity(), FullscreenImageView.class);
-            i.putExtra("url", URL_EP2 + "/upload/" + file_name1);
-            startActivity(i);
-
-
-        } else if ((file_name1.contains(".doc")) || (file_name1.contains(".DOC"))
-                || (file_name1.contains(".psd")) || (file_name1.contains(".PSD"))
-                || (file_name1.contains(".docx")) || (file_name1.contains(".DOCX"))
-                || (file_name1.contains(".pdf")) || (file_name1.contains(".PDF"))
-        ) {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://docs.google.com/gview?embedded=true&url=" + URL_EP2 + "/upload/" + file_name1));
-            startActivity(browserIntent);
-        } else if ((file_name1.contains(".aac")) || (file_name1.contains(".AAC"))
-                || (file_name1.contains(".m4a")) || (file_name1.contains(".M4A"))
-                || (file_name1.contains(".mp4")) || (file_name1.contains(".MP4"))
-                || (file_name1.contains(".3gp")) || (file_name1.contains(".3GP"))
-                || (file_name1.contains(".m4b")) || (file_name1.contains(".M4B"))
-                || (file_name1.contains(".mp3")) || (file_name1.contains(".MP3"))
-                || (file_name1.contains(".wave")) || (file_name1.contains(".WAVE"))
-        ) {
-            /*Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://exhibitpower2.com/upload/" + file_name1));
-            startActivity(browserIntent);*/
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(URL_EP2 + "/upload/" + file_name1));
-            intent.setDataAndType(Uri.parse(URL_EP2 + "/upload/" + file_name1), "video/*");
-            startActivity(intent);
-        } else {
-            Toast.makeText(getActivity(), "Unrecognized file format ! Please download to view the file!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-
-    class Download_images extends AsyncTask<String, Void, String> {///this class make in adapter for downloading the images
-
-        ProgressDialog progressDoalog;
-
-        @Override
-        protected String doInBackground(String... strings) {
-            String fileUrl = strings[0];
-            String fileName = strings[1];
-            String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-            File folder = new File(extStorageDirectory, "Exhibit Power");
-
-            if (!folder.exists()) {
-                folder.mkdir();
-            }
-
-            File folder1 = new File(folder, "Download");
-            if (!folder1.exists()) {
-                folder1.mkdir();
-            }
-
-
-            File pdfFile = new File(folder1, fileName);
-            try {
-                pdfFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-            FileDownloader.download_images(fileUrl, pdfFile);
-            return pdfFile.getAbsolutePath();
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressDoalog = new ProgressDialog(getActivity());
-
-
-            progressDoalog.setMessage("Downloading please wait....");
-            progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDoalog.show();
-        }
-
-        @Override
-        protected void onPostExecute(String path) {
-            super.onPostExecute(path);
-            progressDoalog.dismiss();
-            //  Toast.makeText(Show_Jobs_Activity.this, "File downloaded successfully !", Toast.LENGTH_SHORT).show();
-
-            try {
-                Toast.makeText(getActivity(), "File downloaded successfully !" +
-
-                        "  " + "Location:" + path, Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-        }
-
-    }
 
 
     class get_jobFiles_Acyntask extends AsyncTask<Void, Void, Void> {
-        ProgressDialog progressDoalog;
+       // ProgressDialog progressDoalog;
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -325,23 +207,15 @@ public class ShowClientFiles_Fragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            progressDoalog = new ProgressDialog(getActivity());
-            progressDoalog.setMessage("Please wait....");
-            progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDoalog.setCancelable(false);
-            progressDoalog.show();
+         showprogressdialog();
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            try {
-                progressDoalog.dismiss();
-            } catch (Exception e) {
-                e.getMessage();
-            }
 
+hideprogressdialog();
 
 
                 if (List_ClientFiles.size() < 1) {
@@ -423,8 +297,8 @@ public class ShowClientFiles_Fragment extends Fragment {
                     @Override
                     public void onClick(View view) {
 
-                        download_file(file_name1);
 
+                        Utility. view_downloadFile(file_name1,getActivity());
 
                     }
                 });
@@ -434,8 +308,8 @@ public class ShowClientFiles_Fragment extends Fragment {
                     @Override
                     public void onClick(View view) {
 
-                        view_file(file_name1);
 
+                        Utility. view_downloadFile(file_name1,getActivity());
                     }
                 });
                 holder.row_jobFile.setOnClickListener(new View.OnClickListener() {
@@ -465,14 +339,16 @@ public class ShowClientFiles_Fragment extends Fragment {
                             @Override
                             public void onClick(View view) {
                                 alertDialog.dismiss();
-                                view_file(file_name1);
+
+                                Utility. view_downloadFile(file_name1,getActivity());
                             }
                         });
                         negativeBtn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 alertDialog.dismiss();
-                                download_file(file_name1);
+
+                                Utility. view_downloadFile(file_name1,getActivity());
                             }
                         });
                         alertDialog = dialogBuilder.create();
@@ -481,29 +357,6 @@ public class ShowClientFiles_Fragment extends Fragment {
                         alertDialog.show();
 
 
-
-
-                    /*new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
-                            .setTitleText("Please select the action !")
-                            .setContentText("Press Back to cancel !")
-                            .setConfirmText("View File")
-                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                @Override
-                                public void onClick(SweetAlertDialog sDialog) {
-                                    sDialog.dismissWithAnimation();
-                                    view_file(file_name1);
-                                }
-                            })
-                            .setCancelText("Download File")
-                            .showCancelButton(true)
-                            .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                @Override
-                                public void onClick(SweetAlertDialog sDialog) {
-                                    sDialog.cancel();
-                                    download_file(file_name1);
-                                }
-                            })
-                            .show();*/
 
 
                     }
@@ -545,4 +398,25 @@ public class ShowClientFiles_Fragment extends Fragment {
         }
 
     }
+
+
+    public void showprogressdialog() {
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+
+    }
+
+    public void hideprogressdialog() {
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
+
 }

@@ -1,6 +1,6 @@
 package planet.info.skyline.tech.whats_inside;
 
-import android.app.ProgressDialog;
+//import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.ListView;
@@ -20,7 +20,10 @@ import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.R;
 import planet.info.skyline.adapter.Adapter_Sub_WhatsInside;
 import planet.info.skyline.controller.AppController;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.util.Utility;
+
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class ShowWhatsInside_sub extends BaseActivity {
@@ -41,10 +44,11 @@ public class ShowWhatsInside_sub extends BaseActivity {
 
 
     public void getData(String url) {
-        final ProgressDialog ringProgressDialog = new ProgressDialog(ShowWhatsInside_sub.this);
+      final   ProgressHUD mProgressHUD = ProgressHUD.show(ShowWhatsInside_sub.this, LOADING_TEXT, false);
+        /*final ProgressDialog ringProgressDialog = new ProgressDialog(ShowWhatsInside_sub.this);
         ringProgressDialog.setMessage("Kindly wait...");
         ringProgressDialog.setCancelable(false);
-        ringProgressDialog.show();
+        ringProgressDialog.show();*/
 
         JsonObjectRequest bb = new JsonObjectRequest(Request.Method.GET, url,
                 null, new Response.Listener<JSONObject>() {
@@ -69,8 +73,10 @@ public class ShowWhatsInside_sub extends BaseActivity {
                         e.getMessage();
                     }
 
-                    ringProgressDialog.dismiss();
-
+                   // ringProgressDialog.dismiss();
+if(mProgressHUD.isShowing()){
+    mProgressHUD.dismiss();
+}
 
                 } catch (Exception e) {
                     e.getMessage();
@@ -82,9 +88,11 @@ public class ShowWhatsInside_sub extends BaseActivity {
             @Override
             public void onErrorResponse(VolleyError arg0) {
                 // TODO Auto-generated method stub
-                ringProgressDialog.dismiss();
+               // ringProgressDialog.dismiss();
 
-
+                if(mProgressHUD.isShowing()){
+                    mProgressHUD.dismiss();
+                }
 
             }
         });

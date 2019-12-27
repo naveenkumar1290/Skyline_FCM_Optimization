@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,6 +51,7 @@ import planet.info.skyline.network.Api;
 import planet.info.skyline.network.ProgressRequestBody;
 import planet.info.skyline.network.REST_API_Client;
 import planet.info.skyline.old_activity.AppConstants;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.CameraUtils;
 import planet.info.skyline.util.Utility;
@@ -68,12 +70,13 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
     Adapter_DamageReport userAdapter;
     ArrayList<String> list_path = new ArrayList<>();
 
-    ProgressDialog uploadProgressDialog;
+  //  ProgressDialog uploadProgressDialog;
     int Count_Image_Uploaded = 0;
     long totalSize = 0;
     AlertDialog alertDialog;
     private Context mContext;
     private RecyclerView recycler;
+       ProgressHUD mProgressHUD;
 
 
     @Override
@@ -141,7 +144,7 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
         }
 
         if (new ConnectionDetector(DamageReportNew.this).isConnectingToInternet()) {
-            new MyAsyncTask_MultiApiCall(this, this, jsonArray).execute();
+            new MyAsyncTask_MultiApiCall(this,true, this, jsonArray).execute();
         } else {
             Toast.makeText(DamageReportNew.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -224,15 +227,16 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
 
         if (Count_Image_Uploaded < list_path.size())
             Count_Image_Uploaded++;
-        uploadProgressDialog = new ProgressDialog(mContext);
-        // uploadProgressDialog.setMessage("Uploading , Please wait..");
+      /*  uploadProgressDialog = new ProgressDialog(mContext);
         uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_path.size() + ", Please wait..");
         uploadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         uploadProgressDialog.setIndeterminate(false);
         uploadProgressDialog.setProgress(0);
         uploadProgressDialog.setMax(100);
         uploadProgressDialog.setCancelable(false);
-        uploadProgressDialog.show();
+        uploadProgressDialog.show();*/
+        mProgressHUD = ProgressHUD.show(mContext, "Uploading " + Count_Image_Uploaded + "/" + list_path.size()+", wait..." , false);
+
 
         totalSize = 0;
 
@@ -263,7 +267,7 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
                     Count_Image_Uploaded = 0;
                     if (String.valueOf(response.code()).equals("200")) {
                         try {
-                            uploadProgressDialog.setProgress(100);
+                          //  uploadProgressDialog.setProgress(100);
                             String responseStr = response.body().string();
                             if (!responseStr.contains("api_error")) {
                                 if (responseStr.contains(",")) {
@@ -301,11 +305,15 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
 
                     list_path.clear();
 
-                    try {
+                    /*try {
                         uploadProgressDialog.dismiss();
                     } catch (Exception e) {
                         e.getMessage();
+                    }*/
+                    if(mProgressHUD.isShowing()){
+                        mProgressHUD.dismiss();
                     }
+
 
                     if (String.valueOf(response.code()).equals("200")) {
                         Toast.makeText(getApplicationContext(), "Photo uploaded successfully!", Toast.LENGTH_SHORT).show();
@@ -319,12 +327,16 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    try {
+                  /*  try {
                         if (uploadProgressDialog.isShowing())
                             uploadProgressDialog.dismiss();
                     } catch (Exception e) {
                         e.getMessage();
+                    }*/
+                    if(mProgressHUD.isShowing()){
+                        mProgressHUD.dismiss();
                     }
+
                     Count_Image_Uploaded = 0;
                     list_path.clear();
                     Toast.makeText(getApplicationContext(), "Upload failed!", Toast.LENGTH_SHORT).show();
@@ -382,9 +394,7 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
             public void onClick(View v) {
                 Intent intent = new Intent(mContext, AlbumSelectActivity.class);
                 intent.putExtra(com.darsh.multipleimageselect.helpers.Constants.INTENT_EXTRA_LIMIT, 1);
-                if (mContext instanceof DamageReportNew) {
-                    ((DamageReportNew) mContext).startActivityForResult(intent, AppConstants.GALLERY_CAPTURE_IMAGE_REQUEST_CODE);
-                }
+                startActivityForResult(intent, AppConstants.GALLERY_CAPTURE_IMAGE_REQUEST_CODE);
                 dialog.dismiss();
             }
         });
@@ -455,7 +465,7 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
     @Override
     public void onProgressUpdate(int percentage) {
         // textView.setText(percentage + "%");
-        uploadProgressDialog.setProgress(percentage);
+       // uploadProgressDialog.setProgress(percentage);
     }
 
     @Override
@@ -467,7 +477,9 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
     public void onFinish() {
         if (Count_Image_Uploaded < list_path.size())
             Count_Image_Uploaded++;
-        uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_path.size() + ", Please wait..");
+      //  uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_path.size() + ", Please wait..");
+        mProgressHUD.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_path.size()+", wait..." );
+
     }
 
     @Override
@@ -476,29 +488,29 @@ public class DamageReportNew extends AppCompatActivity implements ProgressReques
     }
 
     @Override
-    public void handleResponse(JSONObject responseJsonObject) {
-        Iterator iterator = responseJsonObject.keys();
+    public void handleMultiApiResponse(JSONArray responseJsonArray) {
+
         String result = "";
-        while (iterator.hasNext()) {
+        for (int i = 0; i < responseJsonArray.length(); i++) {
             try {
-                String Api = (String) iterator.next();
-                String Response = responseJsonObject.getString(Api);
-                JSONObject jsonObject = new JSONObject(Response);
-                String str = jsonObject.getString("cds");
-                if (str.contains("=")) {
-                    String[] result_arr = str.split("=");
-                    result = result_arr[1];
+                JSONObject jsonObject=    responseJsonArray.getJSONObject(i);
+                String _ApiName= jsonObject.getString("Method_Name");
+                if (_ApiName.equals(Api.API_add_item_descwithFileByType)) {
+                    String  str_res = jsonObject.getString("Response");
+                    JSONObject responseObj = new JSONObject(str_res);
+                    result= responseObj.getString("cds");
                 }
             } catch (Exception e) {
                 e.getMessage();
             }
-
-            if (result.equals("1")) {
-                Toast.makeText(DamageReportNew.this, "Report submitted successfully !", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(DamageReportNew.this, "Report submitting failed!", Toast.LENGTH_SHORT).show();
-            }
-            finish();
         }
+
+        if (result.equalsIgnoreCase("st=1")) {
+            Toast.makeText(DamageReportNew.this, "Report submitted successfully !", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(DamageReportNew.this, "Report submitting failed!", Toast.LENGTH_SHORT).show();
+        }
+        finish();
+
     }
 }

@@ -46,7 +46,7 @@ public class CompletedTask_Fragment extends Fragment {
     List<TaskPlan> list_TaskPlan = new ArrayList<>();
 
 
-    AlertDialog alertDialog;
+    //AlertDialog alertDialog;
     SwipeRefreshLayout pullToRefresh;
     SharedPreferences sp;
 

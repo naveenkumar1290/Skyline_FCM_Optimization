@@ -32,7 +32,6 @@ public class PermissionActivity extends AppCompatActivity {
 
     public static boolean CheckingPermissionIsEnabledOrNot(Context context) {
 
-
         return
                 ContextCompat.checkSelfPermission(context, Permissions[0]) == PackageManager.PERMISSION_GRANTED
                         &&
@@ -81,18 +80,24 @@ public class PermissionActivity extends AppCompatActivity {
                     boolean ReadPhoneState = grantResults[2] == PackageManager.PERMISSION_GRANTED;
                     if (ReadExternalStorage && Camera && ReadPhoneState) {
                         Utility.checkDrawOverlayPermission(PermissionActivity.this);
-
                      /*   Intent intent = new Intent();
                         intent.putExtra("result", ReadExternalStorage && Camera && ReadPhoneState);
                         setResult(Activity.RESULT_OK);
                         finish();*/
                     } else {
-                        Toast.makeText(PermissionActivity.this, "Please allow permissions!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(PermissionActivity.this, "Please allow permissions!", Toast.LENGTH_SHORT).show();
                     }
                 }
                 break;
         }
     }
+
+    @Override
+    public void onBackPressed() {
+      //  super.onBackPressed();
+        Toast.makeText(PermissionActivity.this, "Please allow permissions!", Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

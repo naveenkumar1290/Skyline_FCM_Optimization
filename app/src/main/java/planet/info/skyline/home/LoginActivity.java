@@ -2,7 +2,7 @@ package planet.info.skyline.home;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
@@ -41,12 +41,14 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.ClientModel;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.BaseActivity;
-import planet.info.skyline.tech.runtime_permission.PermissionActivity;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
+import planet.info.skyline.tech.runtime_permission.PermissionActivity;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_varify_tech;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -55,7 +57,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
 
     EditText ed_username, ed_passwo;
     TextView rl_btnRegister;
-    ProgressDialog pDialog;
+    //ProgressDialog pDialog;
 
     AlertDialog dialog;
 
@@ -65,27 +67,21 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
 
     JSONArray jsonArray = new JSONArray();
     ArrayList<ClientModel> List_Client = new ArrayList<>();
- /*   String[] Permissions = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.CAMERA,
-            Manifest.permission.READ_PHONE_STATE
-    };*/
 
+
+    Context context;
+    ProgressHUD mProgressHUD;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_userregistat_new);
+        context = LoginActivity.this;
         ed_username = (EditText) findViewById(R.id.reg_fullname);
         ed_username = (EditText) findViewById(R.id.reg_fullname);
         // getToken();
 
-     /*   if (CheckingPermissionIsEnabledOrNot()) {
-        } else {
-            RequestMultiplePermission();
-        }
-*/
         if (PermissionActivity.CheckingPermissionIsEnabledOrNot(LoginActivity.this)) {
         } else {
             Intent i = new Intent(getApplicationContext(), PermissionActivity.class);
@@ -96,9 +92,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
         ed_passwo = (EditText) findViewById(R.id.reg_password);
 
         rl_btnRegister = (TextView) findViewById(R.id.btnRegister);
-        pDialog = new ProgressDialog(LoginActivity.this);
-        pDialog.setMessage(getString(R.string.Loading_text));
-        pDialog.setCancelable(false);
+
 
         rl_btnRegister.setOnClickListener(new OnClickListener() {
             @Override
@@ -135,15 +129,25 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
         return true;
     }
 
-
     public void showprogressdialog() {
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
 
-        pDialog.show();
     }
 
     public void hideprogressdialog() {
-        pDialog.dismiss();
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
     }
+
 
     public void fun_login() {
 
@@ -322,9 +326,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
 
             @Override
             public void onClick(View v) {
-                /**
-                 * Bhanu work continue from 6/04/2016
-                 */
+
                 dialog.dismiss();
                 Shared_Preference.setLoginTrue(LoginActivity.this, Shared_Preference.LOGIN_TYPE_NORMAL);
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -357,31 +359,23 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (pDialog != null && pDialog.isShowing()) {
-            pDialog.dismiss();
-        }
+        hideprogressdialog();
 
-        if (dialog != null && dialog.isShowing()) {
-            dialog.dismiss();
-        }
     }
 
     //This method will be called when the user will tap on allow or deny
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //  is equal our requested code for draw permission
+
         if (requestCode == Utility.CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE) {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (Settings.canDrawOverlays(LoginActivity.this)) {
                     //Permission Granted by Overlay!!!
-                    //Do your Stuff
                 } else {
                     //Permission Not Granted by Overlay!!!
-                    //Do your Stuff
                     Toast.makeText(LoginActivity.this, "Please allow the permission." + System.getProperty("line.separator") + " This will be used to show the clock ! ", Toast.LENGTH_SHORT).show();
-
 
                 }
 
@@ -391,6 +385,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
             if (resultCode == RESULT_OK) {
                 Log.e("", "");
             } else {
+                Toast.makeText(this, "Please grant permissions!", Toast.LENGTH_SHORT).show();
 
             }
         }
@@ -425,49 +420,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
 
     }
 
- /*   private void RequestMultiplePermission() {
-        // Creating String Array with Permissions.
-        ActivityCompat.requestPermissions(LoginActivity.this, Permissions, RequestPermissionCode);
-
-    }
-*/
-  /*  @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-
-            case RequestPermissionCode:
-                if (grantResults.length > 0) {
-                    boolean ReadExternalStorage = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    boolean Camera = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if (ReadExternalStorage && Camera) {
-
-                        Utility.checkDrawOverlayPermission(LoginActivity.this);
-
-                    } else {
-                        Toast.makeText(LoginActivity.this, "Permission Denied", Toast.LENGTH_LONG).show();
-                    }
-                }
-                break;
-        }
-    }
-
-    public boolean CheckingPermissionIsEnabledOrNot() {
-        boolean AllPermissionGranted = true;
-
-        for (int i = 0; i < Permissions.length; i++) {
-            int PermissionResult = ContextCompat.checkSelfPermission(getApplicationContext(), Permissions[i]);
-            if (PermissionResult == PackageManager.PERMISSION_GRANTED) {
-                AllPermissionGranted = true;
-            } else {
-                AllPermissionGranted = false;
-            }
-        }
-        return AllPermissionGranted;
-    }
-
-*/
     public void UpdateTokenOnServer() {
-
 
 
         String empId = Shared_Preference.getLOGIN_USER_ID(this);
@@ -502,7 +455,6 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
             e.printStackTrace();
         }
     }
-
 
 
     private void getToken() {
@@ -545,9 +497,7 @@ public class LoginActivity extends BaseActivity {//implements ActivityCompat.OnR
 
         @Override
         protected Void doInBackground(Void... params) {
-            // TODO Auto-generated method stub
             fun_login();
-            ///    CheckUserAuthForTimeSheet();
             //  UpdateTokenOnServer();
             return null;
         }

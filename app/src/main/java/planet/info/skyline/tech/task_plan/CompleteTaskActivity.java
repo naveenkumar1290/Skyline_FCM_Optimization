@@ -1,6 +1,5 @@
 package planet.info.skyline.tech.task_plan;
 
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,30 +18,22 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import planet.info.skyline.R;
-import planet.info.skyline.model.SWO;
 import planet.info.skyline.model.Technician;
-import planet.info.skyline.network.API_Interface;
-import planet.info.skyline.network.REST_API_Client_TaskPlan;
 import planet.info.skyline.util.Utility;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class CompleteTaskActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, DialogInterface.OnCancelListener {
     TextView Task, Description, Checklist,
             deadline_date, Time_Budget, Start_By, Completed_date;
-    LinearLayout ll_completedDate,ll_completion_date;//,cardview_technician;
+    LinearLayout ll_completedDate, ll_completion_date;//,cardview_technician;
     ImageView cardview_linked, Imgvw_OK;
 
     String checklist;
@@ -61,11 +52,11 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
     List<Technician> list_techs = new ArrayList<>();
 
     boolean IS_CHECKLIST_DONE = false;
-    ScrollView sv ;
+    ScrollView sv;
 
 
     String job_id;
-    String id ,AssignUser;
+    String id, AssignUser;
 
 
     @Override
@@ -79,9 +70,9 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
         setView();
         getIntentData();
         getTechnicians();
-       // setRecyclerTempData();
+        // setRecyclerTempData();
 
-     //   focusOnView();
+        //   focusOnView();
     }
 
     private void setView() {
@@ -95,7 +86,7 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
         ll_checklist = findViewById(R.id.ll_checklist);
         Completed_date = findViewById(R.id.Completed_date);
         ll_completedDate = findViewById(R.id.ll_completedDate);
-        ll_completion_date= findViewById(R.id.ll_completion_date);
+        ll_completion_date = findViewById(R.id.ll_completion_date);
         ll_completion_date.setVisibility(View.INVISIBLE);
 
         tech_recyclerView = (RecyclerView) findViewById(R.id.tech_recyclerView);
@@ -103,13 +94,12 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
         tech_recyclerView.setItemAnimator(new DefaultItemAnimator());
 
 
-
         // Completed_date.set
         if (!IS_CHECKLIST_DONE) {
             Utility.animateTextview(Completed_date, this);
         }
 
-        sv =  findViewById(R.id.scrollview);
+        sv = findViewById(R.id.scrollview);
         Imgvw_OK = findViewById(R.id.OK);
         Imgvw_OK.setVisibility(View.INVISIBLE);
 
@@ -141,11 +131,10 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
         ll_checklist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!IS_CHECKLIST_DONE) {
+                if (!IS_CHECKLIST_DONE) {
                     Intent intent = new Intent(CompleteTaskActivity.this, ChecklistActivity.class);
                     intent.putExtra("Updatable", "1");
                     intent.putExtra("RequestCode", Utility.REQUEST_CODE_CHECKLIST);
-
                     intent.putExtra("job_id", job_id);
                     intent.putExtra("task_id", taskID);
                     intent.putExtra("id", id);
@@ -162,7 +151,7 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
         ll_completedDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!IS_CHECKLIST_DONE) {
+                if (!IS_CHECKLIST_DONE) {
                     Click_getDate();
                 }
 
@@ -197,13 +186,14 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
 
 
     }
+
     private void getTechnicians() {
         list_techs.clear();
         if (AssignUser != null && !AssignUser.isEmpty()) {
             if (AssignUser.contains(",")) {
                 String tech[] = AssignUser.split(",");
                 for (int i = 0; i < tech.length; i++) {
-                    if(tech[i].trim().equals("")) continue;
+                    if (tech[i].trim().equals("")) continue;
                     list_techs.add(new Technician(tech[i], "", false));
                 }
             }
@@ -216,48 +206,47 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
 
 
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // check if the request code is same as what is passed  here it is 2
 
-            if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
-            } else {
-                if (requestCode == Utility.REQUEST_CODE_CHECKLIST) {
-                    IS_CHECKLIST_DONE = data.getBooleanExtra(Utility.IS_CHECKLIST_DONE, false);
-                    if (IS_CHECKLIST_DONE) {
-                        Checklist.setText("3/3");
+        if (resultCode == Activity.RESULT_CANCELED) {
+            //Write your code if there's no result
+        } else {
+            if (requestCode == Utility.REQUEST_CODE_CHECKLIST) {
+                IS_CHECKLIST_DONE = data.getBooleanExtra(Utility.IS_CHECKLIST_DONE, false);
+                if (IS_CHECKLIST_DONE) {
+                    Checklist.setText("3/3");
 
 
-                        Utility.StopanimateTextview(Completed_date, this);
+                    Utility.StopanimateTextview(Completed_date, this);
 
-                        Click_getDate();
-                    }
+                    Click_getDate();
                 }
-               else if (requestCode == Utility.REQUEST_CODE_COMPLETED_DATE) {
+            } else if (requestCode == Utility.REQUEST_CODE_COMPLETED_DATE) {
 
-                    IS_CHECKLIST_DONE = data.getBooleanExtra(Utility.IS_CHECKLIST_DONE, false);
-                    if (IS_CHECKLIST_DONE) {
-                        Checklist.setText("3/3");
-
-
-                        Utility.StopanimateTextview(Completed_date, this);
+                IS_CHECKLIST_DONE = data.getBooleanExtra(Utility.IS_CHECKLIST_DONE, false);
+                if (IS_CHECKLIST_DONE) {
+                    Checklist.setText("3/3");
 
 
-                        Imgvw_OK.setVisibility(View.VISIBLE);
-                        list_techs.set(0, new Technician("tech tech(Service Tech)", "28", true));
-                        JobFilesAdapter jobFilesAdapter = new JobFilesAdapter(this, list_techs);
-                        tech_recyclerView.setAdapter(jobFilesAdapter);
+                    Utility.StopanimateTextview(Completed_date, this);
 
 
-                    }
+                    Imgvw_OK.setVisibility(View.VISIBLE);
+                    list_techs.set(0, new Technician("tech tech(Service Tech)", "28", true));
+                    JobFilesAdapter jobFilesAdapter = new JobFilesAdapter(this, list_techs);
+                    tech_recyclerView.setAdapter(jobFilesAdapter);
+
 
                 }
-
 
             }
 
+
+        }
 
 
         if (!IS_CHECKLIST_DONE) {
@@ -267,10 +256,7 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
         }
 
 
-
-
-        }
-
+    }
 
 
     private void Click_getDate() {
@@ -322,15 +308,13 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
             list_techs.set(0, new Technician("tech tech(Service Tech)", "28", true));
             JobFilesAdapter jobFilesAdapter = new JobFilesAdapter(this, list_techs);
             tech_recyclerView.setAdapter(jobFilesAdapter);
-        }else {
+        } else {
             Intent intent = new Intent(CompleteTaskActivity.this, ChecklistActivity.class);
             intent.putExtra("Updatable", "1");
             intent.putExtra("RequestCode", Utility.REQUEST_CODE_COMPLETED_DATE);
             startActivityForResult(intent, Utility.REQUEST_CODE_COMPLETED_DATE);// Activity is started with requestCode 2
 
         }
-
-
 
 
     }
@@ -341,7 +325,6 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
             Utility.animateTextview(Completed_date, this);
         }
     }
-
 
 
     private void getIntentData() {
@@ -362,7 +345,7 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
                 taskID = bundle.getString("taskID", "");
                 job_id = bundle.getString("job_id", "");
                 id = bundle.getString("id", "");
-                AssignUser= bundle.getString("AssignUser", "");
+                AssignUser = bundle.getString("AssignUser", "");
             }
 
             if (checklist == null || checklist.trim().equals("")) {
@@ -405,8 +388,6 @@ public class CompleteTaskActivity extends AppCompatActivity implements DatePicke
             e.getMessage();
         }
     }
-
-
 
 
     @Override

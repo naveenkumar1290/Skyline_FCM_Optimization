@@ -3,6 +3,7 @@ package planet.info.skyline.tech.job_files_new;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
@@ -17,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -56,7 +58,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import planet.info.skyline.model.ClientUser;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.tech.fullscreenview.FullscreenImageView;
 import planet.info.skyline.tech.fullscreenview.FullscreenWebView;
 import planet.info.skyline.R;
@@ -65,6 +69,7 @@ import planet.info.skyline.model.ProjectPhoto;
 import planet.info.skyline.model.ProjectPhotoComment;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
+import planet.info.skyline.tech.share_photos.SharePhotosToClientActivity;
 import planet.info.skyline.util.FileDownloader;
 import planet.info.skyline.util.Utility;
 
@@ -72,15 +77,15 @@ import static planet.info.skyline.network.Api.API_GetProjectFileComment;
 import static planet.info.skyline.network.Api.API_SaveProjectFileComment;
 import static planet.info.skyline.network.Api.API_UpdateProjectPhotoStatusByClient;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
+import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 import static planet.info.skyline.util.Utility.isValidEmail;
 
 //import planet.info.skyline.httpimage.HttpImageManager;
 
 public class ProjectFileDetailActivityNonClient extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
     String status = "", Comment = "", SnoozDate = "";
-    SharedPreferences sp;
     String Client_id_Pk, comp_ID, jobID, FileId, dealerId, googleId,masterId;
-    // String commentFileShare = "";
     String MailId = "";
     ImageView img_share, thumbnail, img_download;
     String fileExt;
@@ -96,42 +101,30 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
     String Agency = "0";// by default
     ProjectPhoto mPhoto;
     ArrayList<ProjectPhotoComment> list_ProjectPhotoComment = new ArrayList<>();
+    List<ClientUser> list_Selected_Clients =new ArrayList<>();
     EditText et_textDate, et_comment;
- //   private HttpImageManager mHttpImageManager;
     private ProgressBar spinner;
     private RecyclerView recyclerView;
     private MoviesAdapter mAdapter;
     SwipeRefreshLayout pullToRefresh;
-
+    Context context;
+    ProgressHUD mProgressHUD;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project_file_detail_non_clientl);
-
-
+        context=ProjectFileDetailActivityNonClient.this;
         setTitle(Utility.getTitle("Details"));
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-      //  mHttpImageManager = ((AppController) ProjectFileDetailActivityNonClient.this.getApplication()).getHttpImageManager();
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        sp = getApplicationContext().getSharedPreferences("skyline", getApplicationContext().MODE_PRIVATE);
-
-       Client_id_Pk = "0";
-
-
-
+        Client_id_Pk = "0";
         comp_ID =   Shared_Preference.getCOMPANY_ID_BILLABLE(this);
-
-
         dealerId = Shared_Preference.getDEALER_ID(this);
-
         FileId = getIntent().getStringExtra("FileId");
         FileName = getIntent().getStringExtra("FileName");
         jobID = getIntent().getStringExtra("jobID");
         googleId = getIntent().getStringExtra("googleId");
-
         masterId = getIntent().getStringExtra("masterId");
-
 
         Button btn_Approve, btn_RevisionNeeded, btn_Snooze,btn_Comment;
         btn_Approve = findViewById(R.id.btn_Approve);
@@ -142,7 +135,7 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
         thumbnail = findViewById(R.id.thumbnail);
         img_share = findViewById(R.id.img_share);
         img_download = findViewById(R.id.img_download);
-        spinner = (ProgressBar) findViewById(R.id.progressBar1);
+        spinner =  findViewById(R.id.progressBar1);
         spinner.setVisibility(View.VISIBLE);
 
 
@@ -193,7 +186,7 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
         img_download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                download_file(FileName);
+                Utility. view_downloadFile(FileName,context);
             }
         });
 
@@ -264,16 +257,11 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
             @Override
             public void onClick(View view) {
                 if (isImage) {
-
-
                     Intent i = new Intent(ProjectFileDetailActivityNonClient.this, FullscreenImageView.class);
                     i.putExtra("url", url);
                     startActivity(i);
 
-
                 } else if (isDoc || isWord ||isPdf||isText|| isExcel) {
-
-
                     Intent i = new Intent(ProjectFileDetailActivityNonClient.this, FullscreenWebView.class);
                     i.putExtra("url", url);
                     startActivity(i);
@@ -282,7 +270,6 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     intent.setDataAndType(Uri.parse(url), "video/*");
                     startActivity(intent);
-
                 } else {
                     Toast.makeText(ProjectFileDetailActivityNonClient.this, "Unrecognized file format ! Please download to view the file!", Toast.LENGTH_SHORT).show();
                 }
@@ -295,8 +282,6 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
             @Override
             public void onRefresh() {
                 CallApiProjectPhotoDetail();
-                // your code
-
             }
         });
     }
@@ -313,7 +298,6 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                // API 5+ solution
                 onBackPressed();
                 return true;
 
@@ -543,8 +527,6 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
         request.addProperty("MailIDs", mail_id);
         request.addProperty("CommentBy", userID);
 
-
-
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
         envelope.dotNet = true;
         envelope.setOutputSoapObject(request);
@@ -565,16 +547,7 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
 
     }
 
-    public void download_file(String file_name1) {
 
-        if (new ConnectionDetector(ProjectFileDetailActivityNonClient.this).isConnectingToInternet()) {
-            new DownloadFile().execute("https://drive.google.com/thumbnail?id=" + googleId, file_name1);
-        } else {
-            Toast.makeText(ProjectFileDetailActivityNonClient.this, Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
-        }
-
-
-    }
 
     public void getProjectPhotos() {
 
@@ -1020,32 +993,39 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
 
     }
 
-
-
     private class Async_ShareFileToGuest extends AsyncTask<Void, Void, Void> {
 
-        ProgressDialog progressDoalog;
+      //  ProgressDialog progressDoalog;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progressDoalog = new ProgressDialog(ProjectFileDetailActivityNonClient.this);
+          /*  progressDoalog = new ProgressDialog(ProjectFileDetailActivityNonClient.this);
             progressDoalog.setMessage("Please wait....");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
-            progressDoalog.show();
+            progressDoalog.show();*/
+          showprogressdialog();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             if (MailId.contains(",")) {
                 String ar_mails[] = MailId.split(",");
-
                 for (int i = 0; i < ar_mails.length; i++) {
                     ShareFileToGuest(ar_mails[i]);
                 }
             } else {
                 ShareFileToGuest(MailId);
             }
+            String LID = Shared_Preference.getLOGIN_USER_ID(ProjectFileDetailActivityNonClient.this);
+
+            for (int i = 0; i < list_Selected_Clients.size(); i++) {
+                String Mail_1 = list_Selected_Clients.get(i).getTxt_Mail();
+                String UID_1 = list_Selected_Clients.get(i).getId_Pk();
+                // if (api_error) break;
+                Mail(LID, UID_1, Mail_1, comp_ID, jobID, FileId,"3");
+            }
+
 
 
             return null;
@@ -1054,10 +1034,11 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            try {
+           /* try {
                 progressDoalog.dismiss();
             }catch (Exception e){e.getCause();}
-
+*/
+           hideprogressdialog();
             if (status.equals("2") || status.equals("3") || status.equals("4") || status.equals("5")) {
                 Toast.makeText(getApplicationContext(), "Status changed successfully!", Toast.LENGTH_SHORT).show();
             } else {
@@ -1071,81 +1052,68 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
 
         }
     }
+    public void Mail(String LID, String UID, String Mail, String CID, String JID, String FID,String FIleTYpe) {
 
-    private class DownloadFile extends AsyncTask<String, Void, String> {///this class make in adapter for downloading the pdf
-        ProgressDialog progressDoalog;
+        final String NAMESPACE = KEY_NAMESPACE + "";
+        final String METHOD_NAME = Api.API_mail;
+        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
+        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
 
-        @Override
-        protected String doInBackground(String... strings) {
-            String fileUrl = strings[0];   // -> http://maven.apache.org/maven-1.x/maven.pdf
-            String fileName = strings[1];  // -> maven.pdf
-            /**/
+        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
 
-            String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-            File folder = new File(extStorageDirectory, "Exhibit Power");
+        request.addProperty("LID", LID);
+        request.addProperty("UID", UID);
+        request.addProperty("Mail", Mail);
+        request.addProperty("CID", CID);
+        request.addProperty("JID", JID);
+        request.addProperty("FID", FID);
+        request.addProperty("PhotoType", FIleTYpe);
 
-            if (!folder.exists()) {
-                folder.mkdir();
+
+        Log.e("Api called", request.toString());
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE httpTransport = new HttpTransportSE(URL);
+        try {
+            httpTransport.call(SOAP_ACTION, envelope);
+
+            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
+            String result = SoapPrimitiveresult.toString();
+
+            Log.e("Api result", result);
+
+            if (result.equalsIgnoreCase("fail")) {
+             //   api_error = true;
+            } else {
+               // api_error = false;
             }
 
-            File folder1 = new File(folder, "Download");
-            if (!folder1.exists()) {
-                folder1.mkdir();
-            }
 
-
-            if (fileName.contains("/")) {
-                fileName = fileName.substring(fileName.indexOf("/") + 1);
-            }
-            File pdfFile = new File(folder1, fileName);
-            try {
-                pdfFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            FileDownloader.downloadFile(fileUrl, pdfFile);
-            return folder1.getAbsolutePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+           // api_error = true;
+            Log.e("Api result err", String.valueOf(e.getMessage()));
         }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // showDialog(progress_bar_type);
-
-            progressDoalog = new ProgressDialog(ProjectFileDetailActivityNonClient.this);
-            progressDoalog.setMessage("Downloading, please wait...");
-            progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDoalog.show();
-        }
-
-        @Override
-        protected void onPostExecute(String path) {
-            super.onPostExecute(path);
-            progressDoalog.dismiss();
-            try {
-                Toast.makeText(ProjectFileDetailActivityNonClient.this, "File downloaded successfully !" +
-                        "  " + "Location:" + path, Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-        }
-
 
     }
 
+
+
     private class Async_ProjectPhotoDetail extends AsyncTask<Void, Void, Void> {
-        ProgressDialog progressDoalog;
+      //  ProgressDialog progressDoalog;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
 
-            progressDoalog = new ProgressDialog(ProjectFileDetailActivityNonClient.this);
+          /*  progressDoalog = new ProgressDialog(ProjectFileDetailActivityNonClient.this);
             progressDoalog.setMessage("Please wait....");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
-            progressDoalog.show();
+            progressDoalog.show();*/
+          showprogressdialog();
         }
 
         @Override
@@ -1160,8 +1128,8 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            progressDoalog.dismiss();
-
+          //  progressDoalog.dismiss();
+hideprogressdialog();
             if (pullToRefresh.isRefreshing()) {
                 pullToRefresh.setRefreshing(false);
             }
@@ -1260,11 +1228,11 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
 
         public class MyViewHolder extends RecyclerView.ViewHolder {
             TextView tv_Comment, tv_GivenBy, tv_DateTime, tv_status, tv_status_heading;
-            ImageView thumbnail;
+          //  ImageView thumbnail;
             Button index_no;
-            LinearLayout parentView;
+          //  LinearLayout parentView;
 
-            ProgressBar spinner;
+         //   ProgressBar spinner;
 
             public MyViewHolder(View view) {
                 super(view);
@@ -1290,9 +1258,50 @@ public class ProjectFileDetailActivityNonClient extends AppCompatActivity implem
            if (resultCode == Activity.RESULT_CANCELED) {
                 return;
             }
-            String selected_mails=data.getStringExtra(Utility.Client_Mail);
+           /* String selected_mails=data.getStringExtra(Utility.Client_Mail);
             Dialog_ShareFile(selected_mails);
+           */
+
+            ///
+            Bundle args = data.getBundleExtra("BUNDLE");
+           list_Selected_Clients =
+                    (List<ClientUser>) args.getSerializable("ARRAYLIST");
+
+            String selected_mails="";
+            for (int i = 0; i < list_Selected_Clients.size(); i++) {
+                selected_mails = selected_mails + list_Selected_Clients.get(i).getTxt_Mail() + ",";
+            }
+
+            if(selected_mails.contains(",")){
+                selected_mails = selected_mails.substring(0, selected_mails.length() - 1);
+            }
+
+            Dialog_ShareFile(selected_mails);
+
+
         }
 
     }
+
+    public void showprogressdialog() {
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+
+    }
+
+    public void hideprogressdialog() {
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
+
+
+
 }

@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_vertical"
-    android:gravity="center"
     android:focusableInTouchMode="true"
-    android:orientation="vertical">
-
+    android:orientation="vertical">-->
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="?android:attr/selectableItemBackground"
+    card_view:cardElevation="5sp"
+    card_view:cardUseCompatPadding="true">
 
     <FrameLayout
         android:id="@+id/row_item"
@@ -16,12 +22,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="15dp"
+
             android:background="@drawable/corner_round"
-            android:gravity="center"
+
             android:orientation="horizontal"
             android:padding="0dp">
-            <!---add your views here-->
+            <!---add your
+              android:layout_margin="5dp"
+
+             views here-->
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -31,7 +40,7 @@
 
                 <View
                     android:id="@+id/view1"
-                    android:layout_width="40dp"
+                    android:layout_width="30dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="left"
                     android:background="#E4DFDF"
@@ -40,8 +49,8 @@
 
                 <Button
                     android:id="@+id/serial_no"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
 
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="-15dp"
@@ -61,7 +70,7 @@
 
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="2dp"
+                android:padding="5dp"
                 android:orientation="vertical">
 
 
@@ -111,11 +120,12 @@
 
         <ImageView
             android:id="@+id/img_remove_item"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_gravity="top|right"
             android:clickable="true"
             android:src="@drawable/minus11" />
     </FrameLayout>
-
-</LinearLayout>
+</android.support.v7.widget.CardView>
+<!--
+</LinearLayout>-->

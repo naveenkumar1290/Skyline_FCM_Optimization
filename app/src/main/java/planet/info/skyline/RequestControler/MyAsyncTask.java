@@ -3,7 +3,6 @@ package planet.info.skyline.RequestControler;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.widget.Button;
 
 import org.json.JSONObject;
 import org.ksoap2.SoapEnvelope;
@@ -14,23 +13,27 @@ import org.ksoap2.transport.HttpTransportSE;
 
 import java.util.Iterator;
 
-import planet.info.skyline.R;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.progress.ProgressHUD;
 
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 // The types specified here are the input data type, the progress type, and the result type
 public class MyAsyncTask extends AsyncTask<Void, Void, String> {
 
     Context context;
+    ProgressHUD mProgressHUD;
     private ResponseInterface responseInterface;
     private String API_NAME;
     private JSONObject INPUT;
     private ProgressDialog pDialog;
     private Boolean showProgress;
+
     // String Response="";
-    public MyAsyncTask(Context context,Boolean showProgress, ResponseInterface responseInterface, String API_NAME, JSONObject INPUT) {
+    public MyAsyncTask(Context context, Boolean showProgress, ResponseInterface responseInterface, String API_NAME, JSONObject INPUT) {
         this.context = context;
+
         this.responseInterface = responseInterface;
         this.API_NAME = API_NAME;
         this.INPUT = INPUT;
@@ -38,7 +41,11 @@ public class MyAsyncTask extends AsyncTask<Void, Void, String> {
     }
 
     protected void onPreExecute() {
-        if(showProgress) {
+        super.onPreExecute();
+        if (showProgress) {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        }
+       /* if(showProgress) {
             try {
                 pDialog = new ProgressDialog(context);
                 pDialog.setMessage(context.getString(R.string.Loading_text));
@@ -49,8 +56,8 @@ public class MyAsyncTask extends AsyncTask<Void, Void, String> {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-
+        }*/
+        // mProgressHUD.setMessage("Wait...");
     }
 
     protected String doInBackground(Void... strings) {
@@ -64,7 +71,7 @@ public class MyAsyncTask extends AsyncTask<Void, Void, String> {
     }*/
 
     protected void onPostExecute(String response) {
-       if(showProgress) {
+      /* if(showProgress) {
            try {
                if (pDialog.isShowing()) {
                    pDialog.dismiss();
@@ -72,7 +79,12 @@ public class MyAsyncTask extends AsyncTask<Void, Void, String> {
            } catch (Exception e) {
                e.getMessage();
            }
-       }
+       }*/
+        try {
+            if (mProgressHUD.isShowing())
+                mProgressHUD.dismiss();
+        } catch (Exception e) {
+        }
         responseInterface.handleResponse(response, API_NAME);
     }
 

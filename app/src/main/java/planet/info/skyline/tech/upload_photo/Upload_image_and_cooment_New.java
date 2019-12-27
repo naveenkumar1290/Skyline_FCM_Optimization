@@ -3,7 +3,6 @@ package planet.info.skyline.tech.upload_photo;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -65,9 +64,10 @@ import planet.info.skyline.network.ProgressRequestBody;
 import planet.info.skyline.network.REST_API_Client;
 import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.AppConstants;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
-import planet.info.skyline.tech.job_files_new.SharePhotosToClientActivity;
+import planet.info.skyline.tech.share_photos.SharePhotosToClientActivity;
 import planet.info.skyline.tech.runtime_permission.PermissionActivity;
 import planet.info.skyline.util.CameraUtils;
 import planet.info.skyline.util.Utility;
@@ -85,7 +85,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     public static final int MEDIA_TYPE_IMAGE = 1;
     private static String imageStoragePath;
 
-    ProgressDialog pDialog;
+  //  ProgressDialog pDialog;
     String path;
     File file1;
 
@@ -107,20 +107,21 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     ExpandableHeightListView listvw_images;
     LvAdapter adpter;
     String userRole = "";
-    ProgressDialog uploadProgressDialog;
+  //  ProgressDialog uploadProgressDialog;
     int Count_Image_Uploaded = 0;
 
     Context mContext;
 
+    ProgressHUD mProgressHUD;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         mContext = Upload_image_and_cooment_New.this;
         setContentView(R.layout.activity_upload_image_and_cooment);
-        pDialog = new ProgressDialog(mContext);
-        pDialog.setMessage(getString(R.string.Loading_text));
-        pDialog.setCancelable(false);
+       // pDialog = new ProgressDialog(mContext);
+      //  pDialog.setMessage(getString(R.string.Loading_text));
+       // pDialog.setCancelable(false);
 
 
         userRole = Shared_Preference.getUSER_ROLE(this);
@@ -244,7 +245,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
         finishs();
     }
 
-    public void showprogressdialog() {
+/*    public void showprogressdialog() {
         if (!pDialog.isShowing()) {
             pDialog.show();
         }
@@ -254,8 +255,39 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
         if (pDialog.isShowing()) {
             pDialog.dismiss();
         }
+    }*/
+  /*  public void showprogressdialog() {
+       *//* try {
+            if (!(pDialog.isShowing())) {
+                pDialog.show();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }*//*
+        try {
+            mProgressHUD = ProgressHUD.show(mContext, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+
     }
 
+    public void hideprogressdialog() {
+        *//*try {
+            if ((pDialog.isShowing())) {
+                pDialog.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }*//*
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }*/
     public void dialog_sharePhotos() {
         final Dialog showd = new Dialog(mContext);
         showd.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -361,6 +393,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
 
             HashMap<String, String> hashMap = new HashMap<>();
             hashMap.put("int_job_file_id", UploadedPhotoID);
+            hashMap.put("ftype", "Project Photo(s)");
 
             list_UploadedImageID.add(hashMap);
 
@@ -697,6 +730,9 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
                     String jobID = data.getStringExtra("JobID");
                     String company_Name = data.getStringExtra("CompName");
                     String job_Name = data.getStringExtra("JobName");
+                    Shared_Preference.setCOMPANY_ID_BILLABLE(this,compID);
+                    Shared_Preference.setJOB_ID_FOR_JOBFILES(this,jobID);
+
                     selectedJobId = jobID;
                     opendilogforattachfileandimage_custom();
                 } catch (Exception e) {
@@ -736,15 +772,15 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     private void multipartImageUpload() {
         if (Count_Image_Uploaded < list_ImageDescData.size())
             Count_Image_Uploaded++;
-        uploadProgressDialog = new ProgressDialog(mContext);
-        // uploadProgressDialog.setMessage("Uploading , Please wait..");
+      /*  uploadProgressDialog = new ProgressDialog(mContext);
         uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_ImageDescData.size() + ", Please wait..");
         uploadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         uploadProgressDialog.setIndeterminate(false);
         uploadProgressDialog.setProgress(0);
         uploadProgressDialog.setMax(100);
         uploadProgressDialog.setCancelable(false);
-        uploadProgressDialog.show();
+        uploadProgressDialog.show();*/
+        mProgressHUD = ProgressHUD.show(mContext, "Uploading " + Count_Image_Uploaded + "/" + list_ImageDescData.size()+", wait..." , false);
 
         //  initRetrofitClient();
 
@@ -776,7 +812,7 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
                     Count_Image_Uploaded = 0;
                     if (String.valueOf(response.code()).equals("200")) {
                         try {
-                            uploadProgressDialog.setProgress(100);
+                          //  uploadProgressDialog.setProgress(100);
                             String responseStr = response.body().string();
                             if (!responseStr.contains("api_error")) {
                                 String s[] = responseStr.split(",");
@@ -806,12 +842,16 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    try {
+                   /* try {
                         if (uploadProgressDialog.isShowing())
                             uploadProgressDialog.dismiss();
                     } catch (Exception e) {
                         e.getMessage();
+                    }*/
+                    if(mProgressHUD.isShowing()){
+                        mProgressHUD.dismiss();
                     }
+
                     Count_Image_Uploaded = 0;
                     Toast.makeText(getApplicationContext(), "Upload failed!", Toast.LENGTH_SHORT).show();
                     t.printStackTrace();
@@ -827,7 +867,9 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     @Override
     public void onProgressUpdate(int percentage) {
         // textView.setText(percentage + "%");
-        uploadProgressDialog.setProgress(percentage);
+       // uploadProgressDialog.setProgress(percentage);
+
+
     }
 
     @Override
@@ -839,8 +881,8 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
     public void onFinish() {
         if (Count_Image_Uploaded < list_ImageDescData.size())
             Count_Image_Uploaded++;
-        uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_ImageDescData.size() + ", Please wait..");
-
+     //   uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_ImageDescData.size() + ", Please wait..");
+        mProgressHUD.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_ImageDescData.size()+", wait..." );
     }
 
     @Override
@@ -1152,11 +1194,14 @@ public class Upload_image_and_cooment_New extends AppCompatActivity implements P
             list_ImageDescData.clear();
             list_imageSize.clear();
             list_UploadImageName.clear();
-            try {
+           /* try {
                 if (uploadProgressDialog.isShowing())
                     uploadProgressDialog.dismiss();
             } catch (Exception e) {
                 e.getMessage();
+            }*/
+            if(mProgressHUD.isShowing()){
+                mProgressHUD.dismiss();
             }
             try {
                 if (result.equalsIgnoreCase("1")) {

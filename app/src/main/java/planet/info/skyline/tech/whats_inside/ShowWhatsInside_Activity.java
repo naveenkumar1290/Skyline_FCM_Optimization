@@ -41,10 +41,12 @@ import planet.info.skyline.controller.AppController;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.old_activity.BaseActivity;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.tech.task_plan.AttachmentListActivity;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class ShowWhatsInside_Activity extends BaseActivity {
@@ -53,18 +55,20 @@ public class ShowWhatsInside_Activity extends BaseActivity {
     String crateId;
     ArrayList<HashMap<String, String>> al_element1;
     ArrayList<HashMap<String, String>> al_element2;
-    ProgressDialog ringProgressDialog;
+  //  ProgressDialog ringProgressDialog;
     ArrayList<HashMap<String, String>> al_Crates1;
     ArrayList<HashMap<String, String>> al_Crates2;
     ArrayList<HashMap<String, String>> al_graphics1;
     ArrayList<HashMap<String, String>> al_graphics2;
     int crateCount_1 = 0, crateCount_2 = 0;
     private FragmentTabHost mTabHost;
-
+    Context context;
+    ProgressHUD mProgressHUD;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_whats_inside);
+        context=ShowWhatsInside_Activity.this;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(getApplicationContext(), getSupportFragmentManager(), R.id.realtabcontent);
@@ -116,10 +120,11 @@ public class ShowWhatsInside_Activity extends BaseActivity {
     }
 
     public void getCrateData(String urlCrateId) {
-        ringProgressDialog = new ProgressDialog(ShowWhatsInside_Activity.this);
+       /* ringProgressDialog = new ProgressDialog(ShowWhatsInside_Activity.this);
         ringProgressDialog.setMessage("Kindly wait...");
         ringProgressDialog.setCancelable(false);
-        ringProgressDialog.show();
+        ringProgressDialog.show();*/
+       showprogressdialog();
 
         JsonObjectRequest bb = new JsonObjectRequest(Request.Method.GET, urlCrateId,
                 null, new Response.Listener<JSONObject>() {
@@ -291,9 +296,9 @@ public class ShowWhatsInside_Activity extends BaseActivity {
             @Override
             public void onErrorResponse(VolleyError arg0) {
                 // TODO Auto-generated method stub
-                ringProgressDialog.dismiss();
+             //   ringProgressDialog.dismiss();
                 //  tv_msg.setVisibility(View.VISIBLE);
-
+hideprogressdialog();
 
             }
         });
@@ -574,9 +579,10 @@ public class ShowWhatsInside_Activity extends BaseActivity {
         });
 
 
-        if (ringProgressDialog.isShowing()) {
+        /*if (ringProgressDialog.isShowing()) {
             ringProgressDialog.dismiss();
-        }
+        }*/
+        hideprogressdialog();
 
     }
 
@@ -772,6 +778,26 @@ public class ShowWhatsInside_Activity extends BaseActivity {
             }
 
 
+        }
+    }
+    public void showprogressdialog() {
+
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+
+    }
+
+    public void hideprogressdialog() {
+
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
         }
     }
 

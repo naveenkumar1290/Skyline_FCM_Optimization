@@ -36,6 +36,7 @@ import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.model.LaborCode;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.old_activity.BaseActivity;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.update_timesheet.TimeSheetList1Activity;
 import planet.info.skyline.util.Utility;
@@ -77,13 +78,14 @@ public class NonBillable_jobs extends BaseActivity implements ResponseInterface 
 
     // boolean FromClock=false;
 
+    Context context;
     @SuppressLint("NewApi")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanforworkstation);
-
-        jobid = "605";
+        context=NonBillable_jobs.this;
+        jobid = "605";// for non billable jobs
         clientid = Shared_Preference.getLOGIN_USER_ID(NonBillable_jobs.this);
         nextact = URL_EP1 + Api.API_CRATES_LIST
                 + clientid;
@@ -574,6 +576,7 @@ public class NonBillable_jobs extends BaseActivity implements ResponseInterface 
 
 
     }
+
 
 
 }

@@ -25,6 +25,7 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.DamageDetail;
 import planet.info.skyline.model.ItemType;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.tech.fullscreenview.FullscreenWebView;
 import planet.info.skyline.tech.fullscreenview.FullscreenWebViewNew;
 import planet.info.skyline.util.Utility;
 

@@ -1,16 +1,13 @@
 package planet.info.skyline.tech.job_files_new;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -40,36 +37,31 @@ import java.util.List;
 
 import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
-import planet.info.skyline.network.SOAP_API_Client;
-import planet.info.skyline.tech.fullscreenview.FullscreenImageView;
-import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
+import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.progress.ProgressHUD;
+import planet.info.skyline.shared_preference.Shared_Preference;
+import planet.info.skyline.tech.fullscreenview.FullscreenImageView;
+import planet.info.skyline.tech.fullscreenview.FullscreenWebViewNew;
 import planet.info.skyline.util.FileDownloader;
 import planet.info.skyline.util.Utility;
 
-import static android.content.Context.MODE_PRIVATE;
-
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class JobFiles_Fragment extends Fragment {
 
-
+    Context context;
+    ProgressHUD mProgressHUD;
     View rootView;
     String jobtxt_id, tab;
     TextView tv_msg;
     List<HashMap<String, String>> list_ProjectPhotos = new ArrayList<>();
-
     ArrayList<HashMap<String, String>> List_JobFiles = new ArrayList<>();
     HashMap<String, String> map;
-
-
-    AlertDialog alertDialog;
     SwipeRefreshLayout pullToRefresh;
-
-
-    SharedPreferences sp;
 
 
     private RecyclerView jobFiles_recyclerView;
@@ -80,13 +72,12 @@ public class JobFiles_Fragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_job_files, container, false);
-
+        context = getActivity();
         jobFiles_recyclerView = (RecyclerView) rootView.findViewById(R.id.jobFiles_recyclerView);
         jobFiles_recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         jobFiles_recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         tv_msg = (TextView) rootView.findViewById(R.id.tv_msg);
-        sp = getActivity().getApplicationContext().getSharedPreferences("skyline", MODE_PRIVATE);
 
         pullToRefresh = rootView.findViewById(R.id.pullToRefresh);
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -147,7 +138,7 @@ public class JobFiles_Fragment extends Fragment {
             }
             String recved = ks.toString();
             if (recved.contains("Job not found")) {
-               // count = 1;
+                // count = 1;
             } else {
                 recved = recved.substring(recved.indexOf("=") + 1, recved.lastIndexOf(";"));
                 JSONObject jsonObject = new JSONObject(recved);
@@ -197,69 +188,28 @@ public class JobFiles_Fragment extends Fragment {
 
     }
 
-    public void download_file(String file_name1) {
-        if ((file_name1.contains(".jpg")) || (file_name1.contains(".JPG"))
-                || (file_name1.contains(".jpeg")) || (file_name1.contains(".JPEG"))
-                || (file_name1.contains(".png")) || (file_name1.contains(".PNG"))
-                || (file_name1.contains(".bmp")) || (file_name1.contains(".BMP"))
-                || (file_name1.contains(".gif")) || (file_name1.contains(".GIF"))
-                || (file_name1.contains(".webp")) || (file_name1.contains(".WEBP"))
-        ) {
-            if (new ConnectionDetector(getActivity()).isConnectingToInternet()) {
-                new Download_images().execute(URL_EP2 + "/upload/" + file_name1, file_name1);
-            } else {
-                Toast.makeText(getActivity(), Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            // Toast.makeText(Show_Jobs_Activity.this, "No pdf file Avalable", Toast.LENGTH_SHORT).show();
-            if (new ConnectionDetector(getActivity()).isConnectingToInternet()) {
-                new DownloadFile().execute(URL_EP2 + "/upload/" + file_name1, file_name1);
-            } else {
-                Toast.makeText(getActivity(), Utility.NO_INTERNET, Toast.LENGTH_SHORT).show();
-            }
+    public void showprogressdialog() {
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
         }
+
     }
 
-    public void view_file(String file_name1) {
-        if ((file_name1.contains(".jpg")) || (file_name1.contains(".JPG"))
-                || (file_name1.contains(".jpeg")) || (file_name1.contains(".JPEG"))
-                || (file_name1.contains(".png")) || (file_name1.contains(".PNG"))
-                || (file_name1.contains(".bmp")) || (file_name1.contains(".BMP"))
-                || (file_name1.contains(".gif")) || (file_name1.contains(".GIF"))
-                || (file_name1.contains(".webp")) || (file_name1.contains(".WEBP"))
-        ) {
-            Intent i = new Intent(getActivity(), FullscreenImageView.class);
-            i.putExtra("url", URL_EP2 + "/upload/" + file_name1);
-            startActivity(i);
-
-
-        } else if ((file_name1.contains(".doc")) || (file_name1.contains(".DOC"))
-                || (file_name1.contains(".psd")) || (file_name1.contains(".PSD"))
-                || (file_name1.contains(".docx")) || (file_name1.contains(".DOCX"))
-                || (file_name1.contains(".pdf")) || (file_name1.contains(".PDF"))
-        ) {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://docs.google.com/gview?embedded=true&url=" + URL_EP2 + "/upload/" + file_name1));
-            startActivity(browserIntent);
-        } else if ((file_name1.contains(".aac")) || (file_name1.contains(".AAC"))
-                || (file_name1.contains(".m4a")) || (file_name1.contains(".M4A"))
-                || (file_name1.contains(".mp4")) || (file_name1.contains(".MP4"))
-                || (file_name1.contains(".3gp")) || (file_name1.contains(".3GP"))
-                || (file_name1.contains(".m4b")) || (file_name1.contains(".M4B"))
-                || (file_name1.contains(".mp3")) || (file_name1.contains(".MP3"))
-                || (file_name1.contains(".wave")) || (file_name1.contains(".WAVE"))
-        ) {
-            /*Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://exhibitpower2.com/upload/" + file_name1));
-            startActivity(browserIntent);*/
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(URL_EP2 + "/upload/" + file_name1));
-            intent.setDataAndType(Uri.parse(URL_EP2 + "/upload/" + file_name1), "video/*");
-            startActivity(intent);
-        } else {
-            Toast.makeText(getActivity(), "Unrecognized file format ! Please download to view the file!", Toast.LENGTH_SHORT).show();
+    public void hideprogressdialog() {
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
         }
     }
 
     class get_jobFiles_Acyntask extends AsyncTask<Void, Void, Void> {
-        ProgressDialog progressDoalog;
+        // ProgressDialog progressDoalog;
+
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -272,25 +222,26 @@ public class JobFiles_Fragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
+/*
             progressDoalog = new ProgressDialog(getActivity());
             progressDoalog.setMessage("Please wait....");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
-            progressDoalog.show();
+            progressDoalog.show();*/
+            showprogressdialog();
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            try {
+           /* try {
                 progressDoalog.dismiss();
             } catch (Exception e) {
                 e.getMessage();
             }
-
-
+*/
+            hideprogressdialog();
 
 
             ArrayList<HashMap<String, String>> JobfilesList = new ArrayList<>();
@@ -300,9 +251,9 @@ public class JobFiles_Fragment extends Fragment {
                 HashMap<String, String> hashMap = List_JobFiles.get(i);
                 String fileType = hashMap.get("ftype");
                 if (fileType.equals("Project Photo(s)")) {
-                  //  ProjectPhotosList.add(hashMap);
+                    //  ProjectPhotosList.add(hashMap);
                 } else if (fileType.equals("Client Art")) {
-                   // ProofRendersList.add(hashMap);
+                    // ProofRendersList.add(hashMap);
                 } else {
                     JobfilesList.add(hashMap);
                 }
@@ -313,14 +264,13 @@ public class JobFiles_Fragment extends Fragment {
             // 3=Project photos
 
 
-                if (JobfilesList.size() < 1) {
-                    tv_msg.setVisibility(View.VISIBLE);
-                } else {
-                    tv_msg.setVisibility(View.GONE);
-                }
-                JobFilesAdapter jobFilesAdapter = new JobFilesAdapter(getActivity(), JobfilesList);
-                jobFiles_recyclerView.setAdapter(jobFilesAdapter);
-
+            if (JobfilesList.size() < 1) {
+                tv_msg.setVisibility(View.VISIBLE);
+            } else {
+                tv_msg.setVisibility(View.GONE);
+            }
+            JobFilesAdapter jobFilesAdapter = new JobFilesAdapter(getActivity(), JobfilesList);
+            jobFiles_recyclerView.setAdapter(jobFilesAdapter);
 
 
             if (pullToRefresh.isRefreshing()) {
@@ -329,142 +279,8 @@ public class JobFiles_Fragment extends Fragment {
         }
     }
 
-    class Download_images extends AsyncTask<String, Void, String> {///this class make in adapter for downloading the images
-
-        ProgressDialog progressDoalog;
-
-        @Override
-        protected String doInBackground(String... strings) {
-            String fileUrl = strings[0];
-            String fileName = strings[1];
-            String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-            File folder = new File(extStorageDirectory, "Exhibit Power");
-
-            if (!folder.exists()) {
-                folder.mkdir();
-            }
-
-            File folder1 = new File(folder, "Download");
-            if (!folder1.exists()) {
-                folder1.mkdir();
-            }
 
 
-            File pdfFile = new File(folder1, fileName);
-            try {
-                pdfFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-            FileDownloader.download_images(fileUrl, pdfFile);
-            return pdfFile.getAbsolutePath();
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressDoalog = new ProgressDialog(getActivity());
-
-
-            progressDoalog.setMessage("Downloading please wait....");
-            progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDoalog.show();
-        }
-
-        @Override
-        protected void onPostExecute(String path) {
-            super.onPostExecute(path);
-            progressDoalog.dismiss();
-            //  Toast.makeText(Show_Jobs_Activity.this, "File downloaded successfully !", Toast.LENGTH_SHORT).show();
-
-            try {
-                Toast.makeText(getActivity(), "File downloaded successfully !" +
-
-                        "  " + "Location:" + path, Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-        }
-
-    }
-
-    class DownloadFile extends AsyncTask<String, Void, String> {///this class make in adapter for downloading the pdf
-        ProgressDialog progressDoalog;
-
-        @Override
-        protected String doInBackground(String... strings) {
-            String fileUrl = strings[0];   // -> http://maven.apache.org/maven-1.x/maven.pdf
-            String fileName = strings[1];  // -> maven.pdf
-            /**/
-
-            String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-            File folder = new File(extStorageDirectory, "Exhibit Power");
-
-            if (!folder.exists()) {
-                folder.mkdir();
-            }
-
-            File folder1 = new File(folder, "Download");
-            if (!folder1.exists()) {
-                folder1.mkdir();
-            }
-
-
-            if (fileName.contains("/")) {
-                fileName = fileName.substring(fileName.indexOf("/") + 1);
-            }
-            File pdfFile = new File(folder1, fileName);
-            try {
-                pdfFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-            FileDownloader.downloadFile(fileUrl, pdfFile);
-
-
-            /**/
-           /* String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-            File folder = new File(extStorageDirectory, "Skyline");
-            folder.mkdir();
-            File pdfFile = new File(folder, fileName);
-            try {
-                pdfFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            FileDownloader.downloadFile(fileUrl, pdfFile);*/
-            return folder1.getAbsolutePath();
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // showDialog(progress_bar_type);
-
-            progressDoalog = new ProgressDialog(getActivity());
-            progressDoalog.setMessage("Downloading please wait...");
-            progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDoalog.show();
-        }
-
-        @Override
-        protected void onPostExecute(String path) {
-            super.onPostExecute(path);
-            progressDoalog.dismiss();
-            try {
-                Toast.makeText(getActivity(), "File downloaded successfully !" +
-                        "  " + "Location:" + path, Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-        }
-
-
-    }
 
     public class JobFilesAdapter extends RecyclerView.Adapter<JobFilesAdapter.MyViewHolder> {
 
@@ -507,74 +323,6 @@ public class JobFiles_Fragment extends Fragment {
 
             holder.index_no.setText(String.valueOf(i + 1));
 
-
-          /*  String FileName = file_name1;
-            String fileExt = "";
-            if (FileName.contains(".")) {
-                fileExt = FileName.substring(FileName.lastIndexOf("."));
-            }
-
-            boolean isImage = Arrays.asList(Utility.imgExt).contains(fileExt);
-            boolean isDoc = Arrays.asList(Utility.docExt).contains(fileExt);
-            boolean isMedia = Arrays.asList(Utility.mediaExt).contains(fileExt);
-            boolean isWord = Arrays.asList(Utility.wordExt).contains(fileExt);
-            boolean isPdf = Arrays.asList(Utility.pdfExt).contains(fileExt);
-            boolean isExcel = Arrays.asList(Utility.excelExt).contains(fileExt);
-            boolean isText = Arrays.asList(Utility.txtExt).contains(fileExt);
-
-            final String url;
-            if (isImage) {
-                url = URL_EP2 + "/upload/" + file_name1;
-            } else {
-                url = "http://docs.google.com/gview?embedded=true&url=" + URL_EP2 + "/upload/" + file_name1;
-            }
-            if (isImage) {
-                Glide.with(getActivity()).load(url).listener(new RequestListener<Drawable>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        holder.spinner.setVisibility(View.GONE);
-
-                        holder.thumbnail.setImageResource(R.drawable.no_image);
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        holder.spinner.setVisibility(View.GONE);
-
-                        return false;
-                    }
-                })
-                        .into(holder.thumbnail);
-            } else if (isWord) {
-                holder.spinner.setVisibility(View.GONE);
-                holder.thumbnail.setImageResource(R.drawable.doc);
-            } else if (isPdf) {
-                holder.spinner.setVisibility(View.GONE);
-                holder.thumbnail.setImageResource(R.drawable.pdf);
-            } else if (isExcel) {
-                holder.spinner.setVisibility(View.GONE);
-                holder.thumbnail.setImageResource(R.drawable.excel);
-            } else if (isText) {
-                holder.spinner.setVisibility(View.GONE);
-                holder.thumbnail.setImageResource(R.drawable.txt_file_icon);
-            } else if (isMedia) {
-                holder.spinner.setVisibility(View.GONE);
-                holder.thumbnail.setImageResource(R.drawable.media);
-            } else {
-                holder.spinner.setVisibility(View.GONE);
-                holder.thumbnail.setImageResource(R.drawable.no_image);
-            }
-
-
-            holder.thumbnail.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent i = new Intent(getActivity(), FullscreenImageView.class);
-                    i.putExtra("url", url);
-                    startActivity(i);
-                }
-            });*/
 
 
             if (txt_Job.equals(null) || txt_Job.trim().equals("")) {
@@ -651,7 +399,9 @@ public class JobFiles_Fragment extends Fragment {
                 @Override
                 public void onClick(View view) {
 
-                    download_file(file_name1);
+
+                    Utility. view_downloadFile(file_name1,getActivity());
+
 
 
                 }
@@ -662,9 +412,9 @@ public class JobFiles_Fragment extends Fragment {
                 @Override
                 public void onClick(View view) {
 
-                    view_file(file_name1);
 
 
+                    Utility. view_downloadFile(file_name1,getActivity());
                 }
             });
 
@@ -687,8 +437,8 @@ public class JobFiles_Fragment extends Fragment {
         public class MyViewHolder extends RecyclerView.ViewHolder {
 
             TextView Source, user_name, file_upload, date_upload;
-          //  ProgressBar spinner;
-         //   ImageView thumbnail;
+            //  ProgressBar spinner;
+            //   ImageView thumbnail;
             //nks
             Button index_no;
             Button view_file, download_file;
@@ -707,11 +457,10 @@ public class JobFiles_Fragment extends Fragment {
                 download_file = (Button) convertview.findViewById(R.id.download_file);
                 row_jobFile = (LinearLayout) convertview.findViewById(R.id.row_jobFile);
                 checkBox = (CheckBox) convertview.findViewById(R.id.checkBox);
-               // thumbnail = (ImageView) convertview.findViewById(R.id.thumbnail);
-              //  spinner = (ProgressBar) convertview.findViewById(R.id.progressBar1);
+                // thumbnail = (ImageView) convertview.findViewById(R.id.thumbnail);
+                //  spinner = (ProgressBar) convertview.findViewById(R.id.progressBar1);
             }
         }
     }
-
 
 }

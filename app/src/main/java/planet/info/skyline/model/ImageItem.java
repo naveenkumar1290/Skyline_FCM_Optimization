@@ -8,11 +8,13 @@ public class ImageItem {
     public String  ImageName;
     public String  Description;
     public String  ImageURI;
+    public String  UploadedImageId;
 
-    public ImageItem(String imageName, String description, String imageURI) {
+    public ImageItem(String imageName, String description, String imageURI, String UploadedImageId) {
         ImageName = imageName;
         Description = description;
         ImageURI = imageURI;
+        UploadedImageId = UploadedImageId;
     }
 
     public String getImageName() {
@@ -44,4 +46,11 @@ public class ImageItem {
 
     }*/
 
+    public String getUploadedImageId() {
+        return UploadedImageId;
+    }
+
+    public void setUploadedImageId(String uploadedImageId) {
+        UploadedImageId = uploadedImageId;
+    }
 }

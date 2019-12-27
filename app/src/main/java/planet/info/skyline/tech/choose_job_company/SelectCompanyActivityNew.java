@@ -42,6 +42,7 @@ import planet.info.skyline.model.SWO_Details;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.swo.SwoListActivity;
+import planet.info.skyline.tech.task_plan.MyTasksActivity;
 import planet.info.skyline.util.Utility;
 
 public class SelectCompanyActivityNew extends AppCompatActivity implements ResponseInterface {
@@ -76,14 +77,40 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
     boolean Scan_QR_CODE = false;
     boolean Search_by_Job = false;
 
-    Button Btn_SearchByJob;
-    Button Btn_SearchByCompany;
-    Button scan_swo;
-    Button Btn_MySwo;
-    Button Btn_UnassignedSwo;
+    Button Btn_SearchByJob, Btn_SearchByCompany, scan_swo, scan_awo, Btn_MySwo, Btn_UnassignedSwo, Btn_MyTask;
     LinearLayout ll_BySWO;
 
     String CompId = "";
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_select_company);
+        setTitle(Utility.getTitle("Choose Company/Job"));
+        context = SelectCompanyActivityNew.this;
+
+
+        userRole = Shared_Preference.getUSER_ROLE(this);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        Btn_SearchByJob = findViewById(R.id.Btn_SearchByJob);
+        Btn_SearchByCompany = findViewById(R.id.Btn_SearchByCompany);
+        scan_swo = findViewById(R.id.scan_swo);
+        scan_awo = findViewById(R.id.scan_awo);
+        Btn_MySwo = findViewById(R.id.Btn_MySwo);
+        Btn_UnassignedSwo = findViewById(R.id.Btn_UnassignedSwo);
+        Btn_MyTask = findViewById(R.id.Btn_MyTask);
+
+        ll_BySWO = findViewById(R.id.ll_BySWO);
+        ll_BySWO.setVisibility(View.GONE);
+
+        getIntentData();
+        setVisibility();
+        setListener();
+
+
+    }
 
     public void onCompanySelected1(Company company) {
         txtvw_COMP_NAME_SearchByCompany.setText(company.getEname());
@@ -134,33 +161,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
 
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_select_company);
-        setTitle(Utility.getTitle("Choose Company/Job"));
-        context = SelectCompanyActivityNew.this;
-
-
-        userRole = Shared_Preference.getUSER_ROLE(this);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        Btn_SearchByJob = findViewById(R.id.Btn_SearchByJob);
-        Btn_SearchByCompany = findViewById(R.id.Btn_SearchByCompany);
-        scan_swo = findViewById(R.id.scan_swo);
-
-        Btn_MySwo = findViewById(R.id.Btn_MySwo);
-        Btn_UnassignedSwo = findViewById(R.id.Btn_UnassignedSwo);
-        ll_BySWO = findViewById(R.id.ll_BySWO);
-        ll_BySWO.setVisibility(View.GONE);
-
-        getIntentData();
-        setVisibility();
-        setListener();
-
-
-    }
-
     private void getIntentData() {
         try {
             Bundle bundle = getIntent().getExtras();
@@ -191,35 +191,48 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
 
     private void setVisibility() {
         //    if (userRole.equals(Utility.USER_ROLE_ARTIST ) || userRole.equals(Utility.USER_ROLE_APC )) {  // artist
-        if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
-            scan_swo.setVisibility(View.VISIBLE);
 
-            //  Btn_MySwo.setVisibility(View.GONE);
-            //  Btn_UnassignedSwo.setVisibility(View.GONE);
-            Btn_MySwo.setVisibility(View.VISIBLE);
-            Btn_UnassignedSwo.setVisibility(View.VISIBLE);
-            scan_swo.setText("Scan AWO QR Code");
+         /* if(!Shared_Preference.getTIMER_STARTED_FROM_BILLABLE_MODULE(context)){ // clock not running
+            scan_swo.setVisibility(View.VISIBLE);
+            scan_awo.setVisibility(View.VISIBLE);
+        }*/
+
+        /*if (!Shared_Preference.getTIMER_STARTED_FROM_BILLABLE_MODULE(context)) { // clock not running
+            scan_swo.setVisibility(View.VISIBLE);
+            scan_awo.setVisibility(View.VISIBLE);
+        }*/
+
+        if (STARTING_BILLABLE_JOB) {
+            if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
+                scan_swo.setVisibility(View.GONE);
+                scan_awo.setVisibility(View.VISIBLE);
+            } else {
+                scan_swo.setVisibility(View.VISIBLE);
+                scan_awo.setVisibility(View.GONE);
+            }
+        } else {
+            scan_swo.setVisibility(View.VISIBLE);
+            scan_awo.setVisibility(View.VISIBLE);
+        }
+
+
+        if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
+
+            // Btn_MySwo.setVisibility(View.VISIBLE);
+            // Btn_UnassignedSwo.setVisibility(View.VISIBLE);
+
+
             Btn_MySwo.setText("My AWOs");
             Btn_UnassignedSwo.setText("Unassigned AWOs");
 
-        } else { //if (userRole.equals(Utility.USER_ROLE_TECH)) {
-            scan_swo.setVisibility(View.VISIBLE);
-            Btn_MySwo.setVisibility(View.VISIBLE);
-            Btn_UnassignedSwo.setVisibility(View.VISIBLE);
-            scan_swo.setText("Scan SWO QR Code");
+        } else {
+
+            //  Btn_MySwo.setVisibility(View.VISIBLE);
+            // Btn_UnassignedSwo.setVisibility(View.VISIBLE);
+
+
             Btn_MySwo.setText("My SWOs");
             Btn_UnassignedSwo.setText("Unassigned SWOs");
-        } /*else {  //APC,PM
-            scan_swo.setVisibility(View.GONE);
-            Btn_MySwo.setVisibility(View.GONE);
-            Btn_UnassignedSwo.setVisibility(View.GONE);
-        }*/
-
-
-        if (userRole.equals(Utility.USER_ROLE_PM) || userRole.equals(Utility.USER_ROLE_DC)) { // PM/DC can enter time sheet by AWO/SWO both
-            scan_swo.setVisibility(View.VISIBLE);
-            // Btn_MySwo.setVisibility(View.GONE);
-            //Btn_UnassignedSwo.setVisibility(View.GONE);
         }
 
 
@@ -255,9 +268,20 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
             @Override
             public void onClick(View view) {
                 Scan_QR_CODE = true;
+                Shared_Preference.set_EnterTimesheetByAWO(context, false);
                 scanqr();
             }
         });
+
+        scan_awo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Scan_QR_CODE = true;
+                Shared_Preference.set_EnterTimesheetByAWO(context, true);
+                scanqr();
+            }
+        });
+
         Btn_MySwo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -273,6 +297,13 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                 IsMySwo = false;
                 Scan_QR_CODE = false;
                 goToSwoListActivity();
+            }
+        });
+        Btn_MyTask.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(context, MyTasksActivity.class);
+                startActivity(i);
             }
         });
     }
@@ -293,7 +324,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this,true, this, Api.API_bindClientByDealer, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_bindClientByDealer, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -393,7 +424,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
             e.printStackTrace();
         }
         if (new ConnectionDetector(context).isConnectingToInternet()) {
-            new MyAsyncTask(this,true,  this, Api.API_GetAllDetailbyJobtext_New, jsonObject).execute();
+            new MyAsyncTask(this, true, this, Api.API_GetAllDetailbyJobtext_New, jsonObject).execute();
         } else {
             Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -615,7 +646,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
             e.getMessage();
         }
         ImageView closebtn = (ImageView) dialog_ScanSWO.findViewById(R.id.close);
-        Button scanswo = (Button) dialog_ScanSWO.findViewById(R.id.scan);
+
 
         txtvw_JOB_NAME_SearchByJob = (AutoCompleteTextView) dialog_ScanSWO.findViewById(R.id.jobtext);
         Button btn_GO = (Button) dialog_ScanSWO.findViewById(R.id.Btn_Yes);
@@ -674,7 +705,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
         });
 
         closebtn.setOnClickListener(
-
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -684,19 +714,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                             e.getMessage();
                         }
                     }
-
                 });
-        scanswo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                scanqr();
-                try {
-                    dialog_ScanSWO.dismiss();
-                } catch (Exception e) {
-                    e.getMessage();
-                }
-            }
-        });
 
         btn_GO.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -704,7 +722,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                 Utility.hideKeyboard((Activity) context);
                 String str_CompanyName = "";
                 String str_JobName = txtvw_JOB_NAME_SearchByJob.getText().toString();
-                //   boolean isCorrectJob = false;
                 String CompanyId = "";
                 String JObId = "";
 
@@ -712,7 +729,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                     Toast.makeText(context, "Please select job!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
 
                 All_Jobs job = getJobIDFromAllJobs(str_JobName);
                 if (job == null) {
@@ -739,18 +755,10 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == 0) {
-            if (resultCode == RESULT_OK) {
-            } else if (resultCode == RESULT_CANCELED) {
-                Toast.makeText(getApplicationContext(),
-                        "Press a button to start a scan.", Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(), "cancel", Toast.LENGTH_SHORT).show();
-            }
-        }
+
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
-                String contents = intent.getStringExtra("SCAN_RESULT");
-                String result = contents;
+                String result = intent.getStringExtra("SCAN_RESULT");
                 Swo_Id = "";
                 String clientid = "";
                 if (result.contains(",")) {
@@ -766,19 +774,15 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                         Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
                         return;
                     }
-
                     FetchJobDetailBy_SWO_AWO_Id(Swo_Id);
-
                 } else {
                     Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-            }
-            if (resultCode == RESULT_CANCELED) {
+            } else if (resultCode == RESULT_CANCELED) {
             }
         }
         if (requestCode == Utility.SWO_LIST_REQUEST_CODE && resultCode != RESULT_CANCELED) {
-            //  new MainActivity().onActivityResult( requestCode,  resultCode,  intent);
             setResult(requestCode, intent);
             finish();
         }
@@ -1059,9 +1063,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                 txtvw_JOB_NAME_SearchByCompany.setAdapter(jobDescAdapter);
                 txtvw_JOB_NAME_SearchByCompany.setDropDownHeight(550);
             }
-        }
-        else if (api.equalsIgnoreCase(Api.API_GetallJobByDealerID))
-        {
+        } else if (api.equalsIgnoreCase(Api.API_GetallJobByDealerID)) {
             list_AllJobs.clear();
             try {
                 JSONObject jsonObject1 = new JSONObject(responseString);
@@ -1154,6 +1156,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                     String SWO_Status_new = js_obj.getString("SWO_Status_new");
                     String dealerID = js_obj.getString("dealerID");
                     String comp_id = js_obj.getString("compID");
+                    String Archivedstatus = js_obj.getString("Archivedstatus");
                     String Swo_Awo_Name = "";
                     if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
                         Swo_Awo_Name = js_obj.getString("AwoName");
@@ -1161,9 +1164,12 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                         Swo_Awo_Name = js_obj.getString("SwoName");
                     }
 
+
                     if (showDialog_SHOW_INFO) {
                         if (!dealerID.equals(login_dealerId)) {
-                            Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "Please scan valid QR Code!", Toast.LENGTH_SHORT).show();
+                        } else if (Archivedstatus.equals("1")) {
+                            Toast.makeText(getApplicationContext(), "Job has been archived. Please scan valid QR Code.", Toast.LENGTH_SHORT).show();
                         } else {
                             dialog_SHOW_Info(comp_id, job_id, companyName, jobName, JOB_TYPE, desciption, jobstatus, Show_Name, Swo_Awo_Name);
                         }
@@ -1173,7 +1179,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                 }
 
             } catch (Exception e) {
-                Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Please scan valid QR Code!", Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
         } else if (api.equalsIgnoreCase(Api.API_GetAllDetailbyJobtext_New)) {

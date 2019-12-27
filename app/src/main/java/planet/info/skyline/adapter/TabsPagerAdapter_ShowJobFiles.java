@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import planet.info.skyline.tech.job_files_old.ShowJobFiles_Fragment;
+import planet.info.skyline.job_files_old.ShowJobFiles_Fragment;
 
 
 /**

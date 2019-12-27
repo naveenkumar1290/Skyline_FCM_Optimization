@@ -1,19 +1,16 @@
 package planet.info.skyline.tech.fullscreenview;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -22,11 +19,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,10 +35,14 @@ import java.io.IOException;
 
 import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.tech.runtime_permission.PermissionActivity;
-
 import planet.info.skyline.util.FileDownloader;
 import planet.info.skyline.util.Utility;
+
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
+
+//import android.app.ProgressDialog;
 
 
 /**
@@ -71,20 +75,6 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
      */
     private static final int UI_ANIMATION_DELAY = 300;
     private final Handler mHideHandler = new Handler();
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
     // These matrices will be used to scale points of the image
     Matrix matrix = new Matrix();
     Matrix savedMatrix = new Matrix();
@@ -115,6 +105,7 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
     EditText et_mobile, et_password;
     android.app.Dialog alertDialog;
     String url_web, FileName;
+    Context context;
     private View mControlsView;
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
@@ -134,16 +125,31 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
             hide();
         }
     };
+    /**
+     * Touch listener to use for in-layout UI controls to delay hiding the
+     * system UI. This is to prevent the jarring behavior of controls going away
+     * while interacting with activity UI.
+     */
+    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            if (AUTO_HIDE) {
+                delayedHide(AUTO_HIDE_DELAY_MILLIS);
+            }
+            return false;
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_fullscreen_image_view);
-        setTitle("Download File");
+        setTitle(Utility.getTitle("View/Download File"));
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
+        context = FullscreenWebViewNew.this;
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         //  mContentView = (NetworkImageView)findViewById(R.id.fullscreen_content);
@@ -151,19 +157,29 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
         url_web = getIntent().getStringExtra("url");
         FileName = getIntent().getStringExtra("FileName");
 
-
-        final ProgressDialog progressDoalog = new ProgressDialog(FullscreenWebViewNew.this);
+        final ProgressHUD mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+     /*   final ProgressDialog progressDoalog = new ProgressDialog(context);
         progressDoalog.setMessage(getString(R.string.Loading_text));
         progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDoalog.setCancelable(true);
         progressDoalog.show();
-
+*/
 
         WebView webView = (WebView) findViewById(R.id.webView);
         // webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setUseWideViewPort(true);
         webView.getSettings().setBuiltInZoomControls(true);
+
+        //
+        webView.setWebViewClient(new WebViewClient());
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
+        webView.getSettings().setSupportZoom(true);
+        webView.getSettings().setDisplayZoomControls(true);
+
+
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
@@ -176,22 +192,80 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
 
             @Override
             public void onPageFinished(WebView view, final String url) {
-                progressDoalog.dismiss();
+                //   progressDoalog.dismiss();
+                if (mProgressHUD.isShowing()) {
+                    mProgressHUD.dismiss();
+                }
             }
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                progressDoalog.dismiss();
+                //     progressDoalog.dismiss();
+                if (mProgressHUD.isShowing()) {
+                    mProgressHUD.dismiss();
+                }
                 Toast.makeText(getApplicationContext(), "This file is not available.", Toast.LENGTH_SHORT).show();
 
             }
         });
 
 
+
+        /**/
+
+      /*  webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, final Message resultMsg) {
+                final WebView newWebView = new WebView(FullscreenWebViewNew.this);
+                newWebView.getSettings().setJavaScriptEnabled(true);
+                newWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+                newWebView.getSettings().setSupportMultipleWindows(true);
+                newWebView.getSettings().setDomStorageEnabled(true);
+                newWebView.getSettings().setAllowFileAccess(true);
+                newWebView.getSettings().setAllowContentAccess(true);
+                newWebView.getSettings().setAllowFileAccessFromFileURLs(true);
+                newWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
+                newWebView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)); //making sure the popup opens full screen
+                view.addView(newWebView);
+                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+                transport.setWebView(newWebView);
+                resultMsg.sendToTarget();
+                newWebView.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                        view.loadUrl(url);
+                        return true;
+                    }
+                });
+                newWebView.setWebChromeClient(new WebChromeClient() {
+                    @Override
+                    public void onCloseWindow(WebView window) {
+                        super.onCloseWindow(window);
+
+                    }
+                });
+                return true;
+            }
+
+            @Override
+            public void onCloseWindow(WebView window) {
+                super.onCloseWindow(window);
+                finish();
+
+
+            }
+        });*/
+
+
+        /**/
+
+
+
+
+
+
         webView.loadUrl(url_web);
-        mContentView.setOnTouchListener(FullscreenWebViewNew.this);
-
-
+        mContentView.setOnTouchListener(this);
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -410,17 +484,15 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
         int id = item.getItemId();
         if (id == R.id.download) {
             if (PermissionActivity.CheckingPermissionIsEnabledOrNot(this)) {
-                if (new ConnectionDetector(FullscreenWebViewNew.this).isConnectingToInternet()) {
+                if (new ConnectionDetector(context).isConnectingToInternet()) {
                     new DownloadFile().execute(url_web, FileName);
                 } else {
-                    Toast.makeText(FullscreenWebViewNew.this, "No internet", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "No internet", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Intent i = new Intent(getApplicationContext(), PermissionActivity.class);
                 startActivityForResult(i, Utility.REQUEST_CODE_PERMISSIONS);
             }
-
-
 
 
             return true;
@@ -471,7 +543,8 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
     }
 
     class DownloadFile extends AsyncTask<String, Void, String> {///this class make in adapter for downloading the pdf
-        ProgressDialog progressDoalog;
+        //ProgressDialog progressDoalog;
+        ProgressHUD mProgressHUD;
 
         @Override
         protected String doInBackground(String... strings) {
@@ -512,17 +585,17 @@ public class FullscreenWebViewNew extends AppCompatActivity implements View.OnTo
         protected void onPreExecute() {
             super.onPreExecute();
             // showDialog(progress_bar_type);
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, true);
 
-            progressDoalog = new ProgressDialog(FullscreenWebViewNew.this);
-            progressDoalog.setMessage("Downloading please wait...");
-            progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDoalog.show();
         }
 
         @Override
         protected void onPostExecute(String path) {
             super.onPostExecute(path);
-            progressDoalog.dismiss();
+            //  progressDoalog.dismiss();
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
             try {
                /* Toast.makeText(FullscreenWebView.this, "File downloaded successfully !" +
                         "  " + "Location:" + path, Toast.LENGTH_SHORT).show();*/

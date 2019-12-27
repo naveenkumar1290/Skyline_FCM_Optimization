@@ -1,14 +1,12 @@
 package planet.info.skyline.tech.upload_photo;
 
 import android.content.Context;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,25 +20,18 @@ import java.util.ArrayList;
 
 import planet.info.skyline.R;
 import planet.info.skyline.model.ImageItem;
-import planet.info.skyline.model.ItemType;
-import planet.info.skyline.tech.damage_report.DamageReportNew;
 
 
 public class Adapter_UploadPhotos extends RecyclerView.Adapter<Adapter_UploadPhotos.UserViewHolder> {
 
     private Context mContext;
     private ArrayList<ImageItem> ImageItemList;
-    private ArrayList<ItemType> itemTypeList;
-    private ArrayAdapter<ItemType> dataAdapter;
-
 
     public Adapter_UploadPhotos(Context context, ArrayList<ImageItem> ImageItemList) {
         this.mContext = context;
         this.ImageItemList = ImageItemList;
-        this.itemTypeList = ItemType.fillItemTypes();
-        dataAdapter = new ArrayAdapter<>(mContext,
-                android.R.layout.simple_spinner_item, itemTypeList);
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+
     }
 
     @Override
@@ -54,12 +45,13 @@ public class Adapter_UploadPhotos extends RecyclerView.Adapter<Adapter_UploadPho
     public void onBindViewHolder(UserViewHolder holder, final int position) {
 
         holder.et_item_Desc.setText(ImageItemList.get(position).getDescription());
+        holder.imageName.setText(ImageItemList.get(position).getImageName());
         holder.itemcount.setText(String.valueOf(position + 1));
 
 
         if (!ImageItemList.get(position).getImageURI().equals("")) {
             holder.thumbnail.setVisibility(View.VISIBLE);
-           // holder.thumbnail.setImageURI(Uri.parse(ImageItemList.get(position).getImageURI()));
+            // holder.thumbnail.setImageURI(Uri.parse(ImageItemList.get(position).getImageURI()));
 
             Glide
                     .with(mContext)
@@ -77,13 +69,33 @@ public class Adapter_UploadPhotos extends RecyclerView.Adapter<Adapter_UploadPho
     }
 
     public void addItemToList(String ImageURI) {
-        String ImageName = ImageURI.substring(ImageURI.lastIndexOf("/"));
-        ImageItemList.add(new ImageItem(ImageName, "", ImageURI));
+        String ImageName = ImageURI.substring(ImageURI.lastIndexOf("/") + 1);
+        ImageItemList.add(new ImageItem(ImageName, "", ImageURI, ""));
         notifyDataSetChanged();
-        if (mContext instanceof DamageReportNew) {
-            ((DamageReportNew) mContext).ScrollRecyclerviewToBottom(ImageItemList.size() - 1);
+        if (mContext instanceof UploadPhotosActivity) {
+            ((UploadPhotosActivity) mContext).ScrollRecyclerviewToBottom(ImageItemList.size() - 1);
+        }
+        if (mContext instanceof UploadPhotosActivity) {
+            ((UploadPhotosActivity) mContext).onItemAdded();
         }
     }
+
+    public void updateUploadedImageIds(ArrayList<String> listUploadedImageIds) {
+        for (int i=0;i<ImageItemList.size();i++) {
+            ImageItemList.get(i).setUploadedImageId(listUploadedImageIds.get(i));
+        }
+    }
+
+
+    void removeItem(int AdapterPosition) {
+        ImageItemList.remove(AdapterPosition);
+        notifyDataSetChanged();
+        if (mContext instanceof UploadPhotosActivity) {
+            ((UploadPhotosActivity) mContext).onItemRemoved();
+        }
+
+    }
+
 
     public ArrayList<ImageItem> returnData() {
         if (validation() == 1) {
@@ -104,7 +116,7 @@ public class Adapter_UploadPhotos extends RecyclerView.Adapter<Adapter_UploadPho
             int count = i + 1;
             if (ImageItemList.get(i).getDescription().equals("")) {
                 Toast.makeText(mContext,
-                        "Please enter image description of item " + count, Toast.LENGTH_LONG).show();
+                        "Please enter description of photo " + count, Toast.LENGTH_LONG).show();
                 val = 0;
                 break;
             } else {
@@ -164,10 +176,14 @@ public class Adapter_UploadPhotos extends RecyclerView.Adapter<Adapter_UploadPho
             imgvw_remove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ImageItemList.remove(getAdapterPosition());
-                    // notifyItemRemoved(getAdapterPosition());
-                    // notifyItemRangeChanged(getAdapterPosition(), ImageItemList.size());
-                    notifyDataSetChanged();
+                    // ImageItemList.remove(getAdapterPosition());
+                    // notifyDataSetChanged();
+                    if (mContext instanceof UploadPhotosActivity) {
+                        //  ((UploadPhotosActivity) mContext).showConfirmationDialog(getAdapterPosition());
+                        ((UploadPhotosActivity) mContext).ShowConfirmation(getAdapterPosition());
+
+
+                    }
                 }
             });
 
@@ -189,5 +205,6 @@ public class Adapter_UploadPhotos extends RecyclerView.Adapter<Adapter_UploadPho
 
         }
     }
+
 
 }

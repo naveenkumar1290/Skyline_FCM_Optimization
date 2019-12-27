@@ -45,14 +45,17 @@ import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.OverlapTimesheet;
 import planet.info.skyline.model.Timesheet;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
+import planet.info.skyline.tech.billable_timesheet.SubmitTimesheet;
 import planet.info.skyline.util.Utility;
 
 
 import static planet.info.skyline.network.Api.API_GetFutureTimeEntry;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 //import android.support.v4.app.FragmentManager;
 
@@ -90,12 +93,15 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
     boolean startTimeClicked = false;
     int position;
     Timesheet clientUser;
-    private ProgressDialog mProgressDialog;
+   // private ProgressDialog mProgressDialog;
 
+    ProgressHUD mProgressHUD;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timesheet_new);
+
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setTitle(Utility.getTitle("Update Time Sheet"));
@@ -252,7 +258,7 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
     }
 
 
-    private void showProgressDialog(Context context) {
+  /*  private void showProgressDialog(Context context) {
 
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(context);
@@ -275,7 +281,7 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
             e.getMessage();
         }
     }
-
+*/
     public String Submit_Billable_TimeSheetNew() {  ///use this fo billable
         String receivedString = "";
         String timesheetID = "";
@@ -305,8 +311,15 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
         request_new.addProperty("SWOstatus", Swo_Status);
         request_new.addProperty("jobID", JobIdBillable);
         request_new.addProperty("PauseTimeSheetID", pausedTimesheetID);
-        Log.e("overlap Billable data", request_new.toString());
 
+        if (Shared_Preference.get_EnterTimesheetByAWO(TimeSheetList1Activity.this)) {
+            request_new.addProperty("Type", Utility.TYPE_AWO);
+        } else {
+            request_new.addProperty("Type", Utility.TYPE_SWO);
+        }
+
+
+        Log.e("current entry data", request_new.toString());
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.dotNet = true;
@@ -316,11 +329,10 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
             httpTransport.call(SOAP_ACTION, envelope);
             SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
             receivedString = SoapPrimitiveresult.toString();
-            Log.e("receivedString", receivedString);
+            Log.e("current entry res", receivedString);
             JSONObject jsonObject = new JSONObject(receivedString);
             //  {"ID":"0","Output":"0","Message":"Overlapping Time entries"}
             timesheetID = jsonObject.getString("ID");
-
             Shared_Preference.setTIME_SHEET_ID(this,timesheetID);
 
         } catch (Exception e) {
@@ -394,7 +406,7 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
         request.addProperty("EMP_ID", tech_id);
         request.addProperty("DATE_TIME", dt);
 
-        Log.e("overlap editsheet data", request.toString());
+        Log.e("overlaped enrty data", request.toString());
 
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
@@ -407,7 +419,7 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
             httpTransport.call(SOAP_ACTION, envelope);
             SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
             receivedString = SoapPrimitiveresult.toString();
-            Log.e("receivedString", receivedString);
+            Log.e("overlaped enrty res", receivedString);
             JSONArray jsonArray = new JSONArray(receivedString);
             JSONObject jsonObject = jsonArray.getJSONObject(0);
             // JSONObject jsonObject = new JSONObject(receivedString);
@@ -606,19 +618,21 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
 
     class Async_TimesheetList extends AsyncTask<Void, Void, Void> {
 
-        ProgressDialog progressDoalog;
+        //ProgressDialog progressDoalog;
 
 
         @Override
         protected void onPreExecute() {
+          showprogressdialog();
+
             super.onPreExecute();
 
-            progressDoalog = new ProgressDialog(context);
+          /*  progressDoalog = new ProgressDialog(context);
 
             progressDoalog.setMessage("Please wait....");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
-            progressDoalog.show();
+            progressDoalog.show();*/
         }
 
         @Override
@@ -632,8 +646,9 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
 
         @Override
         protected void onPostExecute(Void aVoid) {
+           hideprogressdialog();
             super.onPostExecute(aVoid);
-            progressDoalog.dismiss();
+           // progressDoalog.dismiss();
 
             order_adapter adapter = null;
 
@@ -861,14 +876,17 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
 
         @Override
         protected void onPreExecute() {
+          showprogressdialog();
             super.onPreExecute();
-            showProgressDialog(TimeSheetList1Activity.this);
+            //showProgressDialog(TimeSheetList1Activity.this);
         }
 
         @Override
         protected void onPostExecute(String result) {
+           hideprogressdialog();
+
             super.onPostExecute(result);
-            hideProgressDialog();
+           // hideProgressDialog();
 
             JSONObject jsonObject = null;
             String output = "";
@@ -917,14 +935,16 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
 
         @Override
         protected void onPreExecute() {
+           showprogressdialog();
+
             super.onPreExecute();
-            showProgressDialog(TimeSheetList1Activity.this);
+            //showProgressDialog(TimeSheetList1Activity.this);
         }
 
         @Override
         protected void onPostExecute(String result) {
-            hideProgressDialog();
-
+           // hideProgressDialog();
+hideprogressdialog();
             JSONObject jsonObject = null;
             String output = "";
             String msg = "";
@@ -972,8 +992,9 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
     private class Async_UpdateTimeSheet extends AsyncTask<Void, Void, String> {
         @Override
         protected void onPreExecute() {
+            showprogressdialog();
             super.onPreExecute();
-            showProgressDialog(TimeSheetList1Activity.this);
+            //showProgressDialog(TimeSheetList1Activity.this);
         }
 
         @Override
@@ -984,8 +1005,10 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
 
         @Override
         protected void onPostExecute(String result) {
+            hideprogressdialog();
+
             super.onPostExecute(result);
-            hideProgressDialog();
+           // hideProgressDialog();
             JSONObject jsonObject = null;
             String output = "";
             String msg = "Failed!";
@@ -1012,5 +1035,23 @@ public class TimeSheetList1Activity extends AppCompatActivity implements TimePic
         }
     }
 
+    public void showprogressdialog() {
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+
+    }
+
+    public void hideprogressdialog() {
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
 
 }

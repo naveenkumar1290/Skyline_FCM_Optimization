@@ -1,5 +1,6 @@
 package planet.info.skyline.RequestControler;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -7,6 +8,6 @@ import org.json.JSONObject;
  */
 
 public interface ResponseInterface_MultiApiCall {
-        void handleResponse(JSONObject responseJsonObject);// throws JSONException;
+        void handleMultiApiResponse(JSONArray responseJsonArray);// throws JSONException;
        // void handleErrorMessage(String response, String api);
 }

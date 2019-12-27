@@ -1,4 +1,4 @@
-package planet.info.skyline.tech.job_files_old;
+package planet.info.skyline.job_files_old;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,7 +21,7 @@ import java.util.List;
 
 import planet.info.skyline.R;
 import planet.info.skyline.adapter.TabsPagerAdapter_ShowJobFiles;
-import planet.info.skyline.tech.job_files_new.SharePhotosToClientActivity;
+import planet.info.skyline.tech.share_photos.SharePhotosToClientActivity;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 

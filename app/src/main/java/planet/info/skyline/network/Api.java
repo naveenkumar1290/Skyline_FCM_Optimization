@@ -52,8 +52,8 @@ public class Api {
     public static final String API_GetallJobByDealerID = "GetallJobByDealerID";
     public static final String API_bind_billable_nonBillable_code1 = "bind_billable_nonBillable_code1";
     public static final String API_GetAwoDetailByJob = "GetAwoDetailByJob";
-    public static final String API_bindclock_swo_tatus = "bindclock_swo_tatus";
-    public static final String API_bindclock_swo_awo_status = "bindclock_swo_awo_status";
+    public static final String API_bindclock_swo_tatus = "bindclock_swo_tatus";   //
+    public static final String API_bindclock_swo_awo_status = "bindclock_swo_awo_status"; // both
 
     public static final String API_GetVersion = "GetVersion";
 
@@ -75,8 +75,11 @@ public class Api {
     public static final String API_add_item_desc = "add_item_desc";
     public static final String API_missing_crate = "missing_crate";
     public static final String API_GetClientUserList = "GetClientUserList";
-    public static final String API_ShareProjectFile = "ShareProjectFile";
-    public static final String API_mail = "mail";
+    public static final String API_ShareProjectFile = "ShareProjectFile"; // project file
+    public static final String API_ShareProoofRenders = "ShareProofRender"; // prrof renders
+  //  public static final String API_mail = "mail";  // for both project photos
+    public static final String API_mail = "mailNew"; // for both project photos and proof renders. Chnge in JOB FILE module and UPload Photo module
+
     public static final String API_GetJobFileByTextJob = "GetJobFileByTextJob";
     public static final String API_Bind_Job_client = "Bind_Job_client";
     public static final String API_Bind_Job_client11 = "Bind_Job_client11";
@@ -88,7 +91,6 @@ public class Api {
 
     public static final String API_GetJobDetailsBySWO = "GetJobDetailsBySWO";  // for SWO
     public static final String API_GetJobDetailsBy_SWO_AWO = "GetJobDetailsBySWO_AWO";  // For SWO/ AWO by Type
-
 
     public static final String API_bindSWOStatus = "bindSWOStatus";//4.0  tech
     public static final String API_bind_SWO_AWO_Status = "bindSWOStatusRole";//4.1    both
@@ -114,12 +116,12 @@ public class Api {
     public static final String API_VerifyLaborCode = "bind_code1CheckCode"; //Staging- live
 
   //  public static final String API_getTimesheetAuth = "GetTimeSheetTechPerm"; //live
-    public static final String API_getTimesheetAuth = "GetTimeSheetTechPerm2"; //Staging
+    public static final String API_getTimesheetAuth = "GetTimeSheetTechPerm2"; //live access permission on modules
 
     public static final String API_GetJobFileByTextJob11withrole = "GetJobFileByTextJob11withrole"; //old modified for swo files
    // public static final String API_GetJobFileByTextJob11withrole = "GetAllFilewithrole";  //new satging
 
-    public static final String API_GetEmployee_Roles = "getemployee_roles";
+    public static final String API_GetEmployee_Roles = "getemployee_roles"; // new
 
     /**************************************************EP1**********************************/
 

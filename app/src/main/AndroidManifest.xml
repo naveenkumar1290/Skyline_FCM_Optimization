@@ -51,13 +51,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".tech.runtime_permission.PermissionActivity"
-            android:theme="@style/ThemeNoActionBar"
-            ></activity>
+        <activity android:name=".tech.task_plan.MyTasksActivity">
+
+            </activity>
+        <activity
+            android:name=".tech.runtime_permission.PermissionActivity"
+            android:theme="@style/ThemeNoActionBar" />
         <activity
             android:name=".tech.usage_charges.VendorsListActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".client.SearchJobActivity"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -70,14 +72,11 @@
         <activity
             android:name=".tech.task_plan.TaskPlanMainActivity"
             android:theme="@style/AppTheme.NoActionBar">
-
-            <!--
-            <intent-filter>
+           <!-- <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>-->
         </activity>
         <activity
             android:name=".tech.task_plan.TaskPlanTabActivity"
@@ -90,6 +89,7 @@
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
+
         <activity
             android:name=".tech.choose_job_company.SelectCompanyActivityNew"
             android:windowSoftInputMode="stateAlwaysHidden" /> <!-- android:theme="@style/MyAppCompatDialogTheme" -->
@@ -200,7 +200,8 @@
         <activity
             android:name=".tech.upload_photo.UploadPhotosActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
         <activity
             android:name=".tech.billable_timesheet.ClientLeavingWithCrate"
             android:configChanges="keyboardHidden|orientation|screenLayout|screenSize"
@@ -246,7 +247,7 @@
             android:label="@string/title_activity_upload_at_any_page"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".tech.job_files_old.Show_Jobs_Activity"
+            android:name=".job_files_old.Show_Jobs_Activity"
             android:configChanges="orientation"
             android:label="@string/title_activity_show__jobs_" />
         <activity
@@ -285,9 +286,9 @@
                  android:resource="@xml/provider_paths" />
          </provider>
         -->
-        <activity android:name=".tech.job_files_old.Show_Jobs_Activity_New" />
+        <activity android:name=".job_files_old.Show_Jobs_Activity_New" />
         <activity
-            android:name=".tech.job_files_new.SharePhotosToClientActivity"
+            android:name=".tech.share_photos.SharePhotosToClientActivity"
             android:screenOrientation="sensorPortrait"
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".tech.whats_inside.ShowWhatsInside_Activity" />

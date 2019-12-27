@@ -34,7 +34,7 @@ public class Clock_Submit_Type_Activity extends BaseActivity {
     ImageView imgvw_Company_Logo, homeimg;
     TextView clientname;
     Button btn_StopWork, btn_FinishWork, btnChangeTimeCode, btn_PauseWork;
-    ProgressDialog pDialog;
+  //  ProgressDialog pDialog;
 
 
 
@@ -65,9 +65,6 @@ public class Clock_Submit_Type_Activity extends BaseActivity {
         clientname = (TextView) findViewById(R.id.txtvw_Company_Name);
         clientname.setText("");
 
-        pDialog = new ProgressDialog(Clock_Submit_Type_Activity.this);
-        pDialog.setMessage("Kindly wait");
-        pDialog.setCancelable(false);
 
         String names = Shared_Preference.getCLIENT(this);
         String nam = Shared_Preference.getCLIENT_NAME(this);
@@ -287,19 +284,7 @@ public class Clock_Submit_Type_Activity extends BaseActivity {
 
     }
 
-    public void showprogressdialog() {
-        try {
-            pDialog.show();
-        } catch (Exception e) {
-            e.getMessage();
-        }
-    }
 
-    public void hideprogressdialog() {
-
-        pDialog.dismiss();
-
-    }
 
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;
+import planet.info.skyline.model.MyTask;
 import planet.info.skyline.model.SWO;
 import planet.info.skyline.model.TaskFile;
 import planet.info.skyline.model.TaskPlan;
@@ -39,5 +40,9 @@ public interface API_Interface {
 
    /* @POST("ClientJob/GetSwoByJob")
     Single<Response<List<SWO>>> GetSwoByJob1(@Body HashMap<String, String> body);*/
+
+    @POST("TaskPlanning/BindTaskListByEmployeeID")
+    Observable<List<MyTask>> GetTaskListByEmployeeID(@Body HashMap<String, String> body);
+
 
 }

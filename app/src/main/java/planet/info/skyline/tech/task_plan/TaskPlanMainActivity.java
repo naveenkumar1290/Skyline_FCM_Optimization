@@ -71,7 +71,6 @@ public class TaskPlanMainActivity extends AppCompatActivity {
         }
 
 
-
     }
 
     @Override
@@ -167,53 +166,7 @@ public class TaskPlanMainActivity extends AppCompatActivity {
 
     }
 
-   /* private void GetSwoByJob1() {
 
-      showDialog();
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put("JOB_ID_PK", jobID);
-
-        API_Interface apiService = REST_API_Client_TaskPlan.getClient().create(API_Interface.class);
- *//*
-        apiService.GetSwoByJob(hashMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<Response<List<SWO>>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                    }
-                    @Override
-                    public void onSuccess(Response<List<SWO>> listResponse) {
-                    }
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-                });
-
-*//*
-
-
-        Single<Response<List<SWO>>> testObservable= apiService.GetSwoByJob1(hashMap);
-        testObservable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<Response<List<SWO>>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                    }
-                    @Override
-                    public void onSuccess(Response<List<SWO>> listResponse) {
-                    }
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-                });
-
-
-
-
-
-
-    }*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -223,7 +176,6 @@ public class TaskPlanMainActivity extends AppCompatActivity {
                 return true;
             case R.id.choose:
                 ///  Check_Clock_Status();
-
                 Intent i = new Intent(TaskPlanMainActivity.this, SelectCompanyActivityNew.class);
                 i.putExtra(Utility.IS_JOB_MANDATORY,"1");
                 i.putExtra(Utility.Show_DIALOG_SHOW_INFO,false);

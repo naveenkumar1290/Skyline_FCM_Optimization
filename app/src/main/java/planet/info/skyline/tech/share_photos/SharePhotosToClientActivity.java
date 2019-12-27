@@ -1,4 +1,4 @@
-package planet.info.skyline.tech.job_files_new;
+package planet.info.skyline.tech.share_photos;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -39,22 +39,25 @@ import org.ksoap2.serialization.SoapPrimitive;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.R;
 import planet.info.skyline.crash_report.ConnectionDetector;
+import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.model.ClientUser;
+import planet.info.skyline.network.Api;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
+import planet.info.skyline.tech.job_files_new.ProjectFileDetailActivityNonClient;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_GetClientUserList;
-import static planet.info.skyline.network.Api.API_ShareProjectFile;
-import static planet.info.skyline.network.Api.API_mail;
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP2;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class SharePhotosToClientActivity extends AppCompatActivity {
@@ -63,8 +66,8 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
     Context context;
     ArrayList<ClientUser> list_ClientUser;
     String CompanyId = "";
-  /*  SharedPreferences sp;
-    SharedPreferences.Editor ed;*/
+    /*  SharedPreferences sp;
+      SharedPreferences.Editor ed;*/
     List<HashMap<String, String>> list_Selected_Project_Photos = new ArrayList<>();
     List<ClientUser> list_all_Client = new ArrayList<>();
     List<ClientUser> list_selected_Client = new ArrayList<>();
@@ -74,6 +77,8 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
     boolean api_error = false;
     String isFromProjectFile = "";
 
+
+    ProgressHUD mProgressHUD;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,7 +109,7 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         }
 
 
-        CompanyId =   Shared_Preference.getCOMPANY_ID_BILLABLE(this);
+        CompanyId = Shared_Preference.getCOMPANY_ID_BILLABLE(this);
         if (CompanyId.equals("")) {
             Toast.makeText(context, "Company id not found!", Toast.LENGTH_SHORT).show();
         } else {
@@ -198,10 +203,7 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
                     String int_client_id = jsonObject1.getString("int_client_id");
                     String MasterStatus = jsonObject1.getString("MasterStatus");
 
-
-
-
-                    list_ClientUser.add(new ClientUser(ename, txt_Mail, Id_Pk, int_client_id, false,MasterStatus));
+                    list_ClientUser.add(new ClientUser(ename, txt_Mail, Id_Pk, int_client_id, false, MasterStatus));
                 } catch (Exception e) {
                     e.getMessage();
                 }
@@ -220,9 +222,10 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         list_ClientUser = new ArrayList<>();
 
         final String NAMESPACE = KEY_NAMESPACE + "";
+        final String METHOD_NAME = Api.API_ShareProjectFile;
         final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + API_ShareProjectFile;
-        final String METHOD_NAME = API_ShareProjectFile;
+        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
+
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
 
         request.addProperty("LID", LID);
@@ -261,6 +264,55 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         }
 
     }
+
+
+    public void ShareProofRenders(String LID, String UID, String Mail, String CID, String JID, String FID, String comment) {
+        list_ClientUser = new ArrayList<>();
+
+        final String NAMESPACE = KEY_NAMESPACE + "";
+        final String METHOD_NAME = Api.API_ShareProoofRenders;
+        final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
+        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
+        SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
+        request.addProperty("LID", LID);
+        request.addProperty("UID", UID);
+        request.addProperty("Mail", Mail);
+        request.addProperty("CID", CID);
+        request.addProperty("JID", JID);
+        request.addProperty("FID", FID);
+        request.addProperty("comment", comment);
+
+
+
+        Log.e("Api called", request.toString());
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11); // put all required data into a soap
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE httpTransport = new HttpTransportSE(URL);
+        try {
+            httpTransport.call(SOAP_ACTION, envelope);
+
+            SoapPrimitive SoapPrimitiveresult = (SoapPrimitive) envelope.getResponse();
+            String result = SoapPrimitiveresult.toString();
+
+            Log.e("Api result", result);
+
+            if (result.equalsIgnoreCase("fail")) {
+                api_error = true;
+            } else {
+                api_error = false;
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            api_error = true;
+            Log.e("Api result err", String.valueOf(e.getMessage()));
+        }
+
+    }
+
 
     public void Dialog_EnterComment() {
         final Dialog dialog_comment = new Dialog(SharePhotosToClientActivity.this);
@@ -326,17 +378,6 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         return (!TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches());
     }
 
-    public View getViewByPosition(int pos, ListView listView) {
-        final int firstListItemPosition = listView.getFirstVisiblePosition();
-        final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
-
-        if (pos < firstListItemPosition || pos > lastListItemPosition) {
-            return listView.getAdapter().getView(pos, null, listView);
-        } else {
-            final int childIndex = pos - firstListItemPosition;
-            return listView.getChildAt(childIndex);
-        }
-    }
 
     @Override
     public void onBackPressed() {
@@ -345,7 +386,7 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
             finish();
         }*/
 
-     //   startActivity(new Intent(SharePhotosToClientActivity.this, MainActivity.class));
+        //   startActivity(new Intent(SharePhotosToClientActivity.this, MainActivity.class));
     }
 
     @Override
@@ -375,14 +416,14 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
     }
 
     void sendMail() {
-        String selectedMail="";
+        String selectedMail = "";
         Utility.hideKeyboard(SharePhotosToClientActivity.this);
         list_selected_Client.clear();
         api_error = false;
         for (int i = 0; i < list_all_Client.size(); i++) {
             if (list_all_Client.get(i).isChecked()) {
                 list_selected_Client.add(list_all_Client.get(i));
-               selectedMail= selectedMail+list_all_Client.get(i).getTxt_Mail()+",";
+                selectedMail = selectedMail + list_all_Client.get(i).getTxt_Mail() + ",";
             }
         }
 
@@ -393,13 +434,23 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
             selectedMail = selectedMail.substring(0, selectedMail.length() - 1);
             // Dialog_EnterComment();
             Boolean isValid = ValidateEmail();
+
             if (isValid) {
                 if (isFromProjectFile.equals("true")) {
-
-                    Intent intent=new Intent(SharePhotosToClientActivity.this, ProjectFileDetailActivityNonClient.class);
-                    intent.putExtra(Utility.Client_Mail,selectedMail);
-                    setResult(Utility.PROJECT_FILE_GET_CLIENT_MAILS,intent);
+                   /* Intent intent = new Intent(SharePhotosToClientActivity.this, ProjectFileDetailActivityNonClient.class);
+                    intent.putExtra(Utility.Client_Mail, selectedMail);
+                    setResult(Utility.PROJECT_FILE_GET_CLIENT_MAILS, intent);
                     finish();//finishing activity
+                */
+                    ////////////
+
+                    Intent intent = new Intent(SharePhotosToClientActivity.this, ProjectFileDetailActivityNonClient.class);
+                    Bundle args = new Bundle();
+                    args.putSerializable("ARRAYLIST", (Serializable) list_selected_Client);
+                    intent.putExtra("BUNDLE", args);
+                    setResult(Utility.PROJECT_FILE_GET_CLIENT_MAILS, intent);
+                    finish();//finishing activity
+
 
                 } else {
                     Dialog_EnterComment();
@@ -410,13 +461,14 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         }
     }
 
-    public void Mail(String LID, String UID, String Mail, String CID, String JID, String FID) {
+    public void Mail(String LID, String UID, String Mail, String CID, String JID, String FID, String FIleTYpe) {
         list_ClientUser = new ArrayList<>();
 
         final String NAMESPACE = KEY_NAMESPACE + "";
+        final String METHOD_NAME = Api.API_mail;
         final String URL = URL_EP2 + "/WebService/techlogin_service.asmx";
-        final String SOAP_ACTION = KEY_NAMESPACE + API_mail;
-        final String METHOD_NAME = API_mail;
+        final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
+
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
 
         request.addProperty("LID", LID);
@@ -425,6 +477,7 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         request.addProperty("CID", CID);
         request.addProperty("JID", JID);
         request.addProperty("FID", FID);
+        request.addProperty("PhotoType", FIleTYpe);
 
 
         Log.e("Api called", request.toString());
@@ -458,19 +511,20 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
 
     class Async_ClientUserList extends AsyncTask<Void, Void, Void> {
 
-        ProgressDialog progressDoalog;
+       // ProgressDialog progressDoalog;
 
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
 
-            progressDoalog = new ProgressDialog(context);
+           /* progressDoalog = new ProgressDialog(context);
 
             progressDoalog.setMessage("Please wait....");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
-            progressDoalog.show();
+            progressDoalog.show();*/
+            showprogressdialog();
         }
 
         @Override
@@ -485,8 +539,9 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            progressDoalog.dismiss();
+          //  progressDoalog.dismiss();
 
+            hideprogressdialog();
             order_adapter adapter = null;
 
 
@@ -568,15 +623,13 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
                 holder.userType.setText("Client");
                 holder.userType.setTextColor(getResources().getColor(R.color.main_green_color));
 
-            }else if (getMasterStatus.equalsIgnoreCase("2") || getMasterStatus.equalsIgnoreCase("3")) {
+            } else if (getMasterStatus.equalsIgnoreCase("2") || getMasterStatus.equalsIgnoreCase("3")) {
                 holder.userType.setText("Master User");
                 holder.userType.setTextColor(getResources().getColor(R.color.primaryTextColor));
-            }
-            else if (getMasterStatus.equalsIgnoreCase("4") ) {
+            } else if (getMasterStatus.equalsIgnoreCase("4")) {
                 holder.userType.setText("Normal User");
                 holder.userType.setTextColor(getResources().getColor(R.color.primaryTextColor));
             }
-
 
 
             if (Ename.equals(null) || Ename.trim().equals("")) {
@@ -662,7 +715,7 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
 
 
         class Holder {
-            TextView ename,userType;
+            TextView ename, userType;
             EditText mail_Id;
             Button index_no;
             CheckBox checkBox;
@@ -675,26 +728,26 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
 
     class Async_ShareProjectFile extends AsyncTask<Void, Void, Void> {
 
-        ProgressDialog progressDoalog;
+      //  ProgressDialog progressDoalog;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
 
-            progressDoalog = new ProgressDialog(context);
+           /* progressDoalog = new ProgressDialog(context);
 
             progressDoalog.setMessage("Please wait....");
             progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDoalog.setCancelable(false);
-            progressDoalog.show();
+            progressDoalog.show();*/
+           showprogressdialog();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
 
 
-
-            String LID= Shared_Preference.getLOGIN_USER_ID(SharePhotosToClientActivity.this);
+            String LID = Shared_Preference.getLOGIN_USER_ID(SharePhotosToClientActivity.this);
             String CID = CompanyId;
 
             String JID = Shared_Preference.getJOB_ID_FOR_JOBFILES(SharePhotosToClientActivity.this);
@@ -707,27 +760,34 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
                     if (int_job_file_id.contains(".")) {
                         int_job_file_id = int_job_file_id.substring(0, int_job_file_id.indexOf("."));
                     }
-                    FID = FID + int_job_file_id + ",";
+                    FID = FID + int_job_file_id + ",";// if files are of same type
                 }
 
             }
             FID = FID.substring(0, FID.length() - 1);
-
             Log.e("list_selected_Client--", list_selected_Client.toString());
             Log.e("list_Selected_Photos--", list_Selected_Project_Photos.toString());
             Log.e("FID--", FID);
 
-
             String Mail = list_selected_Client.get(0).getTxt_Mail();
             String UID = list_selected_Client.get(0).getId_Pk();
 
-            ShareProjectFile(LID, UID, Mail, CID, JID, FID, comment);
+
+            String fileType = list_Selected_Project_Photos.get(0).get("ftype");
+            if (fileType.equals("Project Photo(s)")) {
+                fileType = "2";
+                ShareProjectFile(LID, UID, Mail, CID, JID, FID, comment);
+            } else if (fileType.equals("Client Art")) {
+                fileType = "1";
+                ShareProofRenders(LID, UID, Mail, CID, JID, FID, comment);
+            }
+
 
             for (int i = 0; i < list_selected_Client.size(); i++) {
                 String Mail_1 = list_selected_Client.get(i).getTxt_Mail();
                 String UID_1 = list_selected_Client.get(i).getId_Pk();
                 // if (api_error) break;
-                Mail(LID, UID_1, Mail_1, CID, JID, FID);
+                Mail(LID, UID_1, Mail_1, CID, JID, FID, fileType);
             }
 
             return null;
@@ -736,8 +796,8 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            progressDoalog.dismiss();
-
+        //    progressDoalog.dismiss();
+hideprogressdialog();
 
             Toast.makeText(getApplicationContext(), "Photo(s) shared successfully!", Toast.LENGTH_SHORT).show();
             Intent iiu = new Intent(SharePhotosToClientActivity.this, MainActivity.class);
@@ -756,6 +816,24 @@ public class SharePhotosToClientActivity extends AppCompatActivity {
             }*/
 
 
+        }
+    }
+    public void showprogressdialog() {
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+
+    }
+
+    public void hideprogressdialog() {
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
         }
     }
 

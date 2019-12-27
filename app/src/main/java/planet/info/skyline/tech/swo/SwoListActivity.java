@@ -3,6 +3,7 @@ package planet.info.skyline.tech.swo;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,11 +37,13 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.MySwo;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.network.SOAP_API_Client;
+import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
+import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 public class SwoListActivity extends AppCompatActivity {
     TextView tv_msg, txtvw_count;
@@ -54,10 +57,12 @@ public class SwoListActivity extends AppCompatActivity {
     ListView listView;
     //   private RecyclerView recyclerView;
     private Menu menu;
-
+    Context context;
+    ProgressHUD mProgressHUD;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        context=SwoListActivity.this;
         setContentView(R.layout.swo_list);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setView();
@@ -501,30 +506,32 @@ public class SwoListActivity extends AppCompatActivity {
     }
 
     private class async_getSWO_AWO_List extends AsyncTask<Void, Void, Integer> {
-        ProgressDialog pDialog;
+      //  ProgressDialog pDialog;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pDialog = new ProgressDialog(SwoListActivity.this);
+          /*  pDialog = new ProgressDialog(SwoListActivity.this);
             pDialog.setMessage("Kindly wait");
             pDialog.setCancelable(false);
             try {
                 pDialog.show();
             } catch (Exception e) {
                 e.getMessage();
-            }
+            }*/
+          showprogressdialog();
         }
 
 
         @Override
         protected void onPostExecute(Integer integer) {
             super.onPostExecute(integer);
-            try {
+            /*try {
                 pDialog.dismiss();
             } catch (Exception e) {
                 e.getMessage();
-            }
+            }*/
+            hideprogressdialog();
             String userRole = Shared_Preference.getUSER_ROLE(SwoListActivity.this);
             if (mySwoArrayList.size() > 0) {
                 tv_msg.setVisibility(View.GONE);
@@ -570,18 +577,19 @@ public class SwoListActivity extends AppCompatActivity {
     }
 
     private class async_getJobDetailsBySwoId extends AsyncTask<String, Void, JSONObject> {
-        ProgressDialog pDialog;
+       // ProgressDialog pDialog;
 
         @Override
         protected void onPreExecute() {
-            pDialog = new ProgressDialog(SwoListActivity.this);
+           /* pDialog = new ProgressDialog(SwoListActivity.this);
             pDialog.setMessage("Kindly wait");
             pDialog.setCancelable(false);
             try {
                 pDialog.show();
             } catch (Exception e) {
                 e.getMessage();
-            }
+            }*/
+           showprogressdialog();
             super.onPreExecute();
         }
 
@@ -631,11 +639,12 @@ public class SwoListActivity extends AppCompatActivity {
         protected void onPostExecute(JSONObject js_obj) {
             super.onPostExecute(js_obj);
             Utility.hideKeyboard((Activity) SwoListActivity.this);
-            try {
+           /* try {
                 pDialog.dismiss();
             } catch (Exception e) {
                 e.getMessage();
-            }
+            }*/
+           hideprogressdialog();
             try {
                 String login_dealerId = Shared_Preference.getDEALER_ID(SwoListActivity.this);
                 String job_id = js_obj.getString("job_id");
@@ -666,5 +675,23 @@ public class SwoListActivity extends AppCompatActivity {
 
     }
 
+    public void showprogressdialog() {
+        try {
+            mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+
+    }
+
+    public void hideprogressdialog() {
+        try {
+            if (mProgressHUD.isShowing()) {
+                mProgressHUD.dismiss();
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
 
 }
