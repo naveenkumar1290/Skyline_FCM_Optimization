@@ -1,11 +1,10 @@
-package planet.info.skyline.tech.runtime_permission;
+package planet.info.skyline.runtime_permission;
 
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -17,9 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import okhttp3.internal.Util;
 import planet.info.skyline.R;
-import planet.info.skyline.home.LoginActivity;
 import planet.info.skyline.util.Utility;
 
 public class PermissionActivity extends AppCompatActivity {
@@ -27,6 +24,7 @@ public class PermissionActivity extends AppCompatActivity {
     static String[] Permissions = {
             Manifest.permission.CAMERA,
             Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_PHONE_STATE
     };
 
@@ -37,7 +35,9 @@ public class PermissionActivity extends AppCompatActivity {
                         &&
                         ContextCompat.checkSelfPermission(context, Permissions[1]) == PackageManager.PERMISSION_GRANTED
                         &&
-                        ContextCompat.checkSelfPermission(context, Permissions[2]) == PackageManager.PERMISSION_GRANTED;
+                        ContextCompat.checkSelfPermission(context, Permissions[2]) == PackageManager.PERMISSION_GRANTED
+                        &&
+                        ContextCompat.checkSelfPermission(context, Permissions[3]) == PackageManager.PERMISSION_GRANTED;
 
 
     }
@@ -77,8 +77,9 @@ public class PermissionActivity extends AppCompatActivity {
                 if (grantResults.length > 0) {
                     boolean Camera = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean ReadExternalStorage = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    boolean ReadPhoneState = grantResults[2] == PackageManager.PERMISSION_GRANTED;
-                    if (ReadExternalStorage && Camera && ReadPhoneState) {
+                    boolean WriteExternalStorage = grantResults[2] == PackageManager.PERMISSION_GRANTED;
+                    boolean ReadPhoneState = grantResults[3] == PackageManager.PERMISSION_GRANTED;
+                    if (ReadExternalStorage && WriteExternalStorage && Camera && ReadPhoneState) {
                         Utility.checkDrawOverlayPermission(PermissionActivity.this);
                      /*   Intent intent = new Intent();
                         intent.putExtra("result", ReadExternalStorage && Camera && ReadPhoneState);

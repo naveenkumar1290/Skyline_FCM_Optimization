@@ -171,15 +171,14 @@ public class Utility {
 
     /**************************************Roles**********************************************/
 
-
     public static final int SWO_LIST_REQUEST_CODE = 24459;
 
     public static final String COMP_ID = "COMP_ID";
     public static final String JOB_ID = "JOB_ID";
 
-
     public static final String TYPE_AWO = "2";
     public static final String TYPE_SWO = "1";
+
     /*********************************CLIENT*******************************************/
 
 

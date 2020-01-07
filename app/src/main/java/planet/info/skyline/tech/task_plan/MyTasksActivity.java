@@ -13,16 +13,27 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import planet.info.skyline.R;
 import planet.info.skyline.adapter.MyTasksRecyclerAdapter;
+import planet.info.skyline.controller.AppController;
 import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.model.MyTask;
 
 import planet.info.skyline.network.API_Interface;
+import planet.info.skyline.network.Api;
 import planet.info.skyline.network.REST_API_Client_TaskPlan;
 import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
@@ -31,6 +42,7 @@ import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
+import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
 import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 public class MyTasksActivity extends AppCompatActivity {
@@ -137,4 +149,5 @@ public class MyTasksActivity extends AppCompatActivity {
             }
         }
     }
+
 }

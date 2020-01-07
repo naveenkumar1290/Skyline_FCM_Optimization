@@ -13,7 +13,6 @@ public class Api {
     public static final String API_UNASSIGNED_SWO_AWO_by_Type = "GetSwoByDealerbytype";//2.0 both
 
 
-
     public static final String API_VENDOR = "GetVendorByDealer";
     public static final String API_AUTH_USAGE_CHARGE = "GetAuthUsageCharge";
     public static final String API_GetClientNotification = "GetClientNotification";

@@ -50,7 +50,7 @@ import planet.info.skyline.network.API_Interface;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.network.ProgressRequestBody;
 import planet.info.skyline.network.REST_API_Client;
-import planet.info.skyline.old_activity.AppConstants;
+import planet.info.skyline.util.AppConstants;
 import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;

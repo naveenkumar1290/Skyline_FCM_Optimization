@@ -51,39 +51,61 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".tech.task_plan.MyTasksActivity">
-
-            </activity>
+        <activity android:name=".tech.billable_timesheet.LaborCodesActivity"></activity>
         <activity
-            android:name=".tech.runtime_permission.PermissionActivity"
+            android:name=".tech.task_plan.MyTasksActivity"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".runtime_permission.PermissionActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/ThemeNoActionBar" />
         <activity
             android:name=".tech.usage_charges.VendorsListActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".client.SearchJobActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".tech.task_plan.CompleteTaskActivity" />
-        <activity android:name=".tech.task_plan.AttachmentListActivity" />
-        <activity android:name=".tech.task_plan.TechnicianListActivity" />
-        <activity android:name=".tech.task_plan.ChecklistActivity" />
-        <activity android:name=".tech.task_plan.CompletedTaskDetailActivity" />
-        <activity android:name=".tech.swo.SwoListActivity" />
+        <activity
+            android:name=".tech.task_plan.CompleteTaskActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".tech.task_plan.AttachmentListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".tech.task_plan.TechnicianListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".tech.task_plan.ChecklistActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".tech.task_plan.CompletedTaskDetailActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".tech.swo.SwoListActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".tech.task_plan.TaskPlanMainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-           <!-- <intent-filter>
+
+            <!--
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
+            </intent-filter>
+            -->
         </activity>
         <activity
             android:name=".tech.task_plan.TaskPlanTabActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".tech.usage_charges.UsageChargesListActivity"
             android:label="@string/title_activity_usage_charges_list"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <uses-library
@@ -92,10 +114,14 @@
 
         <activity
             android:name=".tech.choose_job_company.SelectCompanyActivityNew"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden" /> <!-- android:theme="@style/MyAppCompatDialogTheme" -->
-        <activity android:name=".tech.usage_charges.UsageChargesUpdateActivityNew" />
+        <activity
+            android:name=".tech.usage_charges.UsageChargesUpdateActivityNew"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".tech.job_files_new.JobFilesTabActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".home.MainActivity"
@@ -200,8 +226,7 @@
         <activity
             android:name=".tech.upload_photo.UploadPhotosActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
+            android:windowSoftInputMode="stateHidden"></activity>
         <activity
             android:name=".tech.billable_timesheet.ClientLeavingWithCrate"
             android:configChanges="keyboardHidden|orientation|screenLayout|screenSize"
@@ -254,6 +279,7 @@
             android:name=".old_activity.webViewActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_web_view"
+            android:screenOrientation="portrait"
             android:theme="@style/ThemeNoActionBar" />
         <activity
             android:name=".old_activity.NonBillable_List_Activity"
@@ -262,7 +288,8 @@
         <activity
             android:name=".old_activity.Packing_Activity"
             android:configChanges="orientation"
-            android:label="@string/title_activity_packing_" />
+            android:label="@string/title_activity_packing_"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".floating_view.ChatHeadService"
@@ -289,15 +316,22 @@
         <activity android:name=".job_files_old.Show_Jobs_Activity_New" />
         <activity
             android:name=".tech.share_photos.SharePhotosToClientActivity"
-            android:screenOrientation="sensorPortrait"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".tech.whats_inside.ShowWhatsInside_Activity" />
-        <activity android:name=".tech.whats_inside.ShowWhatsInside_MainActivity" />
-        <activity android:name=".tech.whats_inside.ShowWhatsInside_sub" /> <!-- <activity android:name="com.nguyenhoanglam.imagepicker.activity.ImagePickerActivity"></activity> -->
+        <activity
+            android:name=".tech.whats_inside.ShowWhatsInside_Activity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".tech.whats_inside.ShowWhatsInside_MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".tech.whats_inside.ShowWhatsInside_sub"
+            android:screenOrientation="portrait" /> <!-- <activity android:name="com.nguyenhoanglam.imagepicker.activity.ImagePickerActivity"></activity> -->
         <activity
             android:name=".tech.fullscreenview.FullscreenImageView"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label=""
+            android:screenOrientation="portrait"
             android:theme="@style/ThemeNoActionBar" />
         <activity android:name=".old_activity.ZoomInZoomOut" />
         <activity
@@ -455,11 +489,11 @@
         -->
         <activity
             android:name=".tech.update_timesheet.TimeSheetList1Activity"
-            android:screenOrientation="sensorPortrait"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".client.Client_Events"
-            android:screenOrientation="sensorPortrait"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
         <service android:name=".fcm.MyFirebaseMessagingService">

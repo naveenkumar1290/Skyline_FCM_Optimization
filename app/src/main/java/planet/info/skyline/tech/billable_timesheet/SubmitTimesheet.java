@@ -40,10 +40,12 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.model.SWO_Status;
 import planet.info.skyline.network.Api;
+import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.tech.update_timesheet.TimeSheetList1Activity;
+import planet.info.skyline.util.AppConstants;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.KEY_NAMESPACE;
@@ -53,21 +55,13 @@ import static planet.info.skyline.util.Utility.LOADING_TEXT;
 
 
 public class SubmitTimesheet extends BaseActivity {
-
-    String selectcrateforworkstation = "";
-    String urlforselect = "";
-    String techname = "";
-    String urlofwebservice11_new = URL_EP2 + "/WebService/techlogin_service.asmx";
+    String urlofwebservice11_new = SOAP_API_Client.BASE_URL;
     int[] arrid;
     String[] arrname;
     String descriptionm;
     String idddd;
 
-
-    String scanedlabourcode = "";
-    int aman_status = 11;
     Dialog showd;
-
     SoapObject request_new;
 
     String JOB_START_DateTime;//dd-MM-yyyy HH:mm:ss
@@ -95,157 +89,25 @@ public class SubmitTimesheet extends BaseActivity {
         setContentView(R.layout.activity_scanforworkstation);
         context=SubmitTimesheet.this;
         userRole = Shared_Preference.getUSER_ROLE(this);
-        Swo_Id = Shared_Preference.getSWO_ID(SubmitTimesheet.this);
+        Swo_Id = Shared_Preference.getSWO_ID(context);
         JobIdBillable = Shared_Preference.getJOB_ID_FOR_JOBFILES(this);
 
-        Bundle bbb = getIntent().getExtras();
-        if (!(bbb == null)) {
-            aman_status = bbb.getInt("aman_status");
+        Bundle bundle = getIntent().getExtras();
+        if (bundle!= null && bundle.containsKey(AppConstants.TYPE)) {
+            status = bundle.getString(AppConstants.TYPE);
         }
 
-        if (new ConnectionDetector(SubmitTimesheet.this).isConnectingToInternet()) {
+        if (new ConnectionDetector(context).isConnectingToInternet()) {
             new async_Get_Billable_Code().execute();
         } else {
-            Toast.makeText(SubmitTimesheet.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
 
-
-    }
-
-    public void Alert_Choose_BillableCode() {
-        final Dialog showd = new Dialog(SubmitTimesheet.this);
-        showd.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        showd.setContentView(R.layout.labourcode_new);
-        showd.getWindow().setBackgroundDrawable(
-                new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        showd.setCancelable(false);
-        try {
-            showd.show();
-        } catch (Exception e) {
-            e.getMessage();
-        }
-
-        TextView yesfo = (TextView) showd.findViewById(R.id.Btn_Yes);
-        yesfo.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (new ConnectionDetector(SubmitTimesheet.this).isConnectingToInternet()) {
-                    new async_Get_Billable_Code().execute();
-                } else {
-                    Toast.makeText(SubmitTimesheet.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                }
-
-
-            }
-        });
-
-        ImageView close = (ImageView) showd.findViewById(R.id.close);
-        close.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    showd.dismiss();
-                } catch (Exception e) {
-                    e.getMessage();
-                }
-
-                Intent in = new Intent(SubmitTimesheet.this, Clock_Submit_Type_Activity.class);
-                startActivity(in);
-                finish();
-            }
-        });
-
-
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode,
-                                    Intent intent) {
-        // TODO Auto-generated method stub
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == 1) {
-                try {
-                    String result = "";
-
-                    String contents = intent.getStringExtra("SCAN_RESULT");
-                    String hom = contents;
-                    result = hom.substring(hom.indexOf("_loc=") + 5
-                    );
-                    try {
-                        String workloc = result;
-                        Shared_Preference.setWORK_LOCATION(this, workloc);
-                        Toast.makeText(SubmitTimesheet.this, workloc,
-                                Toast.LENGTH_LONG).show();
-                        Toast.makeText(SubmitTimesheet.this,
-                                selectcrateforworkstation, Toast.LENGTH_LONG).show();
-                        urlforselect = URL_EP1 + Api.API_UPDATE_CRATE_1
-                                + selectcrateforworkstation
-                                + "&workloc="
-                                + workloc + "&tech=" + techname;
-                        Alert_Choose_BillableCode();
-                    } catch (Exception ee) {
-                    }
-
-                } catch (Exception ee) {
-
-                }
-
-            } else if (requestCode == 2) {
-                String contents = intent.getStringExtra("SCAN_RESULT");
-                scanedlabourcode = contents;
-                if (new ConnectionDetector(SubmitTimesheet.this).isConnectingToInternet()) {
-                    new async_Get_Billable_Code().execute();
-
-                } else {
-                    Toast.makeText(SubmitTimesheet.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-                }
-
-
-            } else if (requestCode == 3) {
-                String worklo = Shared_Preference.getWORK_LOCATION(this);
-                urlforselect = URL_EP1 + Api.API_UPDATE_CRATE_1
-                        + selectcrateforworkstation
-                        + "&workloc="
-                        + worklo
-                        + "&tech=" + techname;
-                Alert_Choose_BillableCode();
-            } else if (requestCode == 4) {
-                try {
-
-                    String result = "";
-                    String contents = intent.getStringExtra("SCAN_RESULT");
-
-                    String hom = contents;
-                    result = hom.substring(hom.indexOf("_loc=") + 5);
-                    String workloc = result;
-                    Shared_Preference.setWORK_LOCATION(this, workloc);
-                } catch (Exception ee) {
-
-                }
-
-                String worklo = Shared_Preference.getWORK_LOCATION(this);
-                urlforselect = URL_EP1 + Api.API_UPDATE_CRATE_1
-                        + selectcrateforworkstation
-                        + "&workloc="
-                        + worklo
-                        + "&tech=" + techname;
-                Alert_Choose_BillableCode();
-            }
-
-        }
-        if (resultCode == RESULT_CANCELED) {
-            if (new ConnectionDetector(SubmitTimesheet.this).isConnectingToInternet()) {
-                new async_Get_Billable_Code().execute();
-            } else {
-                Toast.makeText(SubmitTimesheet.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-            }
-        }
 
     }
 
     public void Dialog_EnterDesc() {
-        final Dialog showd1 = new Dialog(SubmitTimesheet.this);
+        final Dialog showd1 = new Dialog(context);
         showd1.requestWindowFeature(Window.FEATURE_NO_TITLE);
         showd1.setContentView(R.layout.enterdescriptiondata_new);
         showd1.getWindow().setBackgroundDrawable(
@@ -270,7 +132,7 @@ public class SubmitTimesheet extends BaseActivity {
                     e.getMessage();
                 }
 
-                Intent in = new Intent(SubmitTimesheet.this, MainActivity.class);
+                Intent in = new Intent(context, MainActivity.class);
                 startActivity(in);
 
                 finish();
@@ -284,7 +146,7 @@ public class SubmitTimesheet extends BaseActivity {
             public void onClick(View arg0) {
                 // if (Utility.isTimeAutomatic(SubmitTimesheet.this)) {
                 if (ed1.getText().length() < 1) {
-                    Toast.makeText(SubmitTimesheet.this, "Please enter description   ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Please enter description   ", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     descriptionm = ed1.getText().toString().trim();
@@ -295,16 +157,15 @@ public class SubmitTimesheet extends BaseActivity {
                         e.getMessage();
                     }
 
-                    String Total_time = Utility.get_TotalClockTime(SubmitTimesheet.this);
+                    String Total_time = Utility.get_TotalClockTime(context);
 
                     /**************************************************************/
-                    if (aman_status == 1) {
-                        status = "1";//stop work
-                    } else if (aman_status == 0) {
-                        status = "0";//btn_PauseWork work
-                    } else {
-                        status = "3";//finish work
-                    }
+
+                       // status = "1";//stop work
+                       // status = "0";//btn_PauseWork work
+                       // status = "3";//finish work
+                       // status = "2018"; // changeTimeCode
+
 
                     if (oldSwoStatus.equals(Selected_Swo_Status)) {
                         Swo_Status = "0";
@@ -315,7 +176,7 @@ public class SubmitTimesheet extends BaseActivity {
                     }
                     /*****************************************************************/
 
-                    if (aman_status == 100) {      //Change Time Code
+                    if (status .equals( AppConstants.CHANGE_TIME_CODE)) {      //Change Time Code
                         jobType = Utility.CHANGE_TIME_CODE;
                         resetClock = true;
                         status = "2018";
@@ -341,7 +202,7 @@ public class SubmitTimesheet extends BaseActivity {
 
     public void Dialog_Choose_Labor_Code() {
 
-        showd = new Dialog(SubmitTimesheet.this);
+        showd = new Dialog(context);
         showd.requestWindowFeature(Window.FEATURE_NO_TITLE);
         showd.setContentView(R.layout.radiogroupfortimesheat);
         showd.setCancelable(false);
@@ -364,7 +225,7 @@ public class SubmitTimesheet extends BaseActivity {
                 rg.addView(button);
             }
         } else {
-            Toast.makeText(SubmitTimesheet.this, "Some api_error occured!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Some api_error occured!", Toast.LENGTH_SHORT).show();
         }
 
         rg.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -377,21 +238,13 @@ public class SubmitTimesheet extends BaseActivity {
                 } catch (Exception e) {
                     e.getMessage();
                 }
-
-                // if (userRole.equals(Utility.USER_ROLE_APC) || userRole.equals(Utility.USER_ROLE_ARTIST)) {
-                //   if (Shared_Preference.get_EnterTimesheetByAWO(SubmitTimesheet.this)) {
-                ///       Dialog_EnterDesc();
-                //   } else {          // for tech,artist
                 Dialog_Update_Swo_Awo_Status();
-                //   }
-
-
             }
         });
     }
 
     public void Dialog_Update_Swo_Awo_Status() {
-        showd = new Dialog(SubmitTimesheet.this);
+        showd = new Dialog(context);
         showd.requestWindowFeature(Window.FEATURE_NO_TITLE);
         showd.setContentView(R.layout.dialog_swo_status);
 
@@ -404,18 +257,13 @@ public class SubmitTimesheet extends BaseActivity {
 
         RadioGroup radioGroup = showd.findViewById(R.id.radioGroup);
         TextView title = showd.findViewById(R.id.textView1rr);
-        if (Shared_Preference.get_EnterTimesheetByAWO(SubmitTimesheet.this)) {
+        if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
             title.setText("Update AWO Status");
         } else {
             title.setText("Update SWO Status");
         }
-       /* if (userRole.equals(Utility.USER_ROLE_ARTIST)) {  // artist
-            title.setText("Update AWO Status");
-        } else if (userRole.equals(Utility.USER_ROLE_TECH)) {  //tech
-            title.setText("Update SWO Status");
-        }*/
         for (int i = 0; i < list_Swo_Status.size(); i++) {
-            RadioButton radioButton = new RadioButton(SubmitTimesheet.this);
+            RadioButton radioButton = new RadioButton(context);
             int id = 0;
             try {
                 id = Integer.parseInt(list_Swo_Status.get(i).getIDPK());
@@ -517,10 +365,10 @@ public class SubmitTimesheet extends BaseActivity {
         final String METHOD_NAME = Api.API_Get_Swo_AWO_DetailByID_Type;
         final String SOAP_ACTION = KEY_NAMESPACE + METHOD_NAME;
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        String swoID = Shared_Preference.getSWO_ID(SubmitTimesheet.this);
+        String swoID = Shared_Preference.getSWO_ID(context);
 
         request.addProperty("swoID_Awoid", swoID);
-        if (Shared_Preference.get_EnterTimesheetByAWO(SubmitTimesheet.this)) {
+        if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
             request.addProperty("Type", Utility.TYPE_AWO);
         } else {
             request.addProperty("Type", Utility.TYPE_SWO);
@@ -561,7 +409,7 @@ public class SubmitTimesheet extends BaseActivity {
 
         request.addProperty("dealerID", dealerId);//nks
         String Role = Shared_Preference.getUSER_ROLE(this);
-        if (Shared_Preference.get_EnterTimesheetByAWO(SubmitTimesheet.this)) {
+        if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
             Role = Utility.USER_ROLE_ARTIST;
         }
         request.addProperty("Role", Role);
@@ -631,8 +479,8 @@ public class SubmitTimesheet extends BaseActivity {
         }
 
         final String NAMESPACE = KEY_NAMESPACE;
-        String clientid = Shared_Preference.getLOGIN_USER_ID(SubmitTimesheet.this);
-        String PAUSED_TIMESHEET_ID = Shared_Preference.getPAUSED_TIMESHEET_ID(SubmitTimesheet.this);
+        String clientid = Shared_Preference.getLOGIN_USER_ID(context);
+        String PAUSED_TIMESHEET_ID = Shared_Preference.getPAUSED_TIMESHEET_ID(context);
 /************************************************************************************/
         JOB_START_DateTime = Shared_Preference.getCLOCK_START_TIME(this);//dd-MM-yyyy HH:mm:ss
         JOB_STOP_DateTime = Utility.getCurrentTimeString();//dd-MM-yyyy HH:mm:ss
@@ -673,7 +521,7 @@ public class SubmitTimesheet extends BaseActivity {
         request_new.addProperty("SWOstatus", Swo_Status);
         request_new.addProperty("jobID", JobIdBillable);
         request_new.addProperty("PauseTimeSheetID", PAUSED_TIMESHEET_ID);
-        if (Shared_Preference.get_EnterTimesheetByAWO(SubmitTimesheet.this)) {
+        if (Shared_Preference.get_EnterTimesheetByAWO(context)) {
             request_new.addProperty("Type", Utility.TYPE_AWO);
         } else {
             request_new.addProperty("Type", Utility.TYPE_SWO);
@@ -681,10 +529,9 @@ public class SubmitTimesheet extends BaseActivity {
 
 /**************************************************************************************/
 
-
-        if (new ConnectionDetector(SubmitTimesheet.this).isConnectingToInternet()) {
+        if (new ConnectionDetector(context).isConnectingToInternet()) {
             if (!resetClock) {
-                Utility.StopRunningClock(SubmitTimesheet.this);
+                Utility.StopRunningClock(context);
             }
             Shared_Preference.setCLIENT_IMAGE_LOGO_URL(this, "");
             Shared_Preference.setCLIENT(this, "");
@@ -692,8 +539,8 @@ public class SubmitTimesheet extends BaseActivity {
             new Async_Submit_Billable_Timesheet_New().execute();
 
         } else {
-            Toast.makeText(SubmitTimesheet.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
-            showDialog_for_OfflineApiDataSave(SubmitTimesheet.this, request_new.toString(), Utility.getUniqueId());
+            Toast.makeText(context, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
+            showDialog_for_OfflineApiDataSave(context, request_new.toString(), Utility.getUniqueId());
         }
     }
 
@@ -733,13 +580,13 @@ public class SubmitTimesheet extends BaseActivity {
                 }
 
 
-                Utility.StopRunningClock(SubmitTimesheet.this);
-                Shared_Preference.setCLIENT_IMAGE_LOGO_URL(SubmitTimesheet.this, "");
-                Shared_Preference.setCLIENT(SubmitTimesheet.this, "");
-                Shared_Preference.setCLIENT_NAME(SubmitTimesheet.this, "");
+                Utility.StopRunningClock(context);
+                Shared_Preference.setCLIENT_IMAGE_LOGO_URL(context, "");
+                Shared_Preference.setCLIENT(context, "");
+                Shared_Preference.setCLIENT_NAME(context, "");
                 Utility.saveOfflineIncompleteAsynctask(context, api_input, unique_apiId, "Billable");
-                Toast.makeText(SubmitTimesheet.this, Utility.SAVED, Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(SubmitTimesheet.this, MainActivity.class));
+                Toast.makeText(context, Utility.SAVED, Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(context, MainActivity.class));
                 finish();
 
             }
@@ -845,8 +692,8 @@ public class SubmitTimesheet extends BaseActivity {
             @Override
             public void onClick(View view) {
                 alertDialog.dismiss();
-                String PAUSED_TIMESHEET_ID = Shared_Preference.getPAUSED_TIMESHEET_ID(SubmitTimesheet.this);
-                Utility.saveOverlapTimeSheetData(SubmitTimesheet.this,
+                String PAUSED_TIMESHEET_ID = Shared_Preference.getPAUSED_TIMESHEET_ID(context);
+                Utility.saveOverlapTimeSheetData(context,
                         Swo_Id,
                         JOB_START_HrsMinuts,
                         JOB_STOP_HrsMinuts,
@@ -856,7 +703,7 @@ public class SubmitTimesheet extends BaseActivity {
                         status,
                         dayInfo,
                         jobType,
-                        Shared_Preference.getJOB_NAME_BILLABLE(SubmitTimesheet.this), Swo_Status, JobIdBillable, PAUSED_TIMESHEET_ID);
+                        Shared_Preference.getJOB_NAME_BILLABLE(context), Swo_Status, JobIdBillable, PAUSED_TIMESHEET_ID);
 
                 Intent i = new Intent(getApplicationContext(), TimeSheetList1Activity.class);
 
@@ -870,8 +717,8 @@ public class SubmitTimesheet extends BaseActivity {
             @Override
             public void onClick(View view) {
                 alertDialog.dismiss();
-                String PAUSED_TIMESHEET_ID = Shared_Preference.getPAUSED_TIMESHEET_ID(SubmitTimesheet.this);
-                Utility.saveOverlapTimeSheetData(SubmitTimesheet.this,
+                String PAUSED_TIMESHEET_ID = Shared_Preference.getPAUSED_TIMESHEET_ID(context);
+                Utility.saveOverlapTimeSheetData(context,
                         Swo_Id,
                         JOB_START_HrsMinuts,
                         JOB_STOP_HrsMinuts,
@@ -881,7 +728,7 @@ public class SubmitTimesheet extends BaseActivity {
                         status,
                         dayInfo,
                         jobType,
-                        Shared_Preference.getJOB_NAME_BILLABLE(SubmitTimesheet.this), Swo_Status, JobIdBillable, PAUSED_TIMESHEET_ID);
+                        Shared_Preference.getJOB_NAME_BILLABLE(context), Swo_Status, JobIdBillable, PAUSED_TIMESHEET_ID);
 
 
                 Intent i = new Intent(getApplicationContext(), MainActivity.class);
@@ -899,7 +746,7 @@ public class SubmitTimesheet extends BaseActivity {
     }
 
     public void AssignTechToUnassignedSwo() {
-        String clientid = Shared_Preference.getLOGIN_USER_ID(SubmitTimesheet.this);
+        String clientid = Shared_Preference.getLOGIN_USER_ID(context);
         final String NAMESPACE = KEY_NAMESPACE + "";
         final String URL = urlofwebservice11_new;
         final String METHOD_NAME = Api.API_SaveTech;
@@ -929,34 +776,19 @@ public class SubmitTimesheet extends BaseActivity {
     }
 
     public class async_Get_Billable_Code extends AsyncTask<Void, Void, Void> {
-      //  ProgressDialog progressDoalog;
+
 
         @Override
         protected void onPreExecute() {
 
             super.onPreExecute();
-         /*   progressDoalog = new ProgressDialog(SubmitTimesheet.this);
-            progressDoalog.setMessage(getString(R.string.Loading_text));
-            progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDoalog.setCancelable(false);
-            try {
-                progressDoalog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }*/
+
          showprogressdialog();
         }
 
         @Override
         protected void onPostExecute(Void result) {
-            // TODO Auto-generated method stub
-           /* if (progressDoalog != null && progressDoalog.isShowing()) {
-                try {
-                    progressDoalog.dismiss();
-                } catch (Exception e) {
-                    e.getMessage();
-                }
-            }*/
+
            hideprogressdialog();
             if (arrid != null && arrid.length > 0) {
                 Dialog_Choose_Labor_Code();
@@ -982,32 +814,18 @@ public class SubmitTimesheet extends BaseActivity {
     }
 
     public class Async_Submit_Billable_Timesheet_New extends AsyncTask<Void, Void, String> {
-   //     ProgressDialog progressDoalog;
+
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-          /*  progressDoalog = new ProgressDialog(SubmitTimesheet.this);
-            progressDoalog.setMessage(getString(R.string.Loading_text));
-            progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDoalog.setCancelable(false);
-            try {
-                progressDoalog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }*/
+
           showprogressdialog();
         }
 
         @Override
         protected void onPostExecute(String result) {
-           /* if (progressDoalog != null && progressDoalog.isShowing()) {
-                try {
-                    progressDoalog.dismiss();
-                } catch (Exception e) {
-                    e.getMessage();
-                }
-            }*/
+
            hideprogressdialog();
 
             JSONObject jsonObject = null;
@@ -1024,10 +842,10 @@ public class SubmitTimesheet extends BaseActivity {
             }
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
             if (output.equals("1")) {   //means sheet submitted successfully
-                Shared_Preference.setTIMEGAP_JOB_END_TIME(SubmitTimesheet.this, JOB_STOP_DateTime);
-                Shared_Preference.setTIMEGAP_PREV_JOB_START_TIME(SubmitTimesheet.this, JOB_START_DateTime);
+                Shared_Preference.setTIMEGAP_JOB_END_TIME(context, JOB_STOP_DateTime);
+                Shared_Preference.setTIMEGAP_PREV_JOB_START_TIME(context, JOB_START_DateTime);
                 if (resetClock) {
-                    Utility.ResetClock(SubmitTimesheet.this);
+                    Utility.ResetClock(context);
                 }
                 Intent i = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(i);
@@ -1035,7 +853,7 @@ public class SubmitTimesheet extends BaseActivity {
 
             } else if (output.equals("0")) { //overlap
                 if (resetClock) {
-                    Utility.ResetClock(SubmitTimesheet.this);
+                    Utility.ResetClock(context);
                 }
                 dialog_OverlappingTimeEntry();
             }

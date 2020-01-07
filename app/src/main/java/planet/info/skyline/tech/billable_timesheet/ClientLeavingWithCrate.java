@@ -1,7 +1,6 @@
 package planet.info.skyline.tech.billable_timesheet;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -68,10 +67,10 @@ import planet.info.skyline.network.Api;
 import planet.info.skyline.network.ProgressRequestBody;
 import planet.info.skyline.network.REST_API_Client;
 import planet.info.skyline.network.SOAP_API_Client;
-import planet.info.skyline.old_activity.AppConstants;
+import planet.info.skyline.util.AppConstants;
 import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.progress.ProgressHUD;
-import planet.info.skyline.tech.runtime_permission.PermissionActivity;
+import planet.info.skyline.runtime_permission.PermissionActivity;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.CameraUtils;
 import planet.info.skyline.util.Utility;
@@ -188,7 +187,7 @@ public class ClientLeavingWithCrate extends BaseActivity implements ProgressRequ
         }
 
 
-        String id = Shared_Preference.getLOGIN_USER_ID(this);
+
         options = new DisplayImageOptions.Builder()
                 .showStubImage(R.drawable.skylinelogopng)
 
@@ -359,12 +358,7 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
             } else if (requestCode == 3) {
 
             } else if (requestCode == 5) {
-                Intent i = new Intent(getApplicationContext(),
-                        SubmitTimesheet.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(i);
-                finish();
+                StopClock();
             } else if (requestCode == 6) {
                 try {
                     String result = "";
@@ -498,19 +492,14 @@ id :586Vname :Pankaj Saini:Cat :Service Production CoordinatorScanValue : 1
         }
     }
 
+
+    void StopClock(){
+        Intent i = new Intent(getApplicationContext(), SubmitTimesheet.class);
+        i.putExtra(AppConstants.TYPE,AppConstants.FINISH);
+        startActivity(i);
+        finish();
+    }
     public void getCrateName(final String Crate_id, final String clientId) {
-        /*final ProgressDialog progressDailog;
-        progressDailog = new ProgressDialog(ClientLeavingWithCrate.this);
-        progressDailog.setMessage(getString(R.string.Loading_text));
-        progressDailog.setCancelable(false);
-        progressDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-
-
-        try {
-            progressDailog.show();
-        } catch (Exception e) {
-            e.getMessage();
-        }*/
 showprogressdialog();
         //nks
         String url = SOAP_API_Client.URL_EP1 + Api.API_FETCH_CRATE_NAME + Crate_id;
@@ -518,14 +507,6 @@ showprogressdialog();
 
             @Override
             public void onResponse(JSONObject obj) {
-                //nks
-                /*if (progressDailog.isShowing()) {
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-                }*/
                 hideprogressdialog();
 
                 try {
@@ -545,17 +526,7 @@ showprogressdialog();
 
             @Override
             public void onErrorResponse(VolleyError arg0) {
-                // TODO Auto-generated method stub
-                //nks
-                /*if (progressDailog.isShowing()) {
 
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-                }*/
                 hideprogressdialog();
                 Toast.makeText(ClientLeavingWithCrate.this, "Some api error occurred!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(ClientLeavingWithCrate.this, MainActivity.class));
@@ -744,12 +715,7 @@ showprogressdialog();
                     String dh = webhit;
                     String de = dh;
                     getjsonobject11();
-                    Intent i = new Intent(getApplicationContext(),
-                            SubmitTimesheet.class);
-                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(i);
-                    finish();
+                   StopClock();
 
                 } else {
                     Toast.makeText(ClientLeavingWithCrate.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
@@ -799,13 +765,13 @@ showprogressdialog();
 
                     @Override
                     public void onResponse(JSONObject obj) {
-                        showmain();
+                        StopClock();
                     }
                 }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError arg0) {
-                showmain();
+                StopClock();
 
             }
         });
@@ -849,11 +815,6 @@ showprogressdialog();
         ImageView image = (ImageView) layout.findViewById(R.id.image);
         image.setImageResource(R.drawable.apply);
 
-        // set a message
-        // TextView text = (TextView) layout.findViewById(R.id.text);
-        // text.setText("Button is clicked!");
-
-        // Toast...
         Toast toast = new Toast(getApplicationContext());
         // toast.setGravity(Gravity.CENTER_VERTICAL, 0, 120);
         toast.setGravity(Gravity.CENTER_VERTICAL | Gravity.BOTTOM, 0, 0);
@@ -1202,41 +1163,8 @@ showprogressdialog();
         Utility.scanqr(ClientLeavingWithCrate.this,bits);
     }
 
-    public void showmain() {
 
-        Log.d("BHANU_Client_name", "mains");
-        Intent i = new Intent(getApplicationContext(),
-                SubmitTimesheet.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(i);
-        finish();
 
-    }
-
-    public void eventgenerate_for_photo() {
-
-        showprogressdialog();
-        JsonObjectRequest bb = new JsonObjectRequest(Method.GET,
-                webhitforupdate_photo, null, new Response.Listener<JSONObject>() {
-
-            @Override
-            public void onResponse(JSONObject obj) {
-                hideprogressdialog();
-                showmain();
-            }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError arg0) {
-
-                hideprogressdialog();
-                showmain();
-            }
-        });
-
-        AppController.getInstance().addToRequestQueue(bb);
-    }
 
     public void enterdata(String a, String b, String c, String d, String e,
                           String f, String g, String h) {
@@ -1383,20 +1311,6 @@ showprogressdialog();
 
     public void Check_This_Crate_Packed_In_Other_Crate() {
 
-   /*     if (pDailog == null || (!pDailog.isShowing())) {
-            pDailog = new ProgressDialog(ClientLeavingWithCrate.this);
-            pDailog.setMessage(getString(R.string.Loading_text));
-            pDailog.setCancelable(false);
-            pDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-
-            try {
-                pDailog.show();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-
-
-        }*/
         showprogressdialog();
         final String CrateId = SelectedCrateList.get(crateNumber).get("id");
         final String CrateName = SelectedCrateList.get(crateNumber).get("name");
@@ -1411,17 +1325,6 @@ showprogressdialog();
                 //  pDailog.dismiss();
                 //nks
                 try {
-                   /* if (pDailog != null && pDailog.isShowing()) {
-
-
-                        try {
-                            pDailog.dismiss();
-                        } catch (Exception e) {
-                            e.getMessage();
-                        }
-
-
-                    }*/
                    hideprogressdialog();
                     JSONObject jsonObject = obj.getJSONObject("cds");
                     String status = jsonObject.getString("status");
@@ -1450,18 +1353,7 @@ showprogressdialog();
             @Override
             public void onErrorResponse(VolleyError arg0) {
                 // TODO Auto-generated method stub
-        /*        //nks
-                if (pDailog.isShowing()) {
 
-                    try {
-                        pDailog.dismiss();
-
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
         hideprogressdialog();
 
             }
@@ -1726,21 +1618,7 @@ showprogressdialog();
     }
 
     public void Remove_Crate_from_Main_Crate_to_Ship_Alone(final String Crate_name, String Crate_id) {
-      /*  final ProgressDialog progressDailog;
-        progressDailog = new ProgressDialog(ClientLeavingWithCrate.this);
-        progressDailog.setMessage(getString(R.string.Loading_text));
-        progressDailog.setCancelable(false);
-        progressDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-
-
-        try {
-            progressDailog.show();
-        } catch (Exception e) {
-            e.getMessage();
-        }*/
       showprogressdialog();
-
-
         String clientid = Shared_Preference.getLOGIN_USERNAME(ClientLeavingWithCrate.this);
         //nks
         String url = URL_EP1 + Api.API_STORE_ALONE_CRATE + Crate_id + "&tech_id=" + clientid;
@@ -1769,39 +1647,13 @@ showprogressdialog();
                     e.getMessage();
                 }
 
-           /*     if (progressDailog.isShowing()) {
 
-
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
            hideprogressdialog();
             }
         }, new Response.ErrorListener() {
-
             @Override
             public void onErrorResponse(VolleyError arg0) {
-                // TODO Auto-generated method stub
-                //nks
-           /*     if (progressDailog.isShowing()) {
-
-
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
            hideprogressdialog();
-                //   Toast.makeText(SlotMoveactivity.this, "Failed! Crate " + Crate_Name + " has not been shipped alone!", Toast.LENGTH_SHORT).show();
-                //   Show_Dialog_for_More_Crate_Scan("Do you want to scan more Crate(s)?");
             }
         });
 
@@ -1810,21 +1662,7 @@ showprogressdialog();
     }
 
     public void Get_Crates_to_Pack_in(final String Crate_Name, final String Crate_Id) {
-       /* final ProgressDialog progressDailog;
-        progressDailog = new ProgressDialog(ClientLeavingWithCrate.this);
-        progressDailog.setMessage(getString(R.string.Loading_text));
-        progressDailog.setCancelable(false);
-        progressDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-
-
-        try {
-            progressDailog.show();
-        } catch (Exception e) {
-            e.getMessage();
-        }
-*/
        showprogressdialog();
-
         list_CratesPackInto = new ArrayList<>();
         String Client_id = "";
         for (int i = 0; i < noteList.size(); i++) {
@@ -1866,34 +1704,12 @@ showprogressdialog();
                     e.getMessage();
                 }
 
-             /*   if (progressDailog.isShowing()) {
-
-
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
              hideprogressdialog();
             }
         }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError arg0) {
-                // TODO Auto-generated method stub
-                //nks
-               /* if (progressDailog.isShowing()) {
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
                hideprogressdialog();
                 Toast.makeText(ClientLeavingWithCrate.this, "Failed! Error getting crate list!", Toast.LENGTH_SHORT).show();
                 Dialog_Show_All_Crates();
@@ -2047,18 +1863,6 @@ showprogressdialog();
     }
 
     public void Move_CrateInto_Crate(final String CrateToMove, String CrateIntoMove) {
-        /*final ProgressDialog progressDailog;
-        progressDailog = new ProgressDialog(ClientLeavingWithCrate.this);
-        progressDailog.setMessage(getString(R.string.Loading_text));
-        progressDailog.setCancelable(false);
-        progressDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-
-
-        try {
-            progressDailog.show();
-        } catch (Exception e) {
-            e.getMessage();
-        }*/
         showprogressdialog();
 
 
@@ -2094,37 +1898,12 @@ showprogressdialog();
                     e.getMessage();
                 }
 
-             /*   if (progressDailog.isShowing()) {
-
-
-                    try {
-                        progressDailog.dismiss();
-
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
              showprogressdialog();
             }
         }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError arg0) {
-                // TODO Auto-generated method stub
-                //nks
-              /*  if (progressDailog.isShowing()) {
-
-
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
               hideprogressdialog();
                 Toast.makeText(ClientLeavingWithCrate.this, "Failed! Error moving crate into crate!", Toast.LENGTH_SHORT).show();
                 Dialog_Show_All_Crates();
@@ -2136,23 +1915,7 @@ showprogressdialog();
     }
 
     public void GetBinName(String BinId) {
-       /* final ProgressDialog progressDailog;
-        progressDailog = new ProgressDialog(ClientLeavingWithCrate.this);
-        progressDailog.setMessage(getString(R.string.Loading_text));
-        progressDailog.setCancelable(false);
-        progressDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-
-
-        try {
-            progressDailog.show();
-
-        } catch (Exception e) {
-            e.getMessage();
-        }
-*/
        showprogressdialog();
-
-        //nks
         String url = URL_EP1 + Api.API_GET_BIN_NAME + BinId;
         url = url.replace(" ", "%20");
         JsonObjectRequest bb = new JsonObjectRequest(Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -2172,17 +1935,6 @@ showprogressdialog();
                 } catch (Exception e) {
                     e.getMessage();
                 }
-             /*   if (progressDailog.isShowing()) {
-
-
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
              hideprogressdialog();
 
 
@@ -2191,19 +1943,7 @@ showprogressdialog();
 
             @Override
             public void onErrorResponse(VolleyError arg0) {
-                // TODO Auto-generated method stub
-                //nks
-              /*  if (progressDailog.isShowing()) {
 
-
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
               hideprogressdialog();
                 Toast.makeText(ClientLeavingWithCrate.this, "Error getting Bin Name!", Toast.LENGTH_LONG).show();
                 Dialog_Show_All_Crates();
@@ -2216,17 +1956,7 @@ showprogressdialog();
     }
 
     public void GetAreaName(String AreaId) {
-      /*  final ProgressDialog progressDailog;
-        progressDailog = new ProgressDialog(ClientLeavingWithCrate.this);
-        progressDailog.setMessage(getString(R.string.Loading_text));
-        progressDailog.setCancelable(false);
-        progressDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
-        try {
-            progressDailog.show();
-        } catch (Exception e) {
-            e.getMessage();
-        }*/
       showprogressdialog();
 
 
@@ -2236,16 +1966,7 @@ showprogressdialog();
         JsonObjectRequest bb = new JsonObjectRequest(Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject obj) {
-                // TODO Auto-generated method stub
-                //nks
 
-               /* if (progressDailog.isShowing()) {
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-                }*/
                hideprogressdialog();
                 try {
 
@@ -2261,19 +1982,6 @@ showprogressdialog();
                 }
                 showdialogforupdateconfirm();
 
-               /* try {
-                    JSONObject jsonObject = obj.getJSONObject("cds");
-                    scancreateloc = jsonObject.getString("win_loc");
-                    if (!scancreateloc.equals("")) {
-                        showdialogforupdateconfirm();
-                    } else {
-                        Toast.makeText(ClientLeavingWithCrate.this, "Error getting Bin Name!", Toast.LENGTH_LONG).show();
-                        Dialog_Show_All_Crates();
-                    }
-                } catch (Exception e) {
-                    e.getMessage();
-                }
-             */
 
 
             }
@@ -2281,19 +1989,6 @@ showprogressdialog();
 
             @Override
             public void onErrorResponse(VolleyError arg0) {
-                // TODO Auto-generated method stub
-                //nks
-         /*       if (progressDailog.isShowing()) {
-
-
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
          hideprogressdialog();
                 Toast.makeText(ClientLeavingWithCrate.this, "Error getting Bin Name!", Toast.LENGTH_LONG).show();
                 Dialog_Show_All_Crates();
@@ -2306,43 +2001,18 @@ showprogressdialog();
     }
 
     public void Check_Crates_Packed_in_this_Crate(final String CrateId, final String CrateName) {
-        /*final ProgressDialog progressDailog;
-        progressDailog = new ProgressDialog(ClientLeavingWithCrate.this);
-        progressDailog.setMessage(getString(R.string.Loading_text));
-        progressDailog.setCancelable(false);
-        progressDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-
-        //nks
-
-        try {
-            progressDailog.show();
-        } catch (Exception e) {
-            e.getMessage();
-        }*/
         showprogressdialog();
-
-
         /*http://www.exhibitpower2.com/ep1/crateslist_insidecrate_webservice.php?id=3016*/
         String url = URL_EP1 + Api.API_GET_INSIDE_CRATE_LIST + CrateId;
         JsonObjectRequest bb = new JsonObjectRequest(Method.GET, url, null, new Response.Listener<JSONObject>() {
 
             @Override
             public void onResponse(JSONObject obj) {
-                // TODO Auto-generated method stub
-                //nks
+
 
 
                 try {
 
-                  /*  if (progressDailog.isShowing()) {
-                        try {
-                            progressDailog.dismiss();
-                        } catch (Exception e) {
-                            e.getMessage();
-                        }
-
-                    }
-*/
                   hideprogressdialog();
                     JSONArray jsonArray = obj.getJSONArray("data");
 
@@ -2393,17 +2063,7 @@ showprogressdialog();
                     } else {  //means crate not contains other crate inside it.
 
                         if ((SelectedCrateList.size() - 1) == crateNumber) {
-                         /*   if (pDailog != null && pDailog.isShowing()) {
 
-
-                                try {
-                                    pDailog.dismiss();
-                                } catch (Exception e) {
-                                    e.getMessage();
-                                }
-
-
-                            }*/
                          hideprogressdialog();
                             mains.setVisibility(View.VISIBLE);
                         } else {
@@ -2416,10 +2076,7 @@ showprogressdialog();
                     }
 
                 } catch (Exception e) {
-                   /* if (progressDailog.isShowing()) {
-                        progressDailog.dismiss();
 
-                    }*/
                    hideprogressdialog();
                     e.getMessage();
                 }
@@ -2430,19 +2087,6 @@ showprogressdialog();
 
             @Override
             public void onErrorResponse(VolleyError arg0) {
-                // TODO Auto-generated method stub
-                //nks
-           /*     if (progressDailog.isShowing()) {
-
-
-                    try {
-                        progressDailog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-
-
-                }*/
            hideprogressdialog();
 
             }
@@ -2492,17 +2136,7 @@ showprogressdialog();
 
 
                     if ((SelectedCrateList.size() - 1) == crateNumber) {
-                     /*   if (pDailog != null && pDailog.isShowing()) {
 
-
-                            try {
-                                pDailog.dismiss();
-                            } catch (Exception e) {
-                                e.getMessage();
-                            }
-
-
-                        }*/
                      hideprogressdialog();
                         mains.setVisibility(View.VISIBLE);
                     } else {
@@ -2529,17 +2163,6 @@ showprogressdialog();
 
 
                 if ((SelectedCrateList.size() - 1) == crateNumber) {
-                  /*  if (pDailog != null && pDailog.isShowing()) {
-
-
-                        try {
-                            pDailog.dismiss();
-                        } catch (Exception e) {
-                            e.getMessage();
-                        }
-
-
-                    }*/
                   hideprogressdialog();
 
 
@@ -2593,22 +2216,8 @@ showprogressdialog();
     private void multipartImageUpload() {
         if (Count_Image_Uploaded < list_path.size())
             Count_Image_Uploaded++;
-        /*uploadProgressDialog = new ProgressDialog(ClientLeavingWithCrate.this);
-        uploadProgressDialog.setMessage("Uploading " + Count_Image_Uploaded + "/" + list_path.size() + ", Please wait..");
-        uploadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        uploadProgressDialog.setIndeterminate(false);
-        uploadProgressDialog.setProgress(0);
-        uploadProgressDialog.setMax(100);
-        uploadProgressDialog.setCancelable(false);
-        uploadProgressDialog.show();
-*/
         mProgressHUD = ProgressHUD.show(context, "Uploading " + Count_Image_Uploaded + "/" + list_path.size()+", wait..." , false);
-
-        // initRetrofitClient();
-
-        /*damage report photo upload*/
         list_UploadImageName.clear();
-        //   int statusCode = 0;
         totalSize = 0;
 
 
@@ -2674,18 +2283,13 @@ showprogressdialog();
                         }
                     }
 
-                    /*try {
-                        uploadProgressDialog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-                    */
-                    hideprogressdialog();
+
 
 
                     if (result.equalsIgnoreCase("1")) {
                         Toast.makeText(getApplicationContext(), "Photo uploaded successfully!", Toast.LENGTH_SHORT).show();
                     } else {
+                        hideprogressdialog();
                         Toast.makeText(getApplicationContext(), " Upload Failed!", Toast.LENGTH_SHORT).show();
                         dialog_photo_upload_failed();
                     }
@@ -2729,12 +2333,6 @@ showprogressdialog();
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                   /* try {
-                        if (uploadProgressDialog.isShowing())
-                            uploadProgressDialog.dismiss();
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }*/
                    hideprogressdialog();
                     Count_Image_Uploaded = 0;
                     list_path.clear();
@@ -2827,24 +2425,23 @@ showprogressdialog();
 
     @Override
     public void uploadStart() {
-        //  textView.setText("0%");
+
     }
 
     public class updateonep1 extends AsyncTask<String, Void, Void> {
 
         @Override
         protected void onPreExecute() {
-            showprogressdialog();
-            Log.d("BHANU_Client_name", "async_UploadFiles");
+
             super.onPreExecute();
         }
 
         @Override
         protected void onPostExecute(Void result) {
-
-            hideprogressdialog();
+           // hideprogressdialog();
+           // super.onPostExecute(result);
             eventgenerate_for_photo();
-            super.onPostExecute(result);
+
         }
 
         @Override
@@ -2853,7 +2450,6 @@ showprogressdialog();
             enterdata(params[0], params[1], params[2], params[3], params[4],
                     params[5], params[6], params[7]);
 
-
             generate_event(params[0], params[6], params[7], "1");
 
             return null;
@@ -2861,7 +2457,29 @@ showprogressdialog();
 
     }
 
+    public void eventgenerate_for_photo() {
 
+        //showprogressdialog();
+        JsonObjectRequest bb = new JsonObjectRequest(Method.GET,
+                webhitforupdate_photo, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject obj) {
+                hideprogressdialog();
+                StopClock();
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError arg0) {
+
+                hideprogressdialog();
+                StopClock();
+            }
+        });
+
+        AppController.getInstance().addToRequestQueue(bb);
+    }
     public void showprogressdialog() {
         try {
             mProgressHUD = ProgressHUD.show(context, LOADING_TEXT, false);

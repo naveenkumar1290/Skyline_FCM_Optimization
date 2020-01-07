@@ -43,7 +43,7 @@ import planet.info.skyline.network.SOAP_API_Client;
 import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
-import planet.info.skyline.tech.runtime_permission.PermissionActivity;
+import planet.info.skyline.runtime_permission.PermissionActivity;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.Api.API_varify_tech;

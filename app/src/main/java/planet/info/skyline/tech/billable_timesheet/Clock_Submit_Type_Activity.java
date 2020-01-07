@@ -28,6 +28,7 @@ import planet.info.skyline.crash_report.ConnectionDetector;
 import planet.info.skyline.home.MainActivity;
 import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.shared_preference.Shared_Preference;
+import planet.info.skyline.util.AppConstants;
 import planet.info.skyline.util.Utility;
 
 public class Clock_Submit_Type_Activity extends BaseActivity {
@@ -109,11 +110,7 @@ public class Clock_Submit_Type_Activity extends BaseActivity {
             public void onClick(View v) {
 
                 if (new ConnectionDetector(Clock_Submit_Type_Activity.this).isConnectingToInternet()) {
-                    Intent ii = new Intent(Clock_Submit_Type_Activity.this, SubmitTimesheet.class);
-                    ii.putExtra("aman_status", 0);
-                    startActivity(ii);
-                    finish();
-
+                    StopClock(AppConstants.PAUSE);
                 } else {
                     Toast.makeText(Clock_Submit_Type_Activity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
                 }
@@ -126,11 +123,8 @@ public class Clock_Submit_Type_Activity extends BaseActivity {
             public void onClick(View v) {//stop
 
                 if (new ConnectionDetector(getApplicationContext()).isConnectingToInternet()) {
-                    Intent ii = new Intent(Clock_Submit_Type_Activity.this, SubmitTimesheet.class);
-                    ii.putExtra("aman_status", 1);
-                    startActivity(ii);
-                    finish();
 
+                    StopClock(AppConstants.STOP);
                 } else {
                     Toast.makeText(getApplicationContext(), Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
                 }
@@ -145,10 +139,8 @@ public class Clock_Submit_Type_Activity extends BaseActivity {
             public void onClick(View v) {
 
                 if (new ConnectionDetector(getApplicationContext()).isConnectingToInternet()) {
-                    Intent ii = new Intent(Clock_Submit_Type_Activity.this, SubmitTimesheet.class);
-                    ii.putExtra("aman_status", 100);
-                    startActivity(ii);
 
+                    StopClock(AppConstants.CHANGE_TIME_CODE);
 
                 } else {
                     Toast.makeText(getApplicationContext(), Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
@@ -249,12 +241,7 @@ public class Clock_Submit_Type_Activity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (new ConnectionDetector(Clock_Submit_Type_Activity.this).isConnectingToInternet()) {
-                    Intent i = new Intent(getApplicationContext(),
-                            SubmitTimesheet.class);
-                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(i);
-                    finish();
+                    StopClock(AppConstants.FINISH);
 
                 } else {
                     Toast.makeText(Clock_Submit_Type_Activity.this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
@@ -284,7 +271,12 @@ public class Clock_Submit_Type_Activity extends BaseActivity {
 
     }
 
-
+ void StopClock(String type){
+     Intent i = new Intent(getApplicationContext(), SubmitTimesheet.class);
+     i.putExtra(AppConstants.TYPE,type);
+     startActivity(i);
+     finish();
+ }
 
 
 }

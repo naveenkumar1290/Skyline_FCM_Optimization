@@ -163,15 +163,15 @@ ProgressHUD mProgressHUD;
                     e.getMessage();
                     tv_Caret_id.setText("Crate Number: Not Available");
 
-                  if(mProgressHUD.isShowing()){
-                      mProgressHUD.dismiss();
-                  }
+
 
                   /*  if (ringProgressDialog.isShowing()) {
                         ringProgressDialog.dismiss();
                     }*/
                 }
-
+                if(mProgressHUD.isShowing()){
+                    mProgressHUD.dismiss();
+                }
             }
         }, new Response.ErrorListener() {
 
@@ -182,6 +182,11 @@ ProgressHUD mProgressHUD;
                     ringProgressDialog.dismiss();
                 }
 */
+
+
+                if(mProgressHUD.isShowing()){
+                    mProgressHUD.dismiss();
+                }
             }
         });
 

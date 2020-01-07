@@ -183,13 +183,11 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             {
             }
         } else if (requestCode == WIFI_SETTING_REQUEST_CODE) {
-            // checkWifi();
             if (new ConnectionDetector(context).isConnectingToInternet()) {
                 new checkVersionUpdate().execute();
             } else {
                 dialog_TurnOnMobileData();
             }
-
         } else if (requestCode == MOBILE_DATA_SETTING_REQUEST_CODE) {
             if (new ConnectionDetector(context).isConnectingToInternet()) {
                 new checkVersionUpdate().execute();
@@ -411,6 +409,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                     Toast.makeText(context, "Clock already running for admin functions!", Toast.LENGTH_LONG).show();
                 } else {
                     Shared_Preference.setIS_STARTING_BILLABLE_JOB(context, true);
+                    showprogressdialog();
                     CallAPI_CheckPermission();
 
                 }
@@ -432,9 +431,10 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                     boolean isTimerRunningFromAdminClockModule = Shared_Preference.getTIMER_STARTED_FROM_ADMIN_CLOCK_MODULE(context);
                     if (!isTimerRunningFromAdminClockModule) {
                         Shared_Preference.setIS_STARTING_BILLABLE_JOB(context, false);
+                        showprogressdialog();
                         CallAPI_CheckPermission();
                     } else {
-                        Toast.makeText(context, "Clock already running for admin functions!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "Clock already running for admin functions!", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -1030,9 +1030,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
     }
 
     private void parseJsonFeed(JSONObject response) {
-/**
- * BHANU VERMA 17/02/2016
- */
+
         try {
             JSONArray Array = response.getJSONArray("data");
             JSONObject jsonObject = Array.getJSONObject(0);
@@ -1050,7 +1048,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                 Shared_Preference.setCLIENT_NAME(this, companyName);
                 Shared_Preference.setCLIENT_IMAGE_LOGO_URL(this, "");
             }
-
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -2085,14 +2082,19 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        boolean showProgress;
+        if (BillableJobModuleClicked || AdminTimesheetModuleClicked) showProgress = false;
+        else showProgress = true;
+
         if (new ConnectionDetector(this).isConnectingToInternet()) {
-            new MyAsyncTask(this, true, this, Api.API_getTimesheetAuth, jsonObject).execute();
+            new MyAsyncTask(this, showProgress, this, Api.API_getTimesheetAuth, jsonObject).execute();
         } else {
             Toast.makeText(this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
     }
 
-    private void CallAPI_FetchNonBillableCodes() {
+    private void CallAPI_FetchBillableNonBillableCodes() {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("dealerID", Shared_Preference.getDEALER_ID(this));
@@ -2102,7 +2104,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             e.printStackTrace();
         }
         if (new ConnectionDetector(this).isConnectingToInternet()) {
-            new MyAsyncTask(this, true, this, Api.API_BILLABLE_NONBILLABLE_CODE, jsonObject).execute();
+            new MyAsyncTask(this, false, this, Api.API_BILLABLE_NONBILLABLE_CODE, jsonObject).execute();
         } else {
             Toast.makeText(this, Utility.NO_INTERNET, Toast.LENGTH_LONG).show();
         }
@@ -2189,7 +2191,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
 
     @Override
     public void handleResponse(String responseString, String api) {
-
         if (api.equalsIgnoreCase(Api.API_getTimesheetAuth)) {
             SetAuthenticationVariables(responseString);
 
@@ -2209,7 +2210,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                 }
             } else if (UploadPhotoModuleClicked) {
                 if ((CanView_ClientArt && CanUpload_ClientArt) || (CanView_UsageCharge && CanUpload_ClientPhoto)) {
-                    // startActivity(new Intent(context, Upload_image_and_cooment_New.class));
                     startActivity(new Intent(context, UploadPhotosActivity.class));
                     finish();
                 } else {
@@ -2224,9 +2224,13 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                     new async_get_BillableCodes_PausedJobList().execute();
                 }
             } else if (AdminTimesheetModuleClicked) {
-                CallAPI_FetchNonBillableCodes();
-            }
+                if (!CanEnter_MISByDailyTime || !CanView_MISByDailyTime) {
+                    Toast.makeText(context, "You do not have rights to enter Admin Time Sheet!", Toast.LENGTH_SHORT).show();
+                } else {
+                    CallAPI_FetchBillableNonBillableCodes();
+                }
 
+            }
 
             setModuleClickedFalse();//should be in last
         } else if (api.equalsIgnoreCase(Api.API_EditTimesheet_AWO_SWO)) {
@@ -2239,6 +2243,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                 e.getCause();
             }
         } else if (api.equalsIgnoreCase(Api.API_BILLABLE_NONBILLABLE_CODE)) {
+            hideprogressdialog();
             int NonBillableLaborCodesLength = 0;
             try {
                 Shared_Preference.setNON_BILLABLE_CODES(context, responseString);
@@ -2246,11 +2251,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
                 NonBillableLaborCodesLength = jArray.length();
             } catch (Exception e) {
                 e.getMessage();
-            }
-
-            if (!CanEnter_MISByDailyTime || !CanView_MISByDailyTime) {
-                Toast.makeText(context, "You do not have rights to enter Admin Time Sheet!", Toast.LENGTH_SHORT).show();
-                return;
             }
             if (NonBillableLaborCodesLength == 0) {
                 dialog_NoJobCodes();
@@ -2314,9 +2314,6 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             String str = arr[1];
             String JOB_STOP_HrsMinuts = str.substring(0, str.lastIndexOf(":"));//HH:mm
 
-            String swoId = Shared_Preference.getSWO_ID(this);
-            String JobIdBillable = Shared_Preference.getJOB_ID_FOR_JOBFILES(this);
-            String clientid = Shared_Preference.getLOGIN_USER_ID(this);
             String jobName = Shared_Preference.getJOB_NAME_BILLABLE(context);
             String imei = "";
             try {
@@ -2331,8 +2328,8 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             } else if (jobName.equalsIgnoreCase(Utility.CLOCK_OUT)) {
                 Code = CLOCK_OUT_BILLABLE_CODE;
             }
-            jsonObject.put("tech_id", clientid);
-            jsonObject.put("swo_id", swoId);
+            jsonObject.put("tech_id",  Shared_Preference.getLOGIN_USER_ID(this));
+            jsonObject.put("swo_id", Shared_Preference.getSWO_ID(this));
             jsonObject.put("start_time", JOB_STOP_HrsMinuts);
             jsonObject.put("end_time", JOB_STOP_HrsMinuts);
             jsonObject.put("description", jobName);
@@ -2343,7 +2340,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
             jsonObject.put("PhoneType", "Android");
             jsonObject.put("EMI", imei);
             jsonObject.put("SWOstatus", IN_PROGRESS_SWO_AWO_STATUS);
-            jsonObject.put("jobID", JobIdBillable);
+            jsonObject.put("jobID", Shared_Preference.getJOB_ID_FOR_JOBFILES(this));
             jsonObject.put("PauseTimeSheetID", "0");
 
         } catch (Exception e) {
@@ -2451,7 +2448,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
     private class async_get_BillableCodes_PausedJobList extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
-            showprogressdialog();
+            //showprogressdialog();
             super.onPreExecute();
 
         }
@@ -2467,10 +2464,7 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         @Override
         protected void onPostExecute(Void res) {
             hideprogressdialog();
-            if (!CanEnter_BillableTime || !CanView_BillableTime) {
-                Toast.makeText(context, "You do not have rights to Enter Time Sheet via App!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+
             if (BillableLaborCodesLength == 0) {
                 dialog_NoJobCodes();
                 return;

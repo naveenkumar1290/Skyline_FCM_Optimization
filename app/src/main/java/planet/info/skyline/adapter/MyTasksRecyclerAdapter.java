@@ -126,22 +126,7 @@ public class MyTasksRecyclerAdapter extends RecyclerView.Adapter<MyTasksRecycler
             @Override
             public void onClick(View v) {
 
-               /* Intent i = new Intent(context, CompletedTaskDetailActivity.class);
-                i.putExtra("checklist", checklist);
-                i.putExtra("completedDate", completedDate);
-                i.putExtra("deadlineDate", deadlineDate);
-                i.putExtra("description", description);
-                i.putExtra("startBy", startBy);
-                i.putExtra("task", task);
-                i.putExtra("timeBudget", timeBudget);
-                i.putExtra("technician", technician);
-                i.putExtra("completedBy", completedBy);
-                i.putExtra("taskID", taskID);
-                i.putExtra("job_id", "");
-                i.putExtra("id", ID);
-                i.putExtra("AssignUser", AssignUser);
-                 context.startActivity(i);
-*/
+
                 Intent intent = new Intent(context, ChecklistActivity.class);
                 intent.putExtra("Updatable", "1");
                 intent.putExtra("RequestCode", Utility.REQUEST_CODE_CHECKLIST);

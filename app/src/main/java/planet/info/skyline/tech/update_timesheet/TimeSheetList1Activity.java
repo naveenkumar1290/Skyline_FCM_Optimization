@@ -48,7 +48,6 @@ import planet.info.skyline.model.Timesheet;
 import planet.info.skyline.progress.ProgressHUD;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.network.Api;
-import planet.info.skyline.tech.billable_timesheet.SubmitTimesheet;
 import planet.info.skyline.util.Utility;
 
 

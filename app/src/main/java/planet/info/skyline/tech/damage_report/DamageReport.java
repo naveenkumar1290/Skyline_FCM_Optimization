@@ -61,7 +61,7 @@ import planet.info.skyline.network.Api;
 import planet.info.skyline.network.ProgressRequestBody;
 import planet.info.skyline.network.REST_API_Client;
 import planet.info.skyline.network.SOAP_API_Client;
-import planet.info.skyline.old_activity.AppConstants;
+import planet.info.skyline.util.AppConstants;
 import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.shared_preference.Shared_Preference;
 import planet.info.skyline.util.CameraUtils;

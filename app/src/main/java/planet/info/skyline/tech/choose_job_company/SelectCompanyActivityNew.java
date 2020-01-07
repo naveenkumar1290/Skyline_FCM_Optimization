@@ -79,7 +79,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
 
     Button Btn_SearchByJob, Btn_SearchByCompany, scan_swo, scan_awo, Btn_MySwo, Btn_UnassignedSwo, Btn_MyTask;
     LinearLayout ll_BySWO;
-
     String CompId = "";
 
 
@@ -101,7 +100,7 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
         Btn_MySwo = findViewById(R.id.Btn_MySwo);
         Btn_UnassignedSwo = findViewById(R.id.Btn_UnassignedSwo);
         Btn_MyTask = findViewById(R.id.Btn_MyTask);
-
+        Btn_MyTask.setVisibility(View.VISIBLE);
         ll_BySWO = findViewById(R.id.ll_BySWO);
         ll_BySWO.setVisibility(View.GONE);
 
@@ -771,12 +770,21 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
                         Toast.makeText(getApplicationContext(), "SWO error!", Toast.LENGTH_SHORT).show();
                     }
                     if (clientid.equalsIgnoreCase("")) {
-                        Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
+                        if(Shared_Preference.get_EnterTimesheetByAWO(this)){
+                            Toast.makeText(getApplicationContext(), "Please scan valid QR Code of AWO!", Toast.LENGTH_SHORT).show();
+                        }else {
+                            Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
+                        }
+
                         return;
                     }
                     FetchJobDetailBy_SWO_AWO_Id(Swo_Id);
                 } else {
-                    Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
+                    if(Shared_Preference.get_EnterTimesheetByAWO(this)){
+                        Toast.makeText(getApplicationContext(), "Please scan valid QR Code of AWO!", Toast.LENGTH_SHORT).show();
+                    }else {
+                        Toast.makeText(getApplicationContext(), "Please scan valid QR Code of SWO!", Toast.LENGTH_SHORT).show();
+                    }
                     return;
                 }
             } else if (resultCode == RESULT_CANCELED) {
@@ -1084,7 +1092,6 @@ public class SelectCompanyActivityNew extends AppCompatActivity implements Respo
         } else if (api.equalsIgnoreCase(Api.API_GetAwoDetailByJob)) {
             list_Awo.clear();
             try {
-
                 JSONArray jsonArray = new JSONArray(responseString);
                 for (int k = 0; k < (jsonArray.length()); k++) {
                     JSONObject json_obj = jsonArray.getJSONObject(k);
