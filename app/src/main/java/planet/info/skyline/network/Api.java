@@ -75,7 +75,7 @@ public class Api {
     public static final String API_missing_crate = "missing_crate";
     public static final String API_GetClientUserList = "GetClientUserList";
     public static final String API_ShareProjectFile = "ShareProjectFile"; // project file
-    public static final String API_ShareProoofRenders = "ShareProofRender"; // prrof renders
+    public static final String API_ShareProoofRenders = "ShareProofRender"; // proof renders
   //  public static final String API_mail = "mail";  // for both project photos
     public static final String API_mail = "mailNew"; // for both project photos and proof renders. Chnge in JOB FILE module and UPload Photo module
 

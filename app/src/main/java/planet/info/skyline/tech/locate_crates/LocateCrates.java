@@ -1,7 +1,6 @@
 package planet.info.skyline.tech.locate_crates;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -42,8 +41,8 @@ import planet.info.skyline.model.CreateDetails;
 import planet.info.skyline.network.Api;
 import planet.info.skyline.old_activity.BaseActivity;
 import planet.info.skyline.progress.ProgressHUD;
-import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
 import planet.info.skyline.shared_preference.Shared_Preference;
+import planet.info.skyline.tech.choose_job_company.SelectCompanyActivityNew;
 import planet.info.skyline.util.Utility;
 
 import static planet.info.skyline.network.SOAP_API_Client.URL_EP1;
@@ -57,17 +56,17 @@ public class LocateCrates extends BaseActivity {
     RecyclerView listView;
     ImageView img_search;
     EditText et_search;
-    private String urlskyline;
-//    private ProgressDialog pDialog;
-    private List<CreateDetails> createlist = new ArrayList<CreateDetails>();
     Context context;
     ProgressHUD mProgressHUD;
+    private String urlskyline;
+    //    private ProgressDialog pDialog;
+    private List<CreateDetails> createlist = new ArrayList<CreateDetails>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homeact_new);
-        context=LocateCrates.this;
+        context = LocateCrates.this;
      /*   try {
             pDialog = new ProgressDialog(this);
             pDialog.setMessage(getString(R.string.Loading_text));
@@ -167,21 +166,21 @@ public class LocateCrates extends BaseActivity {
         AppController.getInstance().addToRequestQueue(bb);
     }
 
-/*    public void showprogressdialog() {
-        try {
-            pDialog.show();
-        } catch (Exception e) {
-            e.getMessage();
+    /*    public void showprogressdialog() {
+            try {
+                pDialog.show();
+            } catch (Exception e) {
+                e.getMessage();
+            }
         }
-    }
 
-    public void hideprogressdialog() {
-        try {
-            pDialog.dismiss();
-        } catch (Exception e) {
-            e.getMessage();
-        }
-    }*/
+        public void hideprogressdialog() {
+            try {
+                pDialog.dismiss();
+            } catch (Exception e) {
+                e.getMessage();
+            }
+        }*/
     public void showprogressdialog() {
        /* try {
             if (!(pDialog.isShowing())) {

@@ -178,7 +178,7 @@ public class ChecklistActivity extends AppCompatActivity {
                     e.getMessage();
                 }
 
-                JobFilesAdapter jobFilesAdapter = new JobFilesAdapter(ChecklistActivity.this);
+                CheckListAdapter jobFilesAdapter = new CheckListAdapter(ChecklistActivity.this);
                 Checklist_recyclerView.setAdapter(jobFilesAdapter);
 
 
@@ -202,13 +202,13 @@ public class ChecklistActivity extends AppCompatActivity {
     }
 
 
-    public class JobFilesAdapter extends RecyclerView.Adapter<JobFilesAdapter.MyViewHolder> {
+    public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.MyViewHolder> {
 
       //  List<Checklist> list_Checklists;
         Context context;
 
 
-        public JobFilesAdapter(Context context){//, List<Checklist> Checklists) {
+        public CheckListAdapter(Context context){//, List<Checklist> Checklists) {
             this.context = context;
           //  this.list_Checklists = Checklists;
         }

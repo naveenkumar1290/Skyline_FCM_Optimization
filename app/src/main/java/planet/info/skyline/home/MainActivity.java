@@ -1266,9 +1266,11 @@ public class MainActivity extends BaseActivity implements ResponseInterface {
         String dealerId = Shared_Preference.getDEALER_ID(this);
 
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
+
         request.addProperty("dealerID", dealerId);
         request.addProperty("cat", userRole);
         request.addProperty("type", "1");
+
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
                 SoapEnvelope.VER11);
         envelope.dotNet = true;
